@@ -11,6 +11,10 @@ QAnubis is a CAQDAS (Computer Assisted Qualitative Data Analysis Software) desig
 
 [Documentation](https://github.com/unipampa-lesse/qanubis/wiki)
 
+## Run Locally
+
+[Run Locally](https://github.com/unipampa-lesse/qanubis/wiki/Contribution_Guidelines#run-locally)
+
 ## Authors
 
 - [@guilhermebolfe11](https://www.github.com/guilhermebolfe11)
