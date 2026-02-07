@@ -1,4 +1,4 @@
-name: PR Validation
+name: 🧪 PR Validation
 
 permissions:
   contents: read
@@ -10,6 +10,7 @@ on:
 
 jobs:
   validate:
+    name: ✅ Validate PR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

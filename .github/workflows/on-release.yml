@@ -1,26 +1,18 @@
-name: On Release
-
-permissions:
-  contents: read
+name: 🚀 Deploy Vercel on Release
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
-  on-release-job:
+  deploy:
+    name: 🚀 Deploy to Vercel
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to Vercel
+        uses: vercel/actions@v1
         with:
-          node-version: '24'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-        
-      - name: Exibir mensagem
-        run: echo "Uma nova release foi criada!"
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          github-comment: true
