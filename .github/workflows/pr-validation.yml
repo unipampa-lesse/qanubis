@@ -1,4 +1,5 @@
 name: 🧪 PR Validation
+run-name: "✅ Validate PR #${{ github.event.pull_request.number }}"
 
 permissions:
   contents: read
@@ -10,7 +11,7 @@ on:
 
 jobs:
   validate:
-    name: ✅ Validate PR
+    name: "✅ Validate PR"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
