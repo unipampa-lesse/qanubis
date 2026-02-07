@@ -1,5 +1,8 @@
 name: On Release
 
+permissions:
+  contents: read
+
 on:
   release:
     types: [created]
