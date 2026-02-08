@@ -13,9 +13,8 @@ on:
 
 jobs:
   release:
-    name: 🚀 Release
+    name: 📦 Release
     runs-on: ubuntu-latest
-    environment: prd
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,6 +35,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: --prod
+      
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    environment: prd
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
