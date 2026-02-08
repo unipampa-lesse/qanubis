@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@vercel/config':
+        specifier: ^0.0.28
+        version: 0.0.28
       conventional-changelog-conventionalcommits:
         specifier: ^9.1.0
         version: 9.1.0
@@ -480,6 +483,10 @@ packages:
 
   '@types/react@19.2.13':
     resolution: {integrity: sha512-KkiJeU6VbYbUOp5ITMIc7kBfqlYkKA5KhEHVrGMmUUMt7NeaZg65ojdPk+FtNrBAOXNVM5QM72jnADjM+XVRAQ==}
+
+  '@vercel/config@0.0.28':
+    resolution: {integrity: sha512-lGnGmac05Rt+dYNwn6Rfub5GCnhSS33f3oQ3+1SSWw7zaI1gCaBDVetGtAIM5cMGG6UkGcRRSp1sw0dibS5wUQ==}
+    hasBin: true
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -1306,6 +1313,10 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
+  pretty-cache-header@1.0.0:
+    resolution: {integrity: sha512-xtXazslu25CdnGnUkByU1RoOjK55TqwatJkjjJLg5ZAdz2Lngko/mmaUgeET36P2GMlNwh3fdM7FWBO717pNcw==}
+    engines: {node: '>=12.13'}
+
   pretty-ms@9.3.0:
     resolution: {integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==}
     engines: {node: '>=18'}
@@ -1534,6 +1545,10 @@ packages:
     resolution: {integrity: sha512-75voc/9G4rDIJleOo4jPvN4/YC4GRZrY8yy1uU4lwrB3XEQbWve8zXoO5No4eFrGcTAMYyoY67p8jRQdtA1HbA==}
     engines: {node: '>=12'}
 
+  timestring@6.0.0:
+    resolution: {integrity: sha512-wMctrWD2HZZLuIlchlkE2dfXJh7J2KDI9Dwl+2abPYg0mswQHfOAyQW3jJg1pY5VfttSINZuKcXoB3FGypVklA==}
+    engines: {node: '>=8'}
+
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
@@ -1669,6 +1684,9 @@ packages:
   yoctocolors@2.1.2:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -2054,6 +2072,11 @@ snapshots:
   '@types/react@19.2.13':
     dependencies:
       csstype: 3.2.3
+
+  '@vercel/config@0.0.28':
+    dependencies:
+      pretty-cache-header: 1.0.0
+      zod: 3.25.76
 
   agent-base@7.1.4: {}
 
@@ -2743,6 +2766,10 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  pretty-cache-header@1.0.0:
+    dependencies:
+      timestring: 6.0.0
+
   pretty-ms@9.3.0:
     dependencies:
       parse-ms: 4.0.0
@@ -3022,6 +3049,8 @@ snapshots:
     dependencies:
       convert-hrtime: 5.0.0
 
+  timestring@6.0.0: {}
+
   tinyglobby@0.2.15:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
@@ -3129,3 +3158,5 @@ snapshots:
       yargs-parser: 22.0.0
 
   yoctocolors@2.1.2: {}
+
+  zod@3.25.76: {}
