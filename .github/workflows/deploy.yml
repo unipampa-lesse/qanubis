@@ -3,12 +3,13 @@ run-name: Deploy to {{ github.event.release.tag_name }}
 
 permissions:
   contents: read
+  deployments: write
 
 on:
+  workflow_call:
   release:
-    types:
-      - released
-      
+    types: [published]  
+
 jobs:
   deploy:
     name: Deploy
