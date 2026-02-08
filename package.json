@@ -10,11 +10,10 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "biome check --write",
-		"lint:check": "biome check"
+		"lint:check": "biome check",
+		"test": "vitest run"
 	},
 	"dependencies": {
-		"@vercel/config": "^0.0.28",
-		"conventional-changelog-conventionalcommits": "^9.1.0",
 		"next": "16.1.6",
 		"react": "19.2.4",
 		"react-dom": "19.2.4"
@@ -26,10 +25,17 @@
 		"@semantic-release/git": "^10.0.1",
 		"@semantic-release/github": "^12.0.5",
 		"@semantic-release/release-notes-generator": "^14.1.0",
+		"@testing-library/react": "^16.3.2",
 		"@types/node": "^25",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"@vercel/config": "^0.0.28",
+		"@vitejs/plugin-react": "^5.1.3",
+		"conventional-changelog-conventionalcommits": "^9.1.0",
+		"jsdom": "^28.0.0",
 		"semantic-release": "^25.0.3",
-		"typescript": "^5"
+		"typescript": "^5",
+		"vite-tsconfig-paths": "^6.1.0",
+		"vitest": "^4.0.18"
 	}
 }
