@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { TRPCProvider } from "@/server/client";
+import UserMenu from "./components/UserMenu";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -25,7 +27,10 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable}`}>
-				{children}
+				<TRPCProvider>
+					<UserMenu />
+					{children}
+				</TRPCProvider>
 			</body>
 		</html>
 	);
