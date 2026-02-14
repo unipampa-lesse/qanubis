@@ -7,5 +7,8 @@ export default withAuth({
 });
 
 export const config = {
-	matcher: ["/((?!api|_next|static|favicon.ico).*)"],
+	matcher: [
+		// Protege todas as rotas exceto /login e /
+		"/((?!api|_next|static|favicon.ico|login$|$).*)",
+	],
 };
