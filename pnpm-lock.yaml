@@ -49,8 +49,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       '@vercel/config':
-        specifier: ^0.0.28
-        version: 0.0.28
+        specifier: ^0.0.30
+        version: 0.0.30
       '@vitejs/plugin-react':
         specifier: ^5.1.4
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3))
@@ -989,8 +989,8 @@ packages:
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
-  '@vercel/config@0.0.28':
-    resolution: {integrity: sha512-lGnGmac05Rt+dYNwn6Rfub5GCnhSS33f3oQ3+1SSWw7zaI1gCaBDVetGtAIM5cMGG6UkGcRRSp1sw0dibS5wUQ==}
+  '@vercel/config@0.0.30':
+    resolution: {integrity: sha512-XJcWJKkJzu9MRmm1s08QnlPEKJ+TjWVPzqsV9i72Bnn+EqnEsT6vt26IbiufbMEEbsT6kVzm2XZvtp3ocwyZrQ==}
     hasBin: true
 
   '@vitejs/plugin-react@5.1.4':
@@ -3329,7 +3329,7 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
-  '@vercel/config@0.0.28':
+  '@vercel/config@0.0.30':
     dependencies:
       pretty-cache-header: 1.0.0
       zod: 3.25.76
