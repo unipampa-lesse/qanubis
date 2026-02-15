@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
@@ -912,4 +913,28 @@ pre[class*="language-"] {
 }
 pre[class*="language-"].line-numbers {
   padding-left: 2.8em !important;
+}
+/* Customização global do <select> e <option> */
+select {
+  background-color: var(--color-white);
+  transition: background 0.2s;
+}
+select:focus {
+  outline: none;
+  background-color: var(--color-gray-100);
+}
+option {
+  background: var(--color-white);
+  color: var(--color-gray-900);
+}
+.dark select {
+  background-color: var(--color-gray-900);
+  color: var(--color-gray-100);
+}
+.dark select:focus {
+  background-color: var(--color-gray-800);
+}
+.dark option {
+  background: var(--color-gray-900);
+  color: var(--color-gray-100);
 }
