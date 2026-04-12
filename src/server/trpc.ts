@@ -1,9 +1,11 @@
+import type { ProjectRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { cache } from "react";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { prisma } from "@/lib/prisma";
 
 type HeadersLike = {
 	get(name: string): string | null;
@@ -56,15 +58,68 @@ const t = initTRPC.context<TRPCContext>().create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure;
+
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 	if (!ctx.userId) {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
-
-	return next({
-		ctx: {
-			...ctx,
-			userId: ctx.userId,
-		},
-	});
+	return next({ ctx: { ...ctx, userId: ctx.userId } });
 });
+
+/**
+ * Resolves the `projectId` from `input.projectId` and attaches the caller's
+ * membership to the context. Throws UNAUTHORIZED / FORBIDDEN / NOT_FOUND as
+ * appropriate. Downstream procedures receive `ctx.projectId` and `ctx.member`.
+ */
+function makeProjectMiddleware(allowedRoles: ProjectRole[]) {
+	return protectedProcedure
+		.input((input: unknown) => {
+			if (
+				typeof input !== "object" ||
+				input === null ||
+				typeof (input as Record<string, unknown>).projectId !== "string"
+			) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "projectId is required",
+				});
+			}
+			return input as { projectId: string } & Record<string, unknown>;
+		})
+		.use(async ({ ctx, input, next }) => {
+			const member = await prisma.projectMember.findUnique({
+				where: {
+					projectId_userId: { projectId: input.projectId, userId: ctx.userId },
+				},
+			});
+			if (!member) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Not a project member",
+				});
+			}
+			if (!allowedRoles.includes(member.role)) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Insufficient role",
+				});
+			}
+			return next({ ctx: { ...ctx, projectId: input.projectId, member } });
+		});
+}
+
+/** Any project member (OWNER, COLLABORATOR, VIEWER) */
+export const projectProcedure = makeProjectMiddleware([
+	"OWNER",
+	"COLLABORATOR",
+	"VIEWER",
+]);
+
+/** Owner or Collaborator — can create/edit resources */
+export const collaboratorProcedure = makeProjectMiddleware([
+	"OWNER",
+	"COLLABORATOR",
+]);
+
+/** Owner only — destructive or admin-level actions */
+export const ownerProcedure = makeProjectMiddleware(["OWNER"]);

@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Auth (NextAuth tables)
+// ---------------------------------------------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String? // null for OAuth-only users
+  avatar        String?
+  role          UserRole  @default(USER)
+  suspended     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  projectMembers ProjectMember[]
+  projectInvites ProjectInvite[]
+  quotes         Quote[]
+  quoteComments  QuoteComment[]
+  memos          Memo[]
+  supportTickets SupportTicket[]
+  ticketMessages TicketMessage[]
+}
+
+// ---------------------------------------------------------------------------
+// Projects & Collaboration
+// ---------------------------------------------------------------------------
+
+enum ProjectRole {
+  OWNER
+  COLLABORATOR
+  VIEWER
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String   @default("#6366f1") // hex
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members   ProjectMember[]
+  invites   ProjectInvite[]
+  documents Document[]
+  codes     Code[]
+  memos     Memo[]
+}
+
+model ProjectMember {
+  id        String      @id @default(cuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(COLLABORATOR)
+  joinedAt  DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model ProjectInvite {
+  id          String      @id @default(cuid())
+  projectId   String
+  createdById String
+  email       String
+  role        ProjectRole @default(COLLABORATOR)
+  token       String      @unique @default(cuid())
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime    @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
+}
+
+// ---------------------------------------------------------------------------
+// Documents
+// ---------------------------------------------------------------------------
+
+model Document {
+  id             String   @id @default(cuid())
+  projectId      String
+  name           String
+  description    String?
+  storageKey     String // e.g. projects/{projectId}/documents/{id}.pdf
+  pageCount      Int      @default(0)
+  fileSize       Int      @default(0) // bytes
+  extractedTitle String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  quotes  Quote[]
+}
+
+// ---------------------------------------------------------------------------
+// Codes
+// ---------------------------------------------------------------------------
+
+model Code {
+  id          String   @id @default(cuid())
+  projectId   String
+  parentId    String? // self-relation for hierarchy
+  name        String
+  color       String   @default("#6366f1") // background hex
+  textColor   String   @default("#ffffff") // text hex
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent     Code?       @relation("CodeHierarchy", fields: [parentId], references: [id])
+  children   Code[]      @relation("CodeHierarchy")
+  quoteCodes QuoteCode[]
+}
+
+// ---------------------------------------------------------------------------
+// Quotes
+// ---------------------------------------------------------------------------
+
+model Quote {
+  id          String   @id @default(cuid())
+  documentId  String
+  createdById String
+  text        String
+  page        Int
+  position    Json // { start: number, end: number } — char offsets in PDF.js text layer
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document   Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdBy  User           @relation(fields: [createdById], references: [id])
+  quoteCodes QuoteCode[]
+  comments   QuoteComment[]
+
+  @@index([documentId])
+  @@index([createdById])
+}
+
+model QuoteCode {
+  quoteId String
+  codeId  String
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  code  Code  @relation(fields: [codeId], references: [id], onDelete: Cascade)
+
+  @@id([quoteId, codeId])
+}
+
+model QuoteComment {
+  id        String   @id @default(cuid())
+  quoteId   String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([quoteId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Memos
+// ---------------------------------------------------------------------------
+
+model Memo {
+  id          String   @id @default(cuid())
+  projectId   String
+  createdById String
+  name        String
+  content     Json     @default("{}") // Tiptap JSON document
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id])
+}
+
+// ---------------------------------------------------------------------------
+// Support
+// ---------------------------------------------------------------------------
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String
+  subject     String
+  description String
+  status      TicketStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id])
+  messages TicketMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@index([userId])
+}

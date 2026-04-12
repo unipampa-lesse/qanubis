@@ -1,15 +1,17 @@
 import { withAuth } from "next-auth/middleware";
 
+/**
+ * Proxy (Next.js 16 equivalent of middleware).
+ * Protects all /dashboard and /invite routes — redirects to /signin if unauthenticated.
+ * The callbackUrl is automatically appended by withAuth so the user lands back
+ * on the intended page after signing in.
+ */
 export default withAuth({
 	pages: {
 		signIn: "/signin",
-		signOut: "/signout",
-		error: "/error-503",
 	},
 });
 
 export const config = {
-	matcher: [
-		"/((?!api|_next|static|favicon.ico|sign*|reset-password|two-step-verification|error-500|error-503|maintenance|coming-soon|success|dashboard*|$).*)",
-	],
+	matcher: ["/dashboard/:path*", "/invite/:path*"],
 };

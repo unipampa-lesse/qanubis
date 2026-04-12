@@ -1,42 +1,90 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { GoEye, GoEyeClosed } from "react-icons/go";
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import useGoBack from "@/hooks/useGoBack";
+import { trpc } from "@/server/client";
 
 export default function SignUpForm() {
-	const [showPassword, setShowPassword] = useState(false);
-	const [isChecked, setIsChecked] = useState(false);
+	const t = useTranslation();
+	const router = useRouter();
 	const goBack = useGoBack();
+
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [agreed, setAgreed] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const register = trpc.user.register.useMutation({
+		onSuccess: async () => {
+			// Auto sign-in after registration
+			const res = await signIn("credentials", {
+				redirect: false,
+				email,
+				password,
+				rememberMe: "false",
+			});
+			if (res?.ok) {
+				router.push("/dashboard");
+			} else {
+				router.push("/signin");
+			}
+		},
+		onError: (err) => {
+			setError(
+				err.message === "email_taken" ? t.auth.emailTaken : t.auth.signUpError,
+			);
+		},
+	});
+
+	async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setError(null);
+		register.mutate({ firstName, lastName, email, password });
+	}
+
 	return (
 		<div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
 			<div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
 				<button
+					type="button"
 					onClick={goBack}
 					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 				>
 					<FaChevronLeft />
-					Back
+					{t.auth.back}
 				</button>
 			</div>
 			<div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
 				<div>
 					<div className="mb-5 sm:mb-8">
 						<h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-							Sign Up
+							{t.auth.signUp}
 						</h1>
 						<p className="text-sm text-gray-500 dark:text-gray-400">
-							Enter your email and password to sign up!
+							{t.auth.signUpSubtitle}
 						</p>
 					</div>
 					<div>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-							<button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+							<button
+								type="button"
+								onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+								className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+							>
 								<svg
+									aria-hidden="true"
 									width="20"
 									height="20"
 									viewBox="0 0 20 20"
@@ -60,83 +108,102 @@ export default function SignUpForm() {
 										fill="#EB4335"
 									/>
 								</svg>
-								Sign up with Google
+								{t.auth.signUpWithGoogle}
 							</button>
-							<button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+							<button
+								type="button"
+								onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+								className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+							>
 								<svg
+									aria-hidden="true"
 									width="21"
-									className="fill-current"
 									height="20"
-									viewBox="0 0 21 20"
-									fill="none"
+									viewBox="0 0 24 24"
+									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
+									className="fill-current"
 								>
-									<path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
+									<path d="M12 0.2975C5.37 0.2975 0 5.6675 0 12.2975C0 17.6175 3.438 22.0175 8.205 23.6275C8.805 23.7375 9.025 23.3875 9.025 23.0875C9.025 22.8175 9.015 22.0975 9.01 21.1675C5.672 21.8975 4.968 19.6475 4.968 19.6475C4.422 18.2175 3.633 17.8475 3.633 17.8475C2.546 17.0875 3.717 17.1025 3.717 17.1025C4.922 17.1925 5.555 18.3575 5.555 18.3575C6.622 20.1975 8.438 19.6975 9.128 19.3975C9.238 18.6175 9.548 18.0975 9.89 17.7975C7.22 17.4975 4.39 16.4375 4.39 11.7075C4.39 10.3675 4.87 9.2875 5.66 8.4475C5.54 8.1475 5.11 6.8975 5.77 5.2975C5.77 5.2975 6.79 4.9775 9.01 6.3675C9.98 6.0975 11.01 5.9675 12.04 5.9625C13.07 5.9675 14.1 6.0975 15.07 6.3675C17.29 4.9775 18.31 5.2975 18.31 5.2975C18.97 6.8975 18.54 8.1475 18.42 8.4475C19.21 9.2875 19.69 10.3675 19.69 11.7075C19.69 16.4475 16.86 17.4925 14.19 17.7875C14.63 18.1575 15.01 18.8975 15.01 20.0175C15.01 21.6175 15 22.7875 15 23.0875C15 23.3875 15.22 23.7475 15.83 23.6275C20.6 22.0175 24 17.6175 24 12.2975C24 5.6675 18.63 0.2975 12 0.2975Z" />
 								</svg>
-								Sign up with X
+								{t.auth.signUpWithGithub}
 							</button>
 						</div>
 						<div className="relative py-3 sm:py-5">
 							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
+								<div className="w-full border-t border-gray-200 dark:border-gray-800" />
 							</div>
 							<div className="relative flex justify-center text-sm">
 								<span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">
-									Or
+									{t.auth.or}
 								</span>
 							</div>
 						</div>
-						<form>
+						<form onSubmit={handleSubmit}>
 							<div className="space-y-5">
 								<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-									{/* <!-- First Name --> */}
 									<div className="sm:col-span-1">
 										<Label>
-											First Name<span className="text-error-500">*</span>
+											{t.auth.firstName}
+											<span className="text-error-500">*</span>
 										</Label>
 										<Input
 											type="text"
-											id="fname"
-											name="fname"
-											placeholder="Enter your first name"
+											value={firstName}
+											onChange={(e) => setFirstName(e.target.value)}
+											placeholder={t.auth.firstNamePlaceholder}
+											disabled={register.isPending}
+											required
 										/>
 									</div>
-									{/* <!-- Last Name --> */}
 									<div className="sm:col-span-1">
 										<Label>
-											Last Name<span className="text-error-500">*</span>
+											{t.auth.lastName}
+											<span className="text-error-500">*</span>
 										</Label>
 										<Input
 											type="text"
-											id="lname"
-											name="lname"
-											placeholder="Enter your last name"
+											value={lastName}
+											onChange={(e) => setLastName(e.target.value)}
+											placeholder={t.auth.lastNamePlaceholder}
+											disabled={register.isPending}
+											required
 										/>
 									</div>
 								</div>
-								{/* <!-- Email --> */}
 								<div>
 									<Label>
-										Email<span className="text-error-500">*</span>
+										{t.auth.email}
+										<span className="text-error-500">*</span>
 									</Label>
 									<Input
 										type="email"
-										id="email"
-										name="email"
-										placeholder="Enter your email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										placeholder={t.auth.emailPlaceholder}
+										disabled={register.isPending}
+										required
 									/>
 								</div>
-								{/* <!-- Password --> */}
 								<div>
 									<Label>
-										Password<span className="text-error-500">*</span>
+										{t.auth.password}
+										<span className="text-error-500">*</span>
 									</Label>
 									<div className="relative">
 										<Input
-											placeholder="Enter your password"
 											type={showPassword ? "text" : "password"}
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											placeholder={t.auth.passwordPlaceholder}
+											disabled={register.isPending}
+											required
 										/>
-										<span
+										<button
+											type="button"
+											aria-label={
+												showPassword ? "Hide password" : "Show password"
+											}
 											onClick={() => setShowPassword(!showPassword)}
 											className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
 										>
@@ -145,44 +212,47 @@ export default function SignUpForm() {
 											) : (
 												<GoEyeClosed className="fill-gray-500 dark:fill-gray-400" />
 											)}
-										</span>
+										</button>
 									</div>
 								</div>
-								{/* <!-- Checkbox --> */}
 								<div className="flex items-center gap-3">
 									<Checkbox
 										className="w-5 h-5"
-										checked={isChecked}
-										onChange={setIsChecked}
+										checked={agreed}
+										onChange={setAgreed}
 									/>
 									<p className="inline-block font-normal text-gray-500 dark:text-gray-400">
-										By creating an account means you agree to the{" "}
+										{t.auth.terms}{" "}
 										<span className="text-gray-800 dark:text-white/90">
-											Terms and Conditions,
+											{t.auth.termsLink},
 										</span>{" "}
-										and our{" "}
+										{t.auth.and}{" "}
 										<span className="text-gray-800 dark:text-white">
-											Privacy Policy
+											{t.auth.privacyLink}
 										</span>
 									</p>
 								</div>
-								{/* <!-- Button --> */}
+								{error && <p className="text-sm text-error-500">{error}</p>}
 								<div>
-									<button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
-										Sign Up
-									</button>
+									<Button
+										type="submit"
+										className="w-full"
+										size="sm"
+										disabled={register.isPending || !agreed}
+									>
+										{register.isPending ? `${t.auth.signUp}…` : t.auth.signUp}
+									</Button>
 								</div>
 							</div>
 						</form>
-
 						<div className="mt-5">
 							<p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-								Already have an account? {""}
+								{t.auth.haveAccount}{" "}
 								<Link
 									href="/signin"
 									className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
 								>
-									Sign In
+									{t.auth.signIn}
 								</Link>
 							</p>
 						</div>

@@ -21,7 +21,7 @@ export default function UserDropdown() {
 				onClick={toggleDropdown}
 				className="flex items-center dropdown-toggle text-gray-700 dark:text-gray-400 dropdown-toggle"
 			>
-                <FaRegCircleUser size={24}/>
+				<FaRegCircleUser size={24} />
 
 				<svg
 					className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${

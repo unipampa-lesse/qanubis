@@ -1,17 +1,17 @@
 "use client";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import LanguageSelect from "@/components/common/LanguageSelect";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
+import { useTranslation } from "@/context/LanguageContext";
 import { useSidebar } from "@/context/SidebarContext";
-import LanguageSelect from '@/components/common/LanguageSelect';
-import { useTranslation } from '@/context/LanguageContext';
 
 const AppHeader: React.FC = () => {
 	const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 	const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
-  const t = useTranslation();
+	const t = useTranslation();
 
 	const handleToggle = () => {
 		if (window.innerWidth >= 1280) {
@@ -43,7 +43,7 @@ const AppHeader: React.FC = () => {
 	}, []);
 
 	return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b">
+		<header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b">
 			<div className="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
 				<div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 xl:py-4">
 					<button
@@ -129,7 +129,7 @@ const AppHeader: React.FC = () => {
 								<input
 									ref={inputRef}
 									type="text"
-                                    placeholder={t.projects}
+									placeholder={t.dashboard.title}
 									className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-107.5"
 								/>
 								<button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-1.75 py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400">
@@ -148,7 +148,7 @@ const AppHeader: React.FC = () => {
 					<div className="flex items-center gap-2 2xsm:gap-3">
 						<ThemeToggleButton />
 						<NotificationDropdown />
-                        <LanguageSelect/>
+						<LanguageSelect />
 					</div>
 					<UserDropdown />
 				</div>

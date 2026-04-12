@@ -1,12 +1,10 @@
-import { trpc } from "@/server/server";
+import { redirect } from "next/navigation";
+import { getAuthSession } from "@/server/get-server-session";
 
 export default async function Home() {
-	const greeting = await trpc.hello({ text: "from tRPC" });
-	const serverTime = await trpc.serverTime();
-	return (
-		<div>
-			<h1>{greeting.greeting}</h1>
-			<p>Server time: {serverTime.now.toISOString()}</p>
-		</div>
-	);
+	const session = await getAuthSession();
+	if (session) {
+		redirect("/dashboard");
+	}
+	redirect("/signin");
 }

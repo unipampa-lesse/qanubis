@@ -1,23 +1,14 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter } from "../trpc";
+import { documentRouter } from "./document";
+import { memberRouter } from "./member";
+import { projectRouter } from "./project";
+import { userRouter } from "./user";
+
 export const appRouter = createTRPCRouter({
-	hello: publicProcedure
-		.input(
-			z.object({
-				text: z.string(),
-			}),
-		)
-		.query((opts) => {
-			return {
-				greeting: `hello ${opts.input.text}`,
-			};
-		}),
-	serverTime: publicProcedure.query(() => {
-		return { now: new Date() };
-	}),
-	me: protectedProcedure.query(({ ctx }) => {
-		return { userId: ctx.userId };
-	}),
+	user: userRouter,
+	project: projectRouter,
+	member: memberRouter,
+	document: documentRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { GoEye, GoEyeClosed } from "react-icons/go";
@@ -7,37 +9,75 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import useGoBack from "@/hooks/useGoBack";
 
 export default function SignInForm() {
-	const [showPassword, setShowPassword] = useState(false);
-	const [isChecked, setIsChecked] = useState(false);
+	const t = useTranslation();
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
 	const goBack = useGoBack();
+
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [rememberMe, setRememberMe] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setError(null);
+		setIsLoading(true);
+		try {
+			const res = await signIn("credentials", {
+				redirect: false,
+				email,
+				password,
+				rememberMe: rememberMe.toString(),
+			});
+			if (res?.error) {
+				setError(t.auth.invalidCredentials);
+			} else {
+				router.push(callbackUrl);
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
 	return (
 		<div className="flex flex-col flex-1 lg:w-1/2 w-full">
 			<div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
 				<button
+					type="button"
 					onClick={goBack}
 					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 				>
 					<FaChevronLeft />
-					Back
+					{t.auth.back}
 				</button>
 			</div>
 			<div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
 				<div>
 					<div className="mb-5 sm:mb-8">
 						<h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-							Sign In
+							{t.auth.signIn}
 						</h1>
 						<p className="text-sm text-gray-500 dark:text-gray-400">
-							Enter your email and password to sign in!
+							{t.auth.signInSubtitle}
 						</p>
 					</div>
 					<div>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-							<button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+							<button
+								type="button"
+								onClick={() => signIn("google", { callbackUrl })}
+								className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+							>
 								<svg
+									aria-hidden="true"
 									width="20"
 									height="20"
 									viewBox="0 0 20 20"
@@ -61,50 +101,70 @@ export default function SignInForm() {
 										fill="#EB4335"
 									/>
 								</svg>
-								Sign in with Google
+								{t.auth.signInWithGoogle}
 							</button>
-							<button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+							<button
+								type="button"
+								onClick={() => signIn("github", { callbackUrl })}
+								className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+							>
 								<svg
-                                    width="21"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="fill-current"
-                                    >
-                                    <path d="M12 0.2975C5.37 0.2975 0 5.6675 0 12.2975C0 17.6175 3.438 22.0175 8.205 23.6275C8.805 23.7375 9.025 23.3875 9.025 23.0875C9.025 22.8175 9.015 22.0975 9.01 21.1675C5.672 21.8975 4.968 19.6475 4.968 19.6475C4.422 18.2175 3.633 17.8475 3.633 17.8475C2.546 17.0875 3.717 17.1025 3.717 17.1025C4.922 17.1925 5.555 18.3575 5.555 18.3575C6.622 20.1975 8.438 19.6975 9.128 19.3975C9.238 18.6175 9.548 18.0975 9.89 17.7975C7.22 17.4975 4.39 16.4375 4.39 11.7075C4.39 10.3675 4.87 9.2875 5.66 8.4475C5.54 8.1475 5.11 6.8975 5.77 5.2975C5.77 5.2975 6.79 4.9775 9.01 6.3675C9.98 6.0975 11.01 5.9675 12.04 5.9625C13.07 5.9675 14.1 6.0975 15.07 6.3675C17.29 4.9775 18.31 5.2975 18.31 5.2975C18.97 6.8975 18.54 8.1475 18.42 8.4475C19.21 9.2875 19.69 10.3675 19.69 11.7075C19.69 16.4475 16.86 17.4925 14.19 17.7875C14.63 18.1575 15.01 18.8975 15.01 20.0175C15.01 21.6175 15 22.7875 15 23.0875C15 23.3875 15.22 23.7475 15.83 23.6275C20.6 22.0175 24 17.6175 24 12.2975C24 5.6675 18.63 0.2975 12 0.2975Z"/>
-                                </svg>
-								Sign in with Github
+									aria-hidden="true"
+									width="21"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="currentColor"
+									xmlns="http://www.w3.org/2000/svg"
+									className="fill-current"
+								>
+									<path d="M12 0.2975C5.37 0.2975 0 5.6675 0 12.2975C0 17.6175 3.438 22.0175 8.205 23.6275C8.805 23.7375 9.025 23.3875 9.025 23.0875C9.025 22.8175 9.015 22.0975 9.01 21.1675C5.672 21.8975 4.968 19.6475 4.968 19.6475C4.422 18.2175 3.633 17.8475 3.633 17.8475C2.546 17.0875 3.717 17.1025 3.717 17.1025C4.922 17.1925 5.555 18.3575 5.555 18.3575C6.622 20.1975 8.438 19.6975 9.128 19.3975C9.238 18.6175 9.548 18.0975 9.89 17.7975C7.22 17.4975 4.39 16.4375 4.39 11.7075C4.39 10.3675 4.87 9.2875 5.66 8.4475C5.54 8.1475 5.11 6.8975 5.77 5.2975C5.77 5.2975 6.79 4.9775 9.01 6.3675C9.98 6.0975 11.01 5.9675 12.04 5.9625C13.07 5.9675 14.1 6.0975 15.07 6.3675C17.29 4.9775 18.31 5.2975 18.31 5.2975C18.97 6.8975 18.54 8.1475 18.42 8.4475C19.21 9.2875 19.69 10.3675 19.69 11.7075C19.69 16.4475 16.86 17.4925 14.19 17.7875C14.63 18.1575 15.01 18.8975 15.01 20.0175C15.01 21.6175 15 22.7875 15 23.0875C15 23.3875 15.22 23.7475 15.83 23.6275C20.6 22.0175 24 17.6175 24 12.2975C24 5.6675 18.63 0.2975 12 0.2975Z" />
+								</svg>
+								{t.auth.signInWithGithub}
 							</button>
 						</div>
 						<div className="relative py-3 sm:py-5">
 							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
+								<div className="w-full border-t border-gray-200 dark:border-gray-800" />
 							</div>
 							<div className="relative flex justify-center text-sm">
 								<span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">
-									Or
+									{t.auth.or}
 								</span>
 							</div>
 						</div>
-						<form>
+						<form onSubmit={handleSubmit}>
 							<div className="space-y-6">
 								<div>
 									<Label>
-										Email <span className="text-error-500">*</span>{" "}
+										{t.auth.email} <span className="text-error-500">*</span>
 									</Label>
-									<Input placeholder="info@gmail.com" />
+									<Input
+										type="email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										placeholder={t.auth.emailPlaceholder}
+										disabled={isLoading}
+										required
+									/>
 								</div>
 								<div>
 									<Label>
-										Password <span className="text-error-500">*</span>{" "}
+										{t.auth.password} <span className="text-error-500">*</span>
 									</Label>
 									<div className="relative">
 										<Input
 											type={showPassword ? "text" : "password"}
-											placeholder="Enter your password"
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											placeholder={t.auth.passwordPlaceholder}
+											disabled={isLoading}
+											required
 										/>
-										<span
+										<button
+											type="button"
+											aria-label={
+												showPassword ? "Hide password" : "Show password"
+											}
 											onClick={() => setShowPassword(!showPassword)}
 											className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
 										>
@@ -113,26 +173,32 @@ export default function SignInForm() {
 											) : (
 												<GoEyeClosed className="fill-gray-500 dark:fill-gray-400" />
 											)}
-										</span>
+										</button>
 									</div>
 								</div>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<Checkbox checked={isChecked} onChange={setIsChecked} />
+										<Checkbox checked={rememberMe} onChange={setRememberMe} />
 										<span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-											Keep me logged in
+											{t.auth.keepLoggedIn}
 										</span>
 									</div>
 									<Link
 										href="/reset-password"
 										className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
 									>
-										Forgot password?
+										{t.auth.forgotPassword}
 									</Link>
 								</div>
+								{error && <p className="text-sm text-error-500">{error}</p>}
 								<div>
-									<Button className="w-full" size="sm">
-										Sign in
+									<Button
+										type="submit"
+										className="w-full"
+										size="sm"
+										disabled={isLoading}
+									>
+										{isLoading ? `${t.auth.signIn}…` : t.auth.signIn}
 									</Button>
 								</div>
 							</div>
@@ -140,12 +206,12 @@ export default function SignInForm() {
 
 						<div className="mt-5">
 							<p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-								Don&apos;t have an account? {""}
+								{t.auth.noAccount}{" "}
 								<Link
 									href="/signup"
 									className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
 								>
-									Sign Up
+									{t.auth.signUp}
 								</Link>
 							</p>
 						</div>
