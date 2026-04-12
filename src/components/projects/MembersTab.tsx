@@ -2,9 +2,9 @@
 
 import type { ProjectRole } from "@prisma/client";
 import { useState } from "react";
-import { useTranslation } from "@/context/LanguageContext";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 interface MembersTabProps {

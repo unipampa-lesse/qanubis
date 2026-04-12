@@ -28,16 +28,15 @@ export default function ProjectCard({
 	const t = useTranslation();
 
 	const roleColorClass: Record<ProjectRole, string> = {
-		OWNER: "bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300",
+		OWNER:
+			"bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300",
 		COLLABORATOR:
 			"bg-success-100 text-success-700 dark:bg-success-500/20 dark:text-success-300",
 		VIEWER: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
 	};
 
 	const updatedLabel = new Intl.RelativeTimeFormat(
-		typeof window !== "undefined"
-			? navigator.language
-			: "en",
+		typeof window !== "undefined" ? navigator.language : "en",
 		{ numeric: "auto" },
 	).format(
 		Math.round((updatedAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),

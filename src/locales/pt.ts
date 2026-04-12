@@ -29,6 +29,8 @@ export const translations: Translations = {
 	nav: {
 		menu: "Menu",
 		projects: "Projetos",
+		support: "Suporte",
+		admin: "Administração",
 	},
 
 	// Auth screens
@@ -111,6 +113,9 @@ export const translations: Translations = {
 		deleteConfirm:
 			"Isso removerá permanentemente todos os documentos, códigos e citações.",
 		notFound: "Projeto não encontrado ou você não tem acesso.",
+		editProject: "Editar projeto",
+		editSubmit: "Salvar alterações",
+		editSubmitting: "Salvando…",
 	},
 
 	// Tabs
@@ -118,6 +123,36 @@ export const translations: Translations = {
 		documents: "Documentos",
 		members: "Membros",
 		codes: "Códigos",
+		memos: "Memorandos",
+		reports: "Relatórios",
+	},
+
+	// Codes tab
+	codes: {
+		newCode: "Novo código",
+		addSubCode: "Adicionar subcódigo",
+		noCodes: "Nenhum código ainda.",
+		noCodesHint:
+			"Crie seu primeiro código para começar a organizar as citações.",
+		codeName: "Nome",
+		codeNamePlaceholder: "ex: Entrevista",
+		backgroundColor: "Fundo",
+		textColor: "Cor do texto",
+		description: "Descrição",
+		descriptionPlaceholder: "O que este código representa?",
+		createCode: "Criar código",
+		editCode: "Editar código",
+		creating: "Criando…",
+		saving: "Salvando…",
+		deleteCode: "Excluir código",
+		deleteConfirmLine1: "Excluir este código?",
+		deleteUsedIn: "Usado em",
+		deleteUsedInSuffix: "citação(ões) — as associações serão removidas.",
+		deleteHasChildren: "Possui",
+		deleteHasChildrenSuffix:
+			"subcódigo(s) direto(s) — eles se tornarão códigos raiz.",
+		quoteSingular: "citação",
+		quotePlural: "citações",
 	},
 
 	// Members tab
@@ -144,6 +179,180 @@ export const translations: Translations = {
 		noDocuments: "Nenhum documento ainda.",
 		noDocumentsHint: "Envie um PDF para começar.",
 		deleteDocument: "Excluir documento",
+		download: "Baixar PDF",
+	},
+
+	// Document viewer + quote workflow
+	viewer: {
+		backToProject: "Voltar ao projeto",
+		loading: "Carregando PDF…",
+		loadError: "Falha ao carregar o PDF.",
+		page: "Página",
+		of: "de",
+		scannedWarning: "Este PDF parece ser uma imagem digitalizada sem camada de texto. A seleção de texto e extração de citações não estão disponíveis para este documento.",
+
+		// Quote creation
+		quoteButton: "Citar",
+		quotesTitle: "Citações",
+		noQuotes: "Nenhuma citação ainda.",
+		noQuotesHint: "Selecione texto no PDF para criar uma citação.",
+
+		// Quote actions
+		deleteQuote: "Excluir citação",
+		deleteQuoteConfirm:
+			"Excluir esta citação? Todos os códigos e comentários associados também serão removidos.",
+
+		// Code assignment
+		assignCode: "Atribuir código",
+		noCodesAvailable: "Nenhum código neste projeto ainda.",
+		removeCode: "Remover código",
+
+		// Comments
+		comments: "comentário",
+		commentsPlural: "comentários",
+		addComment: "Adicionar um comentário…",
+		submitComment: "Enviar",
+		deleteComment: "Excluir comentário",
+		noComments: "Nenhum comentário ainda.",
+	},
+
+	// Reports tab
+	reports: {
+		tab: "Relatórios",
+		explorer: "Explorador",
+		charts: "Gráficos",
+		export: "Exportar",
+		allDocuments: "Todos os documentos",
+		allCodes: "Todos os códigos",
+		noQuotes: "Nenhuma citação corresponde aos filtros atuais.",
+		quoteCount: "citação(ões)",
+		page: "p.",
+		quotesHeatmapTitle: "Citações × Códigos",
+		coOccurrenceTitle: "Co-ocorrência de Códigos",
+		noDataForCharts:
+			"Adicione citações e atribua códigos para ver os gráficos.",
+		document: "Documento",
+		code: "Código",
+		count: "Quantidade",
+		// Summary
+		summary: "Resumo",
+		documentsTable: "Documentos",
+		codesTable: "Códigos",
+		quotesCount: "Citações",
+		codesUsed: "Códigos usados",
+		documentsUsed: "Documentos",
+		noData: "Nenhuma citação ainda.",
+		exportByCode: "Exportar por código",
+		exportByDocument: "Exportar por documento",
+		exportCSV: "Baixar CSV",
+		exportTXT: "Baixar TXT",
+		exportEmptyHint: "Nenhuma citação para exportar ainda.",
+	},
+
+	// Memos tab
+	memos: {
+		tab: "Memorandos",
+		newMemo: "Novo memorando",
+		creating: "Criando…",
+		noMemos: "Nenhum memorando ainda.",
+		noMemosHint:
+			"Crie seu primeiro memorando para começar a tomar notas de pesquisa.",
+		untitled: "Memorando sem título",
+		namePlaceholder: "Título do memorando",
+		deleteMemo: "Excluir memorando",
+		deleteConfirm: "Excluir este memorando? Essa ação não pode ser desfeita.",
+		saving: "Salvando…",
+		saved: "Salvo",
+		lastUpdated: "Última atualização",
+		by: "por",
+		editorPlaceholder: "Comece a escrever suas notas de pesquisa…",
+	},
+
+	// Admin panel
+	admin: {
+		navTitle: "Administração",
+		dashboard: "Painel",
+		users: "Usuários",
+		projects: "Projetos",
+		tickets: "Suporte",
+		totalUsers: "Total de usuários",
+		totalProjects: "Total de projetos",
+		totalDocuments: "Total de documentos",
+		totalQuotes: "Total de citações",
+		openTickets: "Chamados abertos",
+		user: "Usuário",
+		email: "E-mail",
+		role: "Função",
+		status: "Status",
+		active: "Ativo",
+		suspended: "Suspenso",
+		suspend: "Suspender",
+		unsuspend: "Reativar",
+		makeAdmin: "Tornar admin",
+		makeUser: "Tornar usuário",
+		project: "Projeto",
+		members: "Membros",
+		documents: "Documentos",
+		codes: "Códigos",
+		memos: "Memorandos",
+		ticket: "Chamado",
+		subject: "Assunto",
+		ticketStatus: "Status",
+		openedBy: "Aberto por",
+		lastActivity: "Última atividade",
+		reply: "Responder",
+		replyPlaceholder: "Digite sua resposta…",
+		send: "Enviar",
+		sending: "Enviando…",
+		statusOpen: "Aberto",
+		statusInProgress: "Em andamento",
+		statusResolved: "Resolvido",
+		statusClosed: "Encerrado",
+		markAs: "Marcar como",
+		noTickets: "Nenhum chamado de suporte ainda.",
+		backToTickets: "Voltar aos chamados",
+	},
+
+	// Support tickets (user-facing)
+	support: {
+		title: "Suporte",
+		newTicket: "Novo chamado",
+		myTickets: "Meus chamados",
+		noTickets: "Você ainda não abriu nenhum chamado de suporte.",
+		subject: "Assunto",
+		subjectPlaceholder: "Descreva brevemente o problema",
+		message: "Mensagem",
+		messagePlaceholder: "Descreva seu problema em detalhes…",
+		submit: "Abrir chamado",
+		submitting: "Abrindo…",
+		backToTickets: "Voltar ao suporte",
+		reply: "Responder",
+		replyPlaceholder: "Escreva uma resposta…",
+		send: "Enviar",
+		sending: "Enviando…",
+		ticketClosed: "Este chamado está encerrado.",
+		statusOpen: "Aberto",
+		statusInProgress: "Em andamento",
+		statusResolved: "Resolvido",
+		statusClosed: "Encerrado",
+	},
+
+	// Profile page
+	profile: {
+		title: "Perfil",
+		displayName: "Nome de exibição",
+		namePlaceholder: "Seu nome",
+		saveProfile: "Salvar alterações",
+		savingProfile: "Salvando…",
+		profileSaved: "Perfil atualizado.",
+		changePassword: "Alterar senha",
+		currentPassword: "Senha atual",
+		newPassword: "Nova senha (mín. 8 caracteres)",
+		savePassword: "Atualizar senha",
+		savingPassword: "Atualizando…",
+		passwordSaved: "Senha atualizada.",
+		wrongPassword: "Senha atual incorreta.",
+		oauthAccount: "Sua conta usa login com Google/GitHub — alteração de senha não está disponível.",
 	},
 
 	// Invite acceptance page

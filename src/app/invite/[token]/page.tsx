@@ -3,8 +3,8 @@
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useTranslation } from "@/context/LanguageContext";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 export default function InvitePage() {
@@ -24,7 +24,7 @@ export default function InvitePage() {
 		if (status === "authenticated" && !accept.isPending && !accept.isSuccess) {
 			accept.mutate({ token });
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [status]);
 
 	if (status === "loading" || accept.isPending) {
@@ -58,10 +58,7 @@ export default function InvitePage() {
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center gap-4">
 				<p className="text-sm text-error-500">{accept.error.message}</p>
-				<Button
-					variant="outline"
-					onClick={() => router.push("/dashboard")}
-				>
+				<Button variant="outline" onClick={() => router.push("/dashboard")}>
 					{t.invite.goToDashboard}
 				</Button>
 			</div>

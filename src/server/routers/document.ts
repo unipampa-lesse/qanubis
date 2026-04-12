@@ -19,6 +19,7 @@ export const documentRouter = createTRPCRouter({
 					id: true,
 					name: true,
 					description: true,
+					mimeType: true,
 					pageCount: true,
 					fileSize: true,
 					extractedTitle: true,
@@ -42,6 +43,24 @@ export const documentRouter = createTRPCRouter({
 			const storage = getStorageProvider();
 			const url = await storage.getPresignedUrl(doc.storageKey, 3600);
 			return { url };
+		}),
+
+	/** Get a presigned URL to download (force-download) a document PDF. Available to all members. */
+	getDownloadUrl: projectProcedure
+		.input(z.object({ projectId: z.string(), documentId: z.string() }))
+		.query(async ({ input }) => {
+			const doc = await prisma.document.findUnique({
+				where: { id: input.documentId, projectId: input.projectId },
+				select: { storageKey: true, name: true },
+			});
+			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+
+			const storage = getStorageProvider();
+			const filename = doc.name.endsWith(".pdf") ? doc.name : `${doc.name}.pdf`;
+			const url = await storage.getPresignedUrl(doc.storageKey, 3600, {
+				filename,
+			});
+			return { url, filename };
 		}),
 
 	/** Update document name/description (collaborator+). */

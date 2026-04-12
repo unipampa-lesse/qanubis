@@ -151,3 +151,6 @@ sketch
 
 
 **/__snapshots__/**
+
+# PDF.js worker (derived from pdfjs-dist, copied by postinstall)
+/public/pdf.worker.min.mjs

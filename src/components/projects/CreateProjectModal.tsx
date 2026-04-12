@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslation } from "@/context/LanguageContext";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const PRESET_COLORS = [
@@ -57,7 +57,7 @@ export default function CreateProjectModal({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center">
+		<div className="fixed inset-0 z-[100000] flex items-center justify-center">
 			{/* Backdrop */}
 			<div
 				className="absolute inset-0 bg-black/50"
@@ -78,8 +78,7 @@ export default function CreateProjectModal({
 							htmlFor="project-name"
 							className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
 						>
-							{t.common.name}{" "}
-							<span className="text-error-500">*</span>
+							{t.common.name} <span className="text-error-500">*</span>
 						</label>
 						<input
 							id="project-name"
@@ -134,9 +133,7 @@ export default function CreateProjectModal({
 						</div>
 					</div>
 
-					{error && (
-						<p className="text-sm text-error-500">{error}</p>
-					)}
+					{error && <p className="text-sm text-error-500">{error}</p>}
 
 					<div className="flex justify-end gap-3 pt-2">
 						<Button

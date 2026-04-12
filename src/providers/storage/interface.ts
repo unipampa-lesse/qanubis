@@ -11,8 +11,13 @@ export interface IStorageProvider {
 	 * Generate a pre-signed URL for temporary read access.
 	 * @param key - Object path
 	 * @param expiresInSeconds - Defaults to 3600 (1 hour)
+	 * @param options.filename - When set, adds ResponseContentDisposition: attachment to force download
 	 */
-	getPresignedUrl(key: string, expiresInSeconds?: number): Promise<string>;
+	getPresignedUrl(
+		key: string,
+		expiresInSeconds?: number,
+		options?: { filename?: string },
+	): Promise<string>;
 
 	/**
 	 * Delete an object from storage.

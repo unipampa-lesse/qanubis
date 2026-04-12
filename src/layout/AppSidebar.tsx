@@ -5,8 +5,13 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { GoHorizontalRule } from "react-icons/go";
-import { HiOutlineSquares2X2 } from "react-icons/hi2";
+import {
+	HiOutlineCog6Tooth,
+	HiOutlineLifebuoy,
+	HiOutlineSquares2X2,
+} from "react-icons/hi2";
 import { useTranslation } from "@/context/LanguageContext";
+import { trpc } from "@/server/client";
 import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {
@@ -21,12 +26,32 @@ const AppSidebar: React.FC = () => {
 	const pathname = usePathname();
 	const t = useTranslation();
 
+	// Fetch current user's role to conditionally show the admin link
+	const { data: me } = trpc.user.me.useQuery(undefined, {
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+	const isAdmin = me?.role === "ADMIN";
+
 	const navItems: NavItem[] = [
 		{
 			icon: <HiOutlineSquares2X2 />,
 			name: t.nav.projects,
 			path: "/dashboard",
 		},
+		{
+			icon: <HiOutlineLifebuoy />,
+			name: t.nav.support,
+			path: "/dashboard/support",
+		},
+		...(isAdmin
+			? [
+					{
+						icon: <HiOutlineCog6Tooth />,
+						name: t.nav.admin,
+						path: "/dashboard/admin",
+					},
+				]
+			: []),
 	];
 
 	const [openSubmenu, setOpenSubmenu] = useState<{

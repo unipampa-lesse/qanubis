@@ -65,7 +65,11 @@ export const memberRouter = createTRPCRouter({
 				Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000,
 			);
 			const existing = await prisma.projectInvite.findFirst({
-				where: { projectId: input.projectId, email: input.email, acceptedAt: null },
+				where: {
+					projectId: input.projectId,
+					email: input.email,
+					acceptedAt: null,
+				},
 			});
 			const invite = existing
 				? await prisma.projectInvite.update({

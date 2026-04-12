@@ -938,3 +938,119 @@ option {
   background: var(--color-gray-900);
   color: var(--color-gray-100);
 }
+/* ── PDF.js text layer ─────────────────────────────────────────────────────── */
+.pdf-text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  user-select: text;
+}
+
+.pdf-text-layer span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+.pdf-text-layer span::selection {
+  background: rgba(99, 102, 241, 0.35);
+}
+
+/* ---------------------------------------------------------------------------
+   Tiptap / ProseMirror editor content styles
+   --------------------------------------------------------------------------- */
+
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: inherit;
+}
+
+.ProseMirror > * + * {
+  margin-top: 0.6em;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.25em;
+  margin-bottom: 0.25em;
+  color: inherit;
+}
+
+.ProseMirror h1 { font-size: 1.5rem; }
+.ProseMirror h2 { font-size: 1.25rem; }
+.ProseMirror h3 { font-size: 1.1rem; }
+
+.ProseMirror strong { font-weight: 700; }
+.ProseMirror em { font-style: italic; }
+.ProseMirror s { text-decoration: line-through; }
+
+.ProseMirror code {
+  background-color: rgba(100, 100, 100, 0.15);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.ProseMirror pre {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.dark .ProseMirror pre {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+  color: inherit;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.dark .ProseMirror blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li + li {
+  margin-top: 0.2em;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}

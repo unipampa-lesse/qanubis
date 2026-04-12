@@ -1,10 +1,16 @@
 "use client";
 
 import type { ProjectRole } from "@prisma/client";
+import Link from "next/link";
 import { useRef, useState } from "react";
-import { useTranslation } from "@/context/LanguageContext";
-import { HiOutlineArrowUpTray, HiOutlineDocument, HiOutlineTrash } from "react-icons/hi2";
+import {
+	HiOutlineArrowDownTray,
+	HiOutlineArrowUpTray,
+	HiOutlineDocumentText,
+	HiOutlineTrash,
+} from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 interface DocumentsTabProps {
@@ -18,6 +24,75 @@ function formatBytes(bytes: number) {
 	if (bytes < 1024) return `${bytes} B`;
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+/** Small icon + colored badge showing the document type (e.g. "PDF"). */
+function DocTypeIcon({
+	mimeType,
+	size = "sm",
+}: {
+	mimeType: string;
+	size?: "sm" | "lg";
+}) {
+	const label =
+		mimeType === "application/pdf"
+			? "PDF"
+			: (mimeType.split("/")[1]?.toUpperCase().slice(0, 4) ?? "DOC");
+	const badgeColor =
+		mimeType === "application/pdf"
+			? "bg-red-500 text-white"
+			: "bg-gray-400 text-white";
+	const iconSize = size === "lg" ? "h-8 w-8" : "h-5 w-5";
+	return (
+		<div className="relative flex-shrink-0">
+			<HiOutlineDocumentText className={`${iconSize} text-gray-400`} />
+			<span
+				className={`absolute -bottom-1 -right-1.5 rounded px-0.5 text-[7px] font-bold leading-tight ${badgeColor}`}
+			>
+				{label}
+			</span>
+		</div>
+	);
+}
+
+function DownloadButton({
+	projectId,
+	documentId,
+	title,
+}: {
+	projectId: string;
+	documentId: string;
+	title: string;
+}) {
+	const [fetch, setFetch] = useState(false);
+	const { data, isFetching } = trpc.document.getDownloadUrl.useQuery(
+		{ projectId, documentId },
+		{
+			enabled: fetch,
+			retry: false,
+		},
+	);
+
+	// Once the URL arrives, trigger the download and reset
+	if (data?.url && fetch) {
+		const a = document.createElement("a");
+		a.href = data.url;
+		a.download = data.filename;
+		a.click();
+		setFetch(false);
+	}
+
+	return (
+		<button
+			type="button"
+			title={title}
+			disabled={isFetching}
+			onClick={() => setFetch(true)}
+			className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
+		>
+			<HiOutlineArrowDownTray className="h-4 w-4" />
+		</button>
+	);
 }
 
 export default function DocumentsTab({
@@ -126,11 +201,9 @@ export default function DocumentsTab({
 								<th className="hidden px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 md:table-cell">
 									{t.documents.quotes}
 								</th>
-								{canEdit && (
-									<th className="px-5 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
-										{t.common.actions}
-									</th>
-								)}
+								<th className="px-5 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
+									{t.common.actions}
+								</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
@@ -140,8 +213,11 @@ export default function DocumentsTab({
 									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
 								>
 									<td className="px-5 py-3">
-										<div className="flex items-center gap-2">
-											<HiOutlineDocument className="h-5 w-5 flex-shrink-0 text-gray-400" />
+										<Link
+											href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
+											className="flex items-center gap-2 hover:underline"
+										>
+											<DocTypeIcon mimeType={doc.mimeType} />
 											<div>
 												<div className="font-medium text-gray-800 dark:text-white/90">
 													{doc.name}
@@ -153,7 +229,7 @@ export default function DocumentsTab({
 														</div>
 													)}
 											</div>
-										</div>
+										</Link>
 									</td>
 									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
 										{doc.pageCount > 0 ? doc.pageCount : "—"}
@@ -164,23 +240,30 @@ export default function DocumentsTab({
 									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 md:table-cell">
 										{doc._count.quotes}
 									</td>
-									{canEdit && (
-										<td className="px-5 py-3 text-right">
-											<button
-												type="button"
-												title={t.documents.deleteDocument}
-												onClick={() =>
-													remove.mutate({
-														projectId,
-														documentId: doc.id,
-													})
-												}
-												className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
-											>
-												<HiOutlineTrash className="h-4 w-4" />
-											</button>
-										</td>
-									)}
+									<td className="px-5 py-3 text-right">
+										<div className="flex justify-end gap-2">
+											<DownloadButton
+												projectId={projectId}
+												documentId={doc.id}
+												title={t.documents.download}
+											/>
+											{canEdit && (
+												<button
+													type="button"
+													title={t.documents.deleteDocument}
+													onClick={() =>
+														remove.mutate({
+															projectId,
+															documentId: doc.id,
+														})
+													}
+													className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
+												>
+													<HiOutlineTrash className="h-4 w-4" />
+												</button>
+											)}
+										</div>
+									</td>
 								</tr>
 							))}
 						</tbody>
@@ -188,7 +271,7 @@ export default function DocumentsTab({
 				</div>
 			) : (
 				<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center dark:border-gray-700">
-					<HiOutlineDocument className="mb-3 h-8 w-8 text-gray-300 dark:text-gray-600" />
+					<DocTypeIcon mimeType="application/pdf" size="lg" />
 					<p className="text-sm text-gray-500 dark:text-gray-400">
 						{t.documents.noDocuments}
 						{canEdit && ` ${t.documents.noDocumentsHint}`}

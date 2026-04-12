@@ -4,13 +4,25 @@ import type { ProjectRole } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { useTranslation } from "@/context/LanguageContext";
-import { HiOutlineDocument, HiOutlineUsers } from "react-icons/hi2";
+import {
+	HiOutlineChartBar,
+	HiOutlineDocument,
+	HiOutlineDocumentText,
+	HiOutlinePencilSquare,
+	HiOutlineTag,
+	HiOutlineUsers,
+} from "react-icons/hi2";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import CodesTab from "@/components/projects/CodesTab";
+import EditProjectModal from "@/components/projects/EditProjectModal";
 import DocumentsTab from "@/components/projects/DocumentsTab";
 import MembersTab from "@/components/projects/MembersTab";
+import MemosTab from "@/components/projects/MemosTab";
+import ReportsTab from "@/components/projects/ReportsTab";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
-type Tab = "documents" | "members";
+type Tab = "documents" | "codes" | "memos" | "reports" | "members";
 
 export default function ProjectPage() {
 	const { projectId } = useParams<{ projectId: string }>();
@@ -18,6 +30,8 @@ export default function ProjectPage() {
 	const { data: session } = useSession();
 	const t = useTranslation();
 	const [activeTab, setActiveTab] = useState<Tab>("documents");
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
 
 	const { data: project, isLoading } = trpc.project.get.useQuery(
 		{ projectId },
@@ -49,6 +63,9 @@ export default function ProjectPage() {
 		Icon: React.FC<React.SVGProps<SVGSVGElement>>;
 	}[] = [
 		{ id: "documents", label: t.tabs.documents, Icon: HiOutlineDocument },
+		{ id: "codes", label: t.tabs.codes, Icon: HiOutlineTag },
+		{ id: "memos", label: t.tabs.memos, Icon: HiOutlineDocumentText },
+		{ id: "reports", label: t.tabs.reports, Icon: HiOutlineChartBar },
 		{ id: "members", label: t.tabs.members, Icon: HiOutlineUsers },
 	];
 
@@ -62,9 +79,7 @@ export default function ProjectPage() {
 	}
 
 	if (!project) {
-		return (
-			<div className="text-sm text-gray-500">{t.project.notFound}</div>
-		);
+		return <div className="text-sm text-gray-500">{t.project.notFound}</div>;
 	}
 
 	return (
@@ -112,24 +127,26 @@ export default function ProjectPage() {
 					</div>
 				</div>
 				{myRole === "OWNER" && (
-					<button
-						type="button"
-						onClick={() => {
-							if (
-								window.confirm(
-									`${t.project.deleteProject} "${project.name}"? ${t.project.deleteConfirm}`,
-								)
-							) {
-								deleteProject.mutate({ projectId });
-							}
-						}}
-						disabled={deleteProject.isPending}
-						className="flex-shrink-0 rounded-lg px-3 py-2 text-xs font-medium text-error-500 hover:bg-error-50 disabled:opacity-50 dark:hover:bg-error-500/10"
-					>
-						{deleteProject.isPending
-							? t.project.deleting
-							: t.project.deleteProject}
-					</button>
+					<div className="flex flex-shrink-0 items-center gap-2">
+						<button
+							type="button"
+							onClick={() => setShowEditModal(true)}
+							className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400"
+						>
+							<HiOutlinePencilSquare className="h-3.5 w-3.5" />
+							{t.project.editProject}
+						</button>
+						<button
+							type="button"
+							onClick={() => setShowDeleteConfirm(true)}
+							disabled={deleteProject.isPending}
+							className="rounded-lg px-3 py-2 text-xs font-medium text-error-500 hover:bg-error-50 disabled:opacity-50 dark:hover:bg-error-500/10"
+						>
+							{deleteProject.isPending
+								? t.project.deleting
+								: t.project.deleteProject}
+						</button>
+					</div>
 				)}
 			</div>
 
@@ -158,8 +175,41 @@ export default function ProjectPage() {
 			{activeTab === "documents" && (
 				<DocumentsTab projectId={projectId} currentRole={myRole} />
 			)}
+			{activeTab === "codes" && (
+				<CodesTab projectId={projectId} currentRole={myRole} />
+			)}
+			{activeTab === "memos" && (
+				<MemosTab projectId={projectId} currentRole={myRole} />
+			)}
+			{activeTab === "reports" && (
+				<ReportsTab projectId={projectId} projectName={project.name} />
+			)}
 			{activeTab === "members" && (
 				<MembersTab projectId={projectId} currentRole={myRole} />
+			)}
+
+			<ConfirmModal
+				isOpen={showDeleteConfirm}
+				title={t.project.deleteProject}
+				message={`"${project.name}" — ${t.project.deleteConfirm}`}
+				confirmLabel={t.common.delete}
+				cancelLabel={t.common.cancel}
+				isPending={deleteProject.isPending}
+				onConfirm={() => {
+					deleteProject.mutate({ projectId });
+					setShowDeleteConfirm(false);
+				}}
+				onCancel={() => setShowDeleteConfirm(false)}
+			/>
+
+			{showEditModal && (
+				<EditProjectModal
+					projectId={projectId}
+					initialName={project.name}
+					initialDescription={project.description ?? null}
+					initialColor={project.color}
+					onClose={() => setShowEditModal(false)}
+				/>
 			)}
 		</div>
 	);

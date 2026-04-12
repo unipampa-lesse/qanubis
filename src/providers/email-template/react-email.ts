@@ -21,10 +21,9 @@ export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 		switch (template) {
 			case "project-invite": {
 				const d = data as EmailTemplateData["project-invite"];
-				const html = await render(
-					createElement(ProjectInviteEmail, d),
-					{ pretty: false },
-				);
+				const html = await render(createElement(ProjectInviteEmail, d), {
+					pretty: false,
+				});
 				return {
 					subject: projectInviteSubject(d.inviterName, d.projectName),
 					html,

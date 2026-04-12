@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useTranslation } from "@/context/LanguageContext";
 import { HiOutlinePlus } from "react-icons/hi2";
 import CreateProjectModal from "@/components/projects/CreateProjectModal";
 import ProjectCard from "@/components/projects/ProjectCard";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const SKELETON_KEYS = ["sk-a", "sk-b", "sk-c"] as const;

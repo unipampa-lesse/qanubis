@@ -27,6 +27,8 @@ export const translations = {
 	nav: {
 		menu: "Menu",
 		projects: "Projects",
+		support: "Support",
+		admin: "Administration",
 	},
 
 	// Auth screens
@@ -109,6 +111,9 @@ export const translations = {
 		deleteConfirm:
 			"This will permanently remove all documents, codes, and quotes.",
 		notFound: "Project not found or you don't have access.",
+		editProject: "Edit project",
+		editSubmit: "Save changes",
+		editSubmitting: "Saving…",
 	},
 
 	// Tabs
@@ -116,6 +121,35 @@ export const translations = {
 		documents: "Documents",
 		members: "Members",
 		codes: "Codes",
+		memos: "Memos",
+		reports: "Reports",
+	},
+
+	// Codes tab
+	codes: {
+		newCode: "New code",
+		addSubCode: "Add sub-code",
+		noCodes: "No codes yet.",
+		noCodesHint: "Create your first code to start organizing quotes.",
+		codeName: "Name",
+		codeNamePlaceholder: "e.g. Interview",
+		backgroundColor: "Background",
+		textColor: "Text color",
+		description: "Description",
+		descriptionPlaceholder: "What does this code represent?",
+		createCode: "Create code",
+		editCode: "Edit code",
+		creating: "Creating…",
+		saving: "Saving…",
+		deleteCode: "Delete code",
+		deleteConfirmLine1: "Delete this code?",
+		deleteUsedIn: "Used in",
+		deleteUsedInSuffix: "quote(s) — those associations will be removed.",
+		deleteHasChildren: "Has",
+		deleteHasChildrenSuffix:
+			"direct sub-code(s) — they will become root-level codes.",
+		quoteSingular: "quote",
+		quotePlural: "quotes",
 	},
 
 	// Members tab
@@ -142,6 +176,187 @@ export const translations = {
 		noDocuments: "No documents yet.",
 		noDocumentsHint: "Upload a PDF to get started.",
 		deleteDocument: "Delete document",
+		download: "Download PDF",
+	},
+
+	// Document viewer + quote workflow
+	viewer: {
+		backToProject: "Back to project",
+		loading: "Loading PDF…",
+		loadError: "Failed to load PDF.",
+		page: "Page",
+		of: "of",
+		scannedWarning: "This PDF appears to be a scanned image without a text layer. Text selection and quote extraction are not available for this document.",
+
+		// Quote creation
+		quoteButton: "Quote",
+		quotesTitle: "Quotes",
+		noQuotes: "No quotes yet.",
+		noQuotesHint: "Select text in the PDF to create a quote.",
+
+		// Quote actions
+		deleteQuote: "Delete quote",
+		deleteQuoteConfirm:
+			"Delete this quote? All code assignments and comments will also be removed.",
+
+		// Code assignment
+		assignCode: "Assign code",
+		noCodesAvailable: "No codes in this project yet.",
+		removeCode: "Remove code",
+
+		// Comments
+		comments: "comment",
+		commentsPlural: "comments",
+		addComment: "Add a comment…",
+		submitComment: "Send",
+		deleteComment: "Delete comment",
+		noComments: "No comments yet.",
+	},
+
+	// Reports tab
+	reports: {
+		tab: "Reports",
+		// Sub-tabs
+		explorer: "Explorer",
+		charts: "Charts",
+		export: "Export",
+		// Explorer
+		allDocuments: "All documents",
+		allCodes: "All codes",
+		noQuotes: "No quotes match the current filters.",
+		quoteCount: "quote(s)",
+		page: "p.",
+		// Charts
+		quotesHeatmapTitle: "Quotes × Codes",
+		coOccurrenceTitle: "Code Co-occurrence",
+		noDataForCharts: "Add quotes and assign codes to see charts.",
+		document: "Document",
+		code: "Code",
+		count: "Count",
+		// Summary
+		summary: "Summary",
+		documentsTable: "Documents",
+		codesTable: "Codes",
+		quotesCount: "Quotes",
+		codesUsed: "Codes used",
+		documentsUsed: "Documents",
+		noData: "No quotes yet.",
+		// Export
+		exportByCode: "Export by code",
+		exportByDocument: "Export by document",
+		exportCSV: "Download CSV",
+		exportTXT: "Download TXT",
+		exportEmptyHint: "No quotes to export yet.",
+	},
+
+	// Memos tab
+	memos: {
+		tab: "Memos",
+		newMemo: "New memo",
+		creating: "Creating…",
+		noMemos: "No memos yet.",
+		noMemosHint: "Create your first memo to start taking research notes.",
+		untitled: "Untitled memo",
+		namePlaceholder: "Memo title",
+		deleteMemo: "Delete memo",
+		deleteConfirm: "Delete this memo? This cannot be undone.",
+		saving: "Saving…",
+		saved: "Saved",
+		lastUpdated: "Last updated",
+		by: "by",
+		editorPlaceholder: "Start writing your research notes…",
+	},
+
+	// Admin panel
+	admin: {
+		// Nav
+		navTitle: "Administration",
+		dashboard: "Dashboard",
+		users: "Users",
+		projects: "Projects",
+		tickets: "Support Tickets",
+		// Stats cards
+		totalUsers: "Total users",
+		totalProjects: "Total projects",
+		totalDocuments: "Total documents",
+		totalQuotes: "Total quotes",
+		openTickets: "Open tickets",
+		// Users page
+		user: "User",
+		email: "Email",
+		role: "Role",
+		status: "Status",
+		active: "Active",
+		suspended: "Suspended",
+		suspend: "Suspend",
+		unsuspend: "Unsuspend",
+		makeAdmin: "Make admin",
+		makeUser: "Make user",
+		// Projects page
+		project: "Project",
+		members: "Members",
+		documents: "Documents",
+		codes: "Codes",
+		memos: "Memos",
+		// Tickets page
+		ticket: "Ticket",
+		subject: "Subject",
+		ticketStatus: "Status",
+		openedBy: "Opened by",
+		lastActivity: "Last activity",
+		reply: "Reply",
+		replyPlaceholder: "Type your reply…",
+		send: "Send",
+		sending: "Sending…",
+		statusOpen: "Open",
+		statusInProgress: "In progress",
+		statusResolved: "Resolved",
+		statusClosed: "Closed",
+		markAs: "Mark as",
+		noTickets: "No support tickets yet.",
+		backToTickets: "Back to tickets",
+	},
+
+	// Support tickets (user-facing)
+	support: {
+		title: "Support",
+		newTicket: "New ticket",
+		myTickets: "My tickets",
+		noTickets: "You haven't opened any support tickets yet.",
+		subject: "Subject",
+		subjectPlaceholder: "Briefly describe your issue",
+		message: "Message",
+		messagePlaceholder: "Describe your issue in detail…",
+		submit: "Open ticket",
+		submitting: "Opening…",
+		backToTickets: "Back to support",
+		reply: "Reply",
+		replyPlaceholder: "Write a reply…",
+		send: "Send",
+		sending: "Sending…",
+		ticketClosed: "This ticket is closed.",
+		statusOpen: "Open",
+		statusInProgress: "In progress",
+		statusResolved: "Resolved",
+		statusClosed: "Closed",
+	},
+
+	// Profile page
+	profile: {
+		title: "Profile",
+		displayName: "Display name",
+		namePlaceholder: "Your name",
+		saveProfile: "Save changes",
+		savingProfile: "Saving…",
+		profileSaved: "Profile updated.",
+		changePassword: "Change password",
+		currentPassword: "Current password",
+		newPassword: "New password (min. 8 characters)",
+		savePassword: "Update password",
+		savingPassword: "Updating…",
+		passwordSaved: "Password updated.",
+		wrongPassword: "Current password is incorrect.",
+		oauthAccount: "Your account uses Google/GitHub sign-in — password change is not available.",
 	},
 
 	// Invite acceptance page

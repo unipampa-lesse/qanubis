@@ -1,10 +1,5 @@
 import "server-only";
-// pdf-parse is a CommonJS module; use require to avoid ESM default-export issues.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse") as (
-	buffer: Buffer,
-	options?: Record<string, unknown>,
-) => Promise<{ numpages: number; info: Record<string, unknown> | null }>;
+import { PDFDocument } from "pdf-lib";
 
 export interface PdfMetadata {
 	pageCount: number;
@@ -12,18 +7,23 @@ export interface PdfMetadata {
 }
 
 /**
- * Extracts metadata from a PDF buffer without reading the full text content.
- * Used at upload time to populate Document.pageCount and Document.extractedTitle.
+ * Extracts metadata (page count + embedded title) from a PDF buffer.
+ * Uses pdf-lib — a pure-JS library with no browser-API dependencies —
+ * so it is safe to call in any Node.js server context (route handlers,
+ * tRPC procedures, etc.).
  */
 export async function extractPdfMetadata(buffer: Buffer): Promise<PdfMetadata> {
-	// max_pages: 0 means parse only metadata, not all pages' text — faster for large files.
-	const data = await pdfParse(buffer, { max: 0 });
+	const pdfDoc = await PDFDocument.load(buffer, {
+		// Don't throw on encrypted PDFs — just read what's available
+		ignoreEncryption: true,
+		updateMetadata: false,
+	});
 
-	const extractedTitle =
-		(data.info?.Title as string | undefined)?.trim() || null;
+	const pageCount = pdfDoc.getPageCount();
+	const rawTitle = pdfDoc.getTitle()?.trim() ?? null;
 
 	return {
-		pageCount: data.numpages ?? 0,
-		extractedTitle: extractedTitle || null,
+		pageCount,
+		extractedTitle: rawTitle || null,
 	};
 }

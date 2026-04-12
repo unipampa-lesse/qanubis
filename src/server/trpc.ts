@@ -123,3 +123,18 @@ export const collaboratorProcedure = makeProjectMiddleware([
 
 /** Owner only — destructive or admin-level actions */
 export const ownerProcedure = makeProjectMiddleware(["OWNER"]);
+
+/**
+ * Site-admin procedure — requires UserRole.ADMIN.
+ * Fetches the user record to verify role; throws FORBIDDEN otherwise.
+ */
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+	const user = await prisma.user.findUnique({
+		where: { id: ctx.userId },
+		select: { role: true },
+	});
+	if (!user || user.role !== "ADMIN") {
+		throw new TRPCError({ code: "FORBIDDEN" });
+	}
+	return next({ ctx: { ...ctx, userId: ctx.userId } });
+});

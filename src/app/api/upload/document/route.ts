@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
 			projectId,
 			name: documentName,
 			description: typeof description === "string" ? description : null,
+			mimeType: fileEntry.type,
 			storageKey: "", // placeholder, updated after upload
 			pageCount,
 			fileSize: fileEntry.size,

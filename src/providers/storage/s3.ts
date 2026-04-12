@@ -52,8 +52,18 @@ export class S3StorageProvider implements IStorageProvider {
 		);
 	}
 
-	async getPresignedUrl(key: string, expiresInSeconds = 3600): Promise<string> {
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+	async getPresignedUrl(
+		key: string,
+		expiresInSeconds = 3600,
+		options?: { filename?: string },
+	): Promise<string> {
+		const command = new GetObjectCommand({
+			Bucket: this.bucket,
+			Key: key,
+			...(options?.filename && {
+				ResponseContentDisposition: `attachment; filename="${options.filename}"`,
+			}),
+		});
 		return getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
 	}
 
