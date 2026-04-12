@@ -106,7 +106,8 @@ export const translations = {
 	project: {
 		deleteProject: "Delete project",
 		deleting: "Deleting…",
-		deleteConfirm: "This will permanently remove all documents, codes, and quotes.",
+		deleteConfirm:
+			"This will permanently remove all documents, codes, and quotes.",
 		notFound: "Project not found or you don't have access.",
 	},
 
@@ -114,6 +115,7 @@ export const translations = {
 	tabs: {
 		documents: "Documents",
 		members: "Members",
+		codes: "Codes",
 	},
 
 	// Members tab

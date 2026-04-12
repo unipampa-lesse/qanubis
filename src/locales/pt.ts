@@ -117,6 +117,7 @@ export const translations: Translations = {
 	tabs: {
 		documents: "Documentos",
 		members: "Membros",
+		codes: "Códigos",
 	},
 
 	// Members tab
