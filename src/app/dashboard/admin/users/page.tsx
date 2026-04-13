@@ -3,10 +3,6 @@
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
-const ROLE_LABELS: Record<string, string> = {
-	USER: "User",
-	ADMIN: "Admin",
-};
 
 export default function AdminUsersPage() {
 	const t = useTranslation();
@@ -83,7 +79,7 @@ export default function AdminUsersPage() {
 												: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
 										}`}
 									>
-										{ROLE_LABELS[user.role] ?? user.role}
+										{user.role === "ADMIN" ? t.admin.roleAdmin : t.admin.roleUser}
 									</span>
 								</td>
 								<td className="px-5 py-3">

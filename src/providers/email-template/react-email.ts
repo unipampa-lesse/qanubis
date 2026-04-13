@@ -12,6 +12,11 @@ import {
 	projectInviteSubject,
 	projectInviteText,
 } from "./templates/ProjectInviteEmail";
+import {
+	ResetPasswordEmail,
+	resetPasswordSubject,
+	resetPasswordText,
+} from "./templates/ResetPasswordEmail";
 
 export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 	async render<T extends EmailTemplateName>(
@@ -28,6 +33,17 @@ export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 					subject: projectInviteSubject(d.inviterName, d.projectName),
 					html,
 					text: projectInviteText(d),
+				};
+			}
+			case "reset-password": {
+				const d = data as EmailTemplateData["reset-password"];
+				const html = await render(createElement(ResetPasswordEmail, d), {
+					pretty: false,
+				});
+				return {
+					subject: resetPasswordSubject(),
+					html,
+					text: resetPasswordText(d),
 				};
 			}
 			default:

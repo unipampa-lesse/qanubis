@@ -3,7 +3,7 @@ import type { Translations } from "./en";
 export const translations: Translations = {
 	// Meta
 	language: "Idioma",
-	languages: ["Português", "Inglês"],
+	languages: { pt: "Português", en: "Inglês", es: "Espanhol" },
 
 	// Roles
 	roles: {
@@ -78,6 +78,15 @@ export const translations: Translations = {
 		rememberPassword: "Espera, me lembrei da senha...",
 		clickHere: "Clique aqui",
 		resetLinkSent: "Link enviado! Verifique seu e-mail.",
+		resetRequestError: "Algo deu errado. Tente novamente.",
+		// Confirm reset (token page)
+		newPasswordLabel: "Nova senha (mín. 8 caracteres)",
+		confirmNewPassword: "Confirmar nova senha",
+		setNewPassword: "Definir nova senha",
+		settingPassword: "Atualizando…",
+		passwordResetSuccess: "Senha atualizada! Você já pode entrar.",
+		resetTokenInvalid: "Este link é inválido ou expirou. Solicite um novo.",
+		passwordsDoNotMatch: "As senhas não coincidem.",
 	},
 
 	// Dashboard (project list)
@@ -179,6 +188,7 @@ export const translations: Translations = {
 		noDocuments: "Nenhum documento ainda.",
 		noDocumentsHint: "Envie um PDF para começar.",
 		deleteDocument: "Excluir documento",
+		renameDocument: "Renomear documento",
 		download: "Baixar PDF",
 	},
 
@@ -214,6 +224,8 @@ export const translations: Translations = {
 		submitComment: "Enviar",
 		deleteComment: "Excluir comentário",
 		noComments: "Nenhum comentário ainda.",
+		allCodesAssigned: "Todos os códigos já foram atribuídos.",
+		changeHighlightColor: "Alterar cor do destaque",
 	},
 
 	// Reports tab
@@ -295,6 +307,7 @@ export const translations: Translations = {
 		documents: "Documentos",
 		codes: "Códigos",
 		memos: "Memorandos",
+		quotes: "Citações",
 		ticket: "Chamado",
 		subject: "Assunto",
 		ticketStatus: "Status",
@@ -311,6 +324,10 @@ export const translations: Translations = {
 		markAs: "Marcar como",
 		noTickets: "Nenhum chamado de suporte ainda.",
 		backToTickets: "Voltar aos chamados",
+		ticketNotFound: "Chamado não encontrado.",
+		messages: "mensagens",
+		roleUser: "Usuário",
+		roleAdmin: "Admin",
 	},
 
 	// Support tickets (user-facing)
@@ -335,6 +352,10 @@ export const translations: Translations = {
 		statusInProgress: "Em andamento",
 		statusResolved: "Resolvido",
 		statusClosed: "Encerrado",
+		ticketNotFound: "Chamado não encontrado.",
+		messages: "mensagens",
+		supportAgent: "Suporte",
+		you: "Você",
 	},
 
 	// Profile page
@@ -345,6 +366,14 @@ export const translations: Translations = {
 		saveProfile: "Salvar alterações",
 		savingProfile: "Salvando…",
 		profileSaved: "Perfil atualizado.",
+		changeEmail: "Alterar e-mail",
+		newEmail: "Novo endereço de e-mail",
+		confirmWithPassword: "Confirmar com senha atual",
+		saveEmail: "Atualizar e-mail",
+		savingEmail: "Atualizando…",
+		emailSaved: "E-mail atualizado. Use o novo endereço para entrar.",
+		emailTaken: "Este e-mail já está em uso.",
+		oauthEmail: "O e-mail é gerenciado pelo seu provedor de login e não pode ser alterado aqui.",
 		changePassword: "Alterar senha",
 		currentPassword: "Senha atual",
 		newPassword: "Nova senha (mín. 8 caracteres)",
@@ -355,11 +384,99 @@ export const translations: Translations = {
 		oauthAccount: "Sua conta usa login com Google/GitHub — alteração de senha não está disponível.",
 	},
 
+	// 404 page
+	notFound: {
+		heading: "404",
+		message: "Não conseguimos encontrar a página que você está procurando!",
+		backHome: "Voltar para a página inicial",
+	},
+
 	// Invite acceptance page
 	invite: {
 		accepting: "Aceitando convite…",
 		signInPrompt: "Entre na sua conta para aceitar este convite.",
 		signIn: "Entrar",
 		goToDashboard: "Ir para o painel",
+	},
+
+	// Public landing page
+	landing: {
+		badge: "Código aberto · Gratuito",
+		headline: "Pesquisa Qualitativa,",
+		headlineAccent: "Organizada.",
+		subtitle:
+			"QAnubis é uma plataforma de código aberto para análise qualitativa de dados. Envie documentos, codifique trechos de texto e construa insights — de forma colaborativa.",
+		ctaPrimary: "Começar gratuitamente",
+		ctaSecondary: "Entrar",
+
+		featuresTitle: "Tudo que você precisa para análise qualitativa",
+		featuresSubtitle:
+			"Do gerenciamento de documentos à codificação colaborativa e relatórios visuais — tudo em um só lugar.",
+		features: [
+			{
+				title: "Visualizador de PDF",
+				description:
+					"Envie documentos de pesquisa e navegue por eles com um visualizador integrado. Selecione qualquer trecho de texto para criar uma citação instantaneamente.",
+			},
+			{
+				title: "Codificação Qualitativa",
+				description:
+					"Construa árvores de códigos hierárquicas e atribua códigos a trechos selecionados. Organize sua análise com categorias estruturadas e aninhadas.",
+			},
+			{
+				title: "Projetos Colaborativos",
+				description:
+					"Convide membros com permissões por função — Proprietário, Colaborador ou Visualizador — e trabalhe em equipe em tempo real.",
+			},
+			{
+				title: "Memorandos de Pesquisa",
+				description:
+					"Escreva e organize memorandos analíticos vinculados a cada projeto. Mantenha suas reflexões teóricas junto aos dados.",
+			},
+			{
+				title: "Relatórios e Gráficos",
+				description:
+					"Visualize distribuições de códigos, mapas de calor e matrizes de co-ocorrência para identificar padrões nos seus dados.",
+			},
+			{
+				title: "Exporte seus Achados",
+				description:
+					"Baixe todas as citações organizadas por código ou por documento nos formatos CSV ou TXT — prontas para sua próxima publicação.",
+			},
+		],
+
+		howItWorksTitle: "Como funciona",
+		howItWorksSubtitle:
+			"Do documento bruto a insights estruturados em três etapas simples.",
+		steps: [
+			{
+				number: "01",
+				title: "Crie um projeto",
+				description:
+					"Inicie um novo projeto de pesquisa, dê um nome e cor, e convide seus colaboradores.",
+			},
+			{
+				number: "02",
+				title: "Anote documentos",
+				description:
+					"Envie arquivos PDF, selecione trechos de texto e atribua códigos para construir seu referencial analítico.",
+			},
+			{
+				number: "03",
+				title: "Analise e relate",
+				description:
+					"Explore relatórios visuais, escreva memorandos e exporte seus achados codificados em múltiplos formatos.",
+			},
+		],
+
+		ctaBannerTitle: "Pronto para iniciar sua pesquisa?",
+		ctaBannerSubtitle:
+			"Crie uma conta gratuita e comece a organizar seus dados qualitativos hoje.",
+		ctaBannerButton: "Começar gratuitamente",
+
+		footerCopyright: "Código aberto.",
+		footerGithub: "GitHub",
+		footerSignIn: "Entrar",
+		footerSignUp: "Criar conta",
 	},
 };

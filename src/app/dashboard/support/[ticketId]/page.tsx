@@ -50,7 +50,7 @@ export default function SupportTicketPage() {
 
 	if (isLoading) {
 		return (
-			<div className="space-y-4 max-w-2xl">
+			<div className="max-w-2xl space-y-4">
 				<div className="h-6 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
 				<div className="h-32 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
 			</div>
@@ -58,9 +58,7 @@ export default function SupportTicketPage() {
 	}
 
 	if (!ticket) {
-		return (
-			<p className="text-sm text-gray-500">Ticket not found.</p>
-		);
+		return <p className="text-sm text-gray-500">{t.support.ticketNotFound}</p>;
 	}
 
 	const isClosed = ticket.status === "CLOSED";
@@ -79,9 +77,14 @@ export default function SupportTicketPage() {
 
 			{/* Header */}
 			<div className="flex items-start justify-between gap-4">
-				<h1 className="text-xl font-bold text-gray-800 dark:text-white/90">
-					{ticket.subject}
-				</h1>
+				<div>
+					<h1 className="text-xl font-bold text-gray-800 dark:text-white/90">
+						{ticket.subject}
+					</h1>
+					<p className="mt-0.5 text-xs text-gray-400">
+						{new Date(ticket.createdAt).toLocaleString()}
+					</p>
+				</div>
 				<span
 					className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[ticket.status] ?? ""}`}
 				>
@@ -89,34 +92,41 @@ export default function SupportTicketPage() {
 				</span>
 			</div>
 
-			{/* Messages */}
-			<div className="space-y-4">
-				{ticket.messages.map((msg) => {
-					const isAdmin = msg.sender.role === "ADMIN";
-					return (
-						<div
-							key={msg.id}
-							className={`rounded-xl border p-4 ${
-								isAdmin
-									? "border-brand-200 bg-brand-50 dark:border-brand-800/50 dark:bg-brand-900/10"
-									: "border-gray-200 bg-white dark:border-gray-800 dark:bg-transparent"
-							}`}
-						>
-							<div className="mb-2 flex items-center justify-between gap-2">
-								<span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-									{isAdmin ? "Support" : (msg.sender.name ?? "You")}
-								</span>
-								<span className="text-xs text-gray-400">
-									{new Date(msg.createdAt).toLocaleString()}
-								</span>
-							</div>
-							<p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
-								{msg.content}
-							</p>
-						</div>
-					);
-				})}
+			{/* Original description */}
+			<div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900/50 dark:text-gray-300">
+				<p className="whitespace-pre-wrap">{ticket.description}</p>
 			</div>
+
+			{/* Reply messages */}
+			{ticket.messages.length > 0 && (
+				<div className="space-y-3">
+					{ticket.messages.map((msg) => {
+						const isAdmin = msg.user.role === "ADMIN";
+						return (
+							<div
+								key={msg.id}
+								className={`rounded-xl border p-4 ${
+									isAdmin
+										? "border-brand-200 bg-brand-50 dark:border-brand-800/50 dark:bg-brand-900/10"
+										: "border-gray-200 bg-white dark:border-gray-800 dark:bg-transparent"
+								}`}
+							>
+								<div className="mb-2 flex items-center justify-between gap-2">
+									<span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+										{isAdmin ? t.support.supportAgent : (msg.user.name ?? t.support.you)}
+									</span>
+									<span className="text-xs text-gray-400">
+										{new Date(msg.createdAt).toLocaleString()}
+									</span>
+								</div>
+								<p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+									{msg.content}
+								</p>
+							</div>
+						);
+					})}
+				</div>
+			)}
 
 			{/* Reply form */}
 			{isClosed ? (
@@ -141,9 +151,7 @@ export default function SupportTicketPage() {
 						<button
 							type="button"
 							disabled={reply.isPending || !draft.trim()}
-							onClick={() =>
-								reply.mutate({ ticketId, message: draft.trim() })
-							}
+							onClick={() => reply.mutate({ ticketId, message: draft.trim() })}
 							className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
 						>
 							{reply.isPending ? t.support.sending : t.support.send}

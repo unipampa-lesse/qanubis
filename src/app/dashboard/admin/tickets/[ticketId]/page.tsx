@@ -60,7 +60,7 @@ export default function AdminTicketDetailPage() {
 	}
 
 	if (!ticket) {
-		return <div className="text-sm text-gray-500">Ticket not found.</div>;
+		return <div className="text-sm text-gray-500">{t.admin.ticketNotFound}</div>;
 	}
 
 	return (

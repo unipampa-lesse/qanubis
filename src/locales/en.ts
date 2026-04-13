@@ -1,7 +1,7 @@
 export const translations = {
 	// Meta
 	language: "Language",
-	languages: ["Portuguese", "English"] as [string, string],
+	languages: { pt: "Portuguese", en: "English", es: "Spanish" },
 
 	// Roles
 	roles: {
@@ -76,6 +76,15 @@ export const translations = {
 		rememberPassword: "Wait, I remember my password...",
 		clickHere: "Click here",
 		resetLinkSent: "Reset link sent! Check your email.",
+		resetRequestError: "Something went wrong. Please try again.",
+		// Confirm reset (token page)
+		newPasswordLabel: "New password (min. 8 characters)",
+		confirmNewPassword: "Confirm new password",
+		setNewPassword: "Set new password",
+		settingPassword: "Updating…",
+		passwordResetSuccess: "Password updated! You can now sign in.",
+		resetTokenInvalid: "This link is invalid or has expired. Please request a new one.",
+		passwordsDoNotMatch: "Passwords do not match.",
 	},
 
 	// Dashboard (project list)
@@ -176,6 +185,7 @@ export const translations = {
 		noDocuments: "No documents yet.",
 		noDocumentsHint: "Upload a PDF to get started.",
 		deleteDocument: "Delete document",
+		renameDocument: "Rename document",
 		download: "Download PDF",
 	},
 
@@ -211,6 +221,8 @@ export const translations = {
 		submitComment: "Send",
 		deleteComment: "Delete comment",
 		noComments: "No comments yet.",
+		allCodesAssigned: "All codes assigned.",
+		changeHighlightColor: "Change highlight color",
 	},
 
 	// Reports tab
@@ -298,6 +310,7 @@ export const translations = {
 		documents: "Documents",
 		codes: "Codes",
 		memos: "Memos",
+		quotes: "Quotes",
 		// Tickets page
 		ticket: "Ticket",
 		subject: "Subject",
@@ -315,6 +328,10 @@ export const translations = {
 		markAs: "Mark as",
 		noTickets: "No support tickets yet.",
 		backToTickets: "Back to tickets",
+		ticketNotFound: "Ticket not found.",
+		messages: "messages",
+		roleUser: "User",
+		roleAdmin: "Admin",
 	},
 
 	// Support tickets (user-facing)
@@ -339,6 +356,10 @@ export const translations = {
 		statusInProgress: "In progress",
 		statusResolved: "Resolved",
 		statusClosed: "Closed",
+		ticketNotFound: "Ticket not found.",
+		messages: "messages",
+		supportAgent: "Support",
+		you: "You",
 	},
 
 	// Profile page
@@ -349,6 +370,14 @@ export const translations = {
 		saveProfile: "Save changes",
 		savingProfile: "Saving…",
 		profileSaved: "Profile updated.",
+		changeEmail: "Change email",
+		newEmail: "New email address",
+		confirmWithPassword: "Confirm with current password",
+		saveEmail: "Update email",
+		savingEmail: "Updating…",
+		emailSaved: "Email updated. Use the new address to sign in.",
+		emailTaken: "This email is already in use.",
+		oauthEmail: "Email is managed by your sign-in provider and cannot be changed here.",
 		changePassword: "Change password",
 		currentPassword: "Current password",
 		newPassword: "New password (min. 8 characters)",
@@ -359,12 +388,100 @@ export const translations = {
 		oauthAccount: "Your account uses Google/GitHub sign-in — password change is not available.",
 	},
 
+	// 404 page
+	notFound: {
+		heading: "404",
+		message: "We can't seem to find the page you are looking for!",
+		backHome: "Back to Home Page",
+	},
+
 	// Invite acceptance page
 	invite: {
 		accepting: "Accepting invitation…",
 		signInPrompt: "Sign in to accept this invitation.",
 		signIn: "Sign in",
 		goToDashboard: "Go to dashboard",
+	},
+
+	// Public landing page
+	landing: {
+		badge: "Open source · Free to use",
+		headline: "Qualitative Research,",
+		headlineAccent: "Organized.",
+		subtitle:
+			"QAnubis is an open-source platform for qualitative data analysis. Upload documents, code text passages, and build insights — collaboratively.",
+		ctaPrimary: "Get started for free",
+		ctaSecondary: "Sign in",
+
+		featuresTitle: "Everything you need for qualitative analysis",
+		featuresSubtitle:
+			"From document management to collaborative coding and visual reporting — all in one place.",
+		features: [
+			{
+				title: "PDF Document Viewer",
+				description:
+					"Upload research documents and navigate them with a built-in PDF viewer. Select any text passage to create a quote instantly.",
+			},
+			{
+				title: "Qualitative Coding",
+				description:
+					"Build hierarchical code trees and assign codes to selected passages. Organize your analysis with structured, nested categories.",
+			},
+			{
+				title: "Collaborative Projects",
+				description:
+					"Invite team members with role-based permissions — Owner, Collaborator, or Viewer — and work together in real time.",
+			},
+			{
+				title: "Research Memos",
+				description:
+					"Write and organize analytical memos tied to each project. Keep your theoretical reflections alongside your data.",
+			},
+			{
+				title: "Reports & Charts",
+				description:
+					"Visualize code distributions, frequency heatmaps, and code co-occurrence matrices to surface patterns in your data.",
+			},
+			{
+				title: "Export Your Findings",
+				description:
+					"Download all quotes organized by code or by document in CSV or TXT format — ready for your next publication.",
+			},
+		] as { title: string; description: string }[],
+
+		howItWorksTitle: "How it works",
+		howItWorksSubtitle:
+			"Get from raw documents to structured insights in three simple steps.",
+		steps: [
+			{
+				number: "01",
+				title: "Create a project",
+				description:
+					"Start a new research project, give it a name and color, and invite your collaborators.",
+			},
+			{
+				number: "02",
+				title: "Annotate documents",
+				description:
+					"Upload PDF files, select text passages, and assign codes to build your analytical framework.",
+			},
+			{
+				number: "03",
+				title: "Analyze & report",
+				description:
+					"Explore visual reports, write memos, and export your coded findings in multiple formats.",
+			},
+		] as { number: string; title: string; description: string }[],
+
+		ctaBannerTitle: "Ready to begin your research?",
+		ctaBannerSubtitle:
+			"Create a free account and start organizing your qualitative data today.",
+		ctaBannerButton: "Get started for free",
+
+		footerCopyright: "Open source.",
+		footerGithub: "GitHub",
+		footerSignIn: "Sign in",
+		footerSignUp: "Sign up",
 	},
 };
 

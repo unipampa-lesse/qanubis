@@ -22,13 +22,18 @@ import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 // Dynamically import the PDF viewer — pdfjs-dist requires browser APIs
+function PdfViewerLoading() {
+	const t = useTranslation();
+	return (
+		<div className="flex h-64 items-center justify-center text-sm text-gray-400">
+			<span className="animate-pulse">{t.viewer.loading}</span>
+		</div>
+	);
+}
+
 const PdfViewer = dynamic(() => import("@/components/projects/PdfViewer"), {
 	ssr: false,
-	loading: () => (
-		<div className="flex h-64 items-center justify-center text-sm text-gray-400">
-			<span className="animate-pulse">Loading PDF…</span>
-		</div>
-	),
+	loading: PdfViewerLoading,
 });
 
 // ---------------------------------------------------------------------------
@@ -295,7 +300,7 @@ function QuoteCard({
 					<div className="relative">
 						<button
 							type="button"
-							title="Change highlight color"
+							title={t.viewer.changeHighlightColor}
 							onClick={() => {
 								setShowColorPicker((v) => !v);
 								setShowCodePicker(false);
@@ -343,7 +348,7 @@ function QuoteCard({
 								{unassigned.length === 0 ? (
 									<p className="px-3 py-2 text-xs text-gray-400">
 										{assignedIds.size === codes.length
-											? "All codes assigned."
+											? t.viewer.allCodesAssigned
 											: t.viewer.noCodesAvailable}
 									</p>
 								) : (

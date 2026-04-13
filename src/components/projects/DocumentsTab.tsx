@@ -6,8 +6,11 @@ import { useRef, useState } from "react";
 import {
 	HiOutlineArrowDownTray,
 	HiOutlineArrowUpTray,
+	HiOutlineCheck,
 	HiOutlineDocumentText,
+	HiOutlinePencilSquare,
 	HiOutlineTrash,
+	HiOutlineXMark,
 } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
@@ -105,6 +108,10 @@ export default function DocumentsTab({
 	const [uploading, setUploading] = useState(false);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 
+	// Inline rename state
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [draftName, setDraftName] = useState("");
+
 	const utils = trpc.useUtils();
 	const { data: documents, isLoading } = trpc.document.list.useQuery({
 		projectId,
@@ -112,6 +119,28 @@ export default function DocumentsTab({
 	const remove = trpc.document.delete.useMutation({
 		onSuccess: () => utils.document.list.invalidate({ projectId }),
 	});
+	const rename = trpc.document.update.useMutation({
+		onSuccess: () => {
+			utils.document.list.invalidate({ projectId });
+			setEditingId(null);
+		},
+	});
+
+	function startEdit(id: string, currentName: string) {
+		setEditingId(id);
+		setDraftName(currentName);
+	}
+
+	function cancelEdit() {
+		setEditingId(null);
+		setDraftName("");
+	}
+
+	function commitEdit(documentId: string) {
+		const trimmed = draftName.trim();
+		if (!trimmed) return cancelEdit();
+		rename.mutate({ projectId, documentId, name: trimmed });
+	}
 
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
@@ -207,65 +236,121 @@ export default function DocumentsTab({
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
-							{documents.map((doc) => (
-								<tr
-									key={doc.id}
-									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
-								>
-									<td className="px-5 py-3">
-										<Link
-											href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
-											className="flex items-center gap-2 hover:underline"
-										>
-											<DocTypeIcon mimeType={doc.mimeType} />
-											<div>
-												<div className="font-medium text-gray-800 dark:text-white/90">
-													{doc.name}
-												</div>
-												{doc.extractedTitle &&
-													doc.extractedTitle !== doc.name && (
-														<div className="text-xs text-gray-400">
-															{doc.extractedTitle}
-														</div>
-													)}
-											</div>
-										</Link>
-									</td>
-									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
-										{doc.pageCount > 0 ? doc.pageCount : "—"}
-									</td>
-									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
-										{doc.fileSize > 0 ? formatBytes(doc.fileSize) : "—"}
-									</td>
-									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 md:table-cell">
-										{doc._count.quotes}
-									</td>
-									<td className="px-5 py-3 text-right">
-										<div className="flex justify-end gap-2">
-											<DownloadButton
-												projectId={projectId}
-												documentId={doc.id}
-												title={t.documents.download}
-											/>
-											{canEdit && (
-												<button
-													type="button"
-													title={t.documents.deleteDocument}
-													onClick={() =>
-														remove.mutate({
-															projectId,
-															documentId: doc.id,
-														})
-													}
-													className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
+							{documents.map((doc) => {
+								const isEditing = editingId === doc.id;
+								return (
+									<tr
+										key={doc.id}
+										className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+									>
+										<td className="px-5 py-3">
+											{isEditing ? (
+												<form
+													className="flex items-center gap-2"
+													onSubmit={(e) => {
+														e.preventDefault();
+														commitEdit(doc.id);
+													}}
 												>
-													<HiOutlineTrash className="h-4 w-4" />
-												</button>
+													<DocTypeIcon mimeType={doc.mimeType} />
+													<input
+														// eslint-disable-next-line jsx-a11y/no-autofocus
+														autoFocus
+														type="text"
+														value={draftName}
+														onChange={(e) => setDraftName(e.target.value)}
+														onKeyDown={(e) =>
+															e.key === "Escape" && cancelEdit()
+														}
+														maxLength={200}
+														required
+														className="h-8 flex-1 rounded-lg border border-brand-400 bg-transparent px-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-brand-500 dark:text-white/90"
+													/>
+													<button
+														type="submit"
+														disabled={rename.isPending || !draftName.trim()}
+														className="text-success-600 hover:text-success-700 disabled:opacity-40 dark:text-success-400"
+														title={t.common.save}
+													>
+														<HiOutlineCheck className="h-4 w-4" />
+													</button>
+													<button
+														type="button"
+														onClick={cancelEdit}
+														className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+														title={t.common.cancel}
+													>
+														<HiOutlineXMark className="h-4 w-4" />
+													</button>
+												</form>
+											) : (
+												<Link
+													href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
+													className="flex items-center gap-2 hover:underline"
+												>
+													<DocTypeIcon mimeType={doc.mimeType} />
+													<div>
+														<div className="font-medium text-gray-800 dark:text-white/90">
+															{doc.name}
+														</div>
+														{doc.extractedTitle &&
+															doc.extractedTitle !== doc.name && (
+																<div className="text-xs text-gray-400">
+																	{doc.extractedTitle}
+																</div>
+															)}
+													</div>
+												</Link>
 											)}
-										</div>
-									</td>
-								</tr>
-							))}
+										</td>
+										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
+											{doc.pageCount > 0 ? doc.pageCount : "—"}
+										</td>
+										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
+											{doc.fileSize > 0 ? formatBytes(doc.fileSize) : "—"}
+										</td>
+										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 md:table-cell">
+											{doc._count.quotes}
+										</td>
+										<td className="px-5 py-3 text-right">
+											{!isEditing && (
+												<div className="flex justify-end gap-2">
+													<DownloadButton
+														projectId={projectId}
+														documentId={doc.id}
+														title={t.documents.download}
+													/>
+													{canEdit && (
+														<>
+															<button
+																type="button"
+																title={t.documents.renameDocument}
+																onClick={() => startEdit(doc.id, doc.name)}
+																className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
+															>
+																<HiOutlinePencilSquare className="h-4 w-4" />
+															</button>
+															<button
+																type="button"
+																title={t.documents.deleteDocument}
+																onClick={() =>
+																	remove.mutate({
+																		projectId,
+																		documentId: doc.id,
+																	})
+																}
+																className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
+															>
+																<HiOutlineTrash className="h-4 w-4" />
+															</button>
+														</>
+													)}
+												</div>
+											)}
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>

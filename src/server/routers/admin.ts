@@ -10,7 +10,7 @@ export const adminRouter = createTRPCRouter({
 			prisma.project.count(),
 			prisma.document.count(),
 			prisma.quote.count(),
-			prisma.supportTicket.count(),
+			prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
 		]);
 		return { users, projects, documents, quotes, tickets };
 	}),

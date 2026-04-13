@@ -1,18 +1,17 @@
 "use client";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { translations as en } from "../locales/en";
+import { translations as es } from "../locales/es";
 import { translations as pt } from "../locales/pt";
 
-const localeMap = {
-	pt,
-	en,
-};
+const localeMap = { pt, en, es };
+
+export type Language = keyof typeof localeMap;
+
 export function useTranslation() {
 	const { language } = useLanguage();
 	return localeMap[language];
 }
-
-export type Language = "pt" | "en";
 
 interface LanguageContextProps {
 	language: Language;

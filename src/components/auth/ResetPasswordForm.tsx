@@ -7,23 +7,17 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
 import useGoBack from "@/hooks/useGoBack";
+import { trpc } from "@/server/client";
 
 export default function ResetPasswordForm() {
 	const t = useTranslation();
 	const goBack = useGoBack();
 	const [email, setEmail] = useState("");
 	const [sent, setSent] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
 
-	async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-		e.preventDefault();
-		setIsLoading(true);
-		// Password reset email delivery will be wired in a future phase.
-		// For now we simulate a successful request so the UI is functional.
-		await new Promise((r) => setTimeout(r, 800));
-		setSent(true);
-		setIsLoading(false);
-	}
+	const requestReset = trpc.user.requestPasswordReset.useMutation({
+		onSuccess: () => setSent(true),
+	});
 
 	return (
 		<div className="flex flex-col flex-1 lg:w-1/2 w-full">
@@ -50,7 +44,12 @@ export default function ResetPasswordForm() {
 					{sent ? (
 						<p className="text-sm text-success-500">{t.auth.resetLinkSent}</p>
 					) : (
-						<form onSubmit={handleSubmit}>
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								requestReset.mutate({ email: email.trim() });
+							}}
+						>
 							<div className="space-y-5">
 								<div>
 									<Label>
@@ -62,18 +61,25 @@ export default function ResetPasswordForm() {
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 										placeholder={t.auth.emailPlaceholder}
-										disabled={isLoading}
+										disabled={requestReset.isPending}
 										required
 									/>
 								</div>
+								{requestReset.isError && (
+									<p className="text-sm text-error-500">
+										{t.auth.resetRequestError}
+									</p>
+								)}
 								<div>
 									<Button
 										type="submit"
 										className="w-full"
 										size="sm"
-										disabled={isLoading}
+										disabled={requestReset.isPending}
 									>
-										{isLoading ? t.auth.sendingResetLink : t.auth.sendResetLink}
+										{requestReset.isPending
+											? t.auth.sendingResetLink
+											: t.auth.sendResetLink}
 									</Button>
 								</div>
 							</div>

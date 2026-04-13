@@ -179,7 +179,7 @@ export default function SupportPage() {
 											{ticket.subject}
 										</Link>
 										<div className="text-xs text-gray-400">
-											{ticket._count.messages} messages
+											{ticket._count.messages} {t.support.messages}
 										</div>
 									</td>
 									<td className="px-5 py-3">

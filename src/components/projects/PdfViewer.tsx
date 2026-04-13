@@ -377,7 +377,7 @@ export default function PdfViewer({
 	if (loading) {
 		return (
 			<div className="flex h-64 items-center justify-center text-sm text-gray-400">
-				<span className="animate-pulse">Loading PDF…</span>
+				<span className="animate-pulse">{t.viewer.loading}</span>
 			</div>
 		);
 	}
@@ -385,7 +385,7 @@ export default function PdfViewer({
 	if (error) {
 		return (
 			<div className="flex h-64 items-center justify-center text-sm text-error-500">
-				Failed to load PDF.
+				{t.viewer.loadError}
 			</div>
 		);
 	}

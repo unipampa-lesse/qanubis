@@ -83,7 +83,7 @@ export default function AdminTicketsPage() {
 											{ticket.subject}
 										</Link>
 										<div className="text-xs text-gray-400">
-											{ticket._count.messages} messages
+											{ticket._count.messages} {t.admin.messages}
 										</div>
 									</td>
 									<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">

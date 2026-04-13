@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const supportRouter = createTRPCRouter({
-	/** Open a new support ticket. */
+	/** Open a new support ticket. The message becomes the ticket's description. */
 	createTicket: protectedProcedure
 		.input(
 			z.object({
@@ -17,13 +17,8 @@ export const supportRouter = createTRPCRouter({
 				data: {
 					userId: ctx.userId,
 					subject: input.subject,
+					description: input.message,
 					status: "OPEN",
-					messages: {
-						create: {
-							senderId: ctx.userId,
-							content: input.message,
-						},
-					},
 				},
 				select: { id: true },
 			});
@@ -51,15 +46,30 @@ export const supportRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const ticket = await prisma.supportTicket.findUnique({
 				where: { id: input.ticketId },
-				include: {
+				select: {
+					id: true,
+					subject: true,
+					description: true,
+					status: true,
+					createdAt: true,
 					messages: {
-						include: { sender: { select: { id: true, name: true, role: true } } },
+						select: {
+							id: true,
+							content: true,
+							createdAt: true,
+							user: { select: { id: true, name: true, role: true } },
+						},
 						orderBy: { createdAt: "asc" },
 					},
 				},
 			});
 			if (!ticket) throw new TRPCError({ code: "NOT_FOUND" });
-			if (ticket.userId !== ctx.userId)
+			// Fetch userId separately to avoid exposing it in the select above
+			const raw = await prisma.supportTicket.findUnique({
+				where: { id: input.ticketId },
+				select: { userId: true },
+			});
+			if (!raw || raw.userId !== ctx.userId)
 				throw new TRPCError({ code: "FORBIDDEN" });
 			return ticket;
 		}),
@@ -89,23 +99,19 @@ export const supportRouter = createTRPCRouter({
 			await prisma.ticketMessage.create({
 				data: {
 					ticketId: input.ticketId,
-					senderId: ctx.userId,
+					userId: ctx.userId,
 					content: input.message,
 				},
 			});
 
 			// Re-open if resolved so admin knows there's a new reply
-			if (ticket.status === "RESOLVED") {
-				await prisma.supportTicket.update({
-					where: { id: input.ticketId },
-					data: { status: "OPEN" },
-				});
-			} else {
-				await prisma.supportTicket.update({
-					where: { id: input.ticketId },
-					data: { updatedAt: new Date() },
-				});
-			}
+			await prisma.supportTicket.update({
+				where: { id: input.ticketId },
+				data: {
+					status: ticket.status === "RESOLVED" ? "OPEN" : ticket.status,
+					updatedAt: new Date(),
+				},
+			});
 
 			return { success: true };
 		}),

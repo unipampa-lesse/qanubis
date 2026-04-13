@@ -103,7 +103,7 @@ export default function UserDropdown() {
 
 				<button
 					type="button"
-					onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+					onClick={() => signOut({ callbackUrl: "/" })}
 					className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
 				>
 					<HiArrowRightOnRectangle className="h-5 w-5 text-gray-500" />

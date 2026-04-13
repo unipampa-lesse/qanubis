@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type React from "react";
+
+export const metadata: Metadata = {
+	title: "Administration | QAnubis",
+};
 import { prisma } from "@/lib/prisma";
 import { getAuthSession } from "@/server/get-server-session";
 
