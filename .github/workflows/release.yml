@@ -67,7 +67,7 @@ jobs:
         run: pnpm prisma:generate
 
       - name: Run database migrations
-        run: npx prisma migrate deploy
+        run: npx prisma migrate deploy --config prisma/config.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
