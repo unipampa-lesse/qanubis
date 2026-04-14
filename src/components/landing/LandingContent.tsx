@@ -171,6 +171,12 @@ export default function LandingContent() {
 						>
 							{l.footerGithub}
 						</a>
+                        <Link
+							href="/docs"
+							className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+						>
+							{l.footerDocs}
+						</Link>
 						<Link
 							href="/signin"
 							className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors"

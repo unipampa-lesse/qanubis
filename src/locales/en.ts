@@ -29,6 +29,7 @@ export const translations = {
 		projects: "Projects",
 		support: "Support",
 		admin: "Administration",
+		docs: "Documentation",
 	},
 
 	// Auth screens
@@ -480,8 +481,31 @@ export const translations = {
 
 		footerCopyright: "Open source.",
 		footerGithub: "GitHub",
+		footerDocs: "Documentation",
 		footerSignIn: "Sign in",
 		footerSignUp: "Sign up",
+	},
+
+	// Docs section
+	docs: {
+		header: "Documentation",
+		backToApp: "← QAnubis",
+		loading: "Loading…",
+		notFound: "Page not found.",
+		sectionDocumentation: "Documentation",
+		sectionDevelopment: "Development",
+		nav: {
+			home: "Home",
+			userManual: "User Manual",
+			faq: "FAQ",
+			contact: "Contact",
+			howToContribute: "How to Contribute",
+			features: "Features",
+			domainModel: "Domain Model",
+			architecture: "Architecture",
+			migrationPlan: "Migration Plan",
+			contributionGuidelines: "Contribution Guidelines",
+		},
 	},
 };
 

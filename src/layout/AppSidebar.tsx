@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { GoHorizontalRule } from "react-icons/go";
 import {
+	HiOutlineBookOpen,
 	HiOutlineCog6Tooth,
 	HiOutlineLifebuoy,
 	HiOutlineSquares2X2,
@@ -43,6 +44,11 @@ const AppSidebar: React.FC = () => {
 			name: t.nav.support,
 			path: "/dashboard/support",
 		},
+        {
+            icon: <HiOutlineBookOpen />,
+            name: t.nav.docs,
+            path: "/docs",
+	    },
 		...(isAdmin
 			? [
 					{

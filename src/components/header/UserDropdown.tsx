@@ -6,6 +6,7 @@ import { useState } from "react";
 import { FaRegCircleUser } from "react-icons/fa6";
 import {
 	HiArrowRightOnRectangle,
+	HiOutlineBookOpen,
 	HiOutlineCog6Tooth,
 	HiOutlineLifebuoy,
 	HiOutlineUser,
@@ -86,6 +87,18 @@ export default function UserDropdown() {
 							{t.support.title}
 						</DropdownItem>
 					</li>
+
+                    <li>
+						<DropdownItem
+							onItemClick={() => setIsOpen(false)}
+							tag="a"
+							href="/docs"
+							className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+						>
+							<HiOutlineLifebuoy className="h-5 w-5 text-gray-500" />
+							{t.docs.header}
+						</DropdownItem>
+					</li>
 					{user?.role === "ADMIN" && (
 						<li>
 							<DropdownItem
@@ -100,11 +113,10 @@ export default function UserDropdown() {
 						</li>
 					)}
 				</ul>
-
 				<button
 					type="button"
 					onClick={() => signOut({ callbackUrl: "/" })}
-					className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+					className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
 				>
 					<HiArrowRightOnRectangle className="h-5 w-5 text-gray-500" />
 					Sign out

@@ -31,6 +31,7 @@ export const translations: Translations = {
 		projects: "Proyectos",
 		support: "Soporte",
 		admin: "Administración",
+		docs: "Documentación",
 	},
 
 	// Auth screens
@@ -478,7 +479,30 @@ export const translations: Translations = {
 
 		footerCopyright: "Código abierto.",
 		footerGithub: "GitHub",
+		footerDocs: "Documentación",
 		footerSignIn: "Iniciar sesión",
 		footerSignUp: "Crear cuenta",
+	},
+
+	// Docs section
+	docs: {
+		header: "Documentación",
+		backToApp: "← QAnubis",
+		loading: "Cargando…",
+		notFound: "Página no encontrada.",
+		sectionDocumentation: "Documentación",
+		sectionDevelopment: "Desarrollo",
+		nav: {
+			home: "Inicio",
+			userManual: "Manual de Usuario",
+			faq: "FAQ",
+			contact: "Contacto",
+			howToContribute: "Cómo Contribuir",
+			features: "Funcionalidades",
+			domainModel: "Modelo de Dominio",
+			architecture: "Arquitectura",
+			migrationPlan: "Plan de Migración",
+			contributionGuidelines: "Guía de Contribución",
+		},
 	},
 };
