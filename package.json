@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
+		"build": "prisma generate --config prisma/config.ts && next build",
 		"start": "next start",
 		"lint": "biome check --write",
 		"lint:check": "biome check",
