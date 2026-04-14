@@ -151,7 +151,49 @@ The release pipeline publishes a Docker image to **GitHub Container Registry (GH
 docker pull ghcr.io/unipampa-lesse/qanubis:latest
 ```
 
-### Local development
+### Producción — Vercel + servicios administrados
+
+Opción serverless usando servicios administrados gratuitos — ideal para validación y MVPs sin infraestructura que gestionar.
+
+```
+Vercel (Next.js)
+  ├── Neon.tech         ← PostgreSQL (administrado, nivel gratuito)
+  ├── Cloudflare R2     ← Almacenamiento de objetos (10 GB gratis)
+  └── Resend            ← Correo electrónico (3.000 emails/mes gratis)
+```
+
+El pipeline de release (`release.yml`) ejecuta `prisma migrate deploy` en Neon y despliega en Vercel automáticamente en cada nuevo release.
+
+**Secrets requeridos en GitHub Actions:**
+
+| Secret | Cómo obtener |
+|--------|---------------|
+| `DATABASE_URL` | Consola de Neon → Connection string |
+| `VERCEL_TOKEN` | vercel.com → Settings → Tokens |
+| `VERCEL_ORG_ID` | Ejecutar `vercel link` localmente → `.vercel/project.json` |
+| `VERCEL_PROJECT_ID` | Mismo archivo anterior |
+
+**Variables de entorno a configurar en Vercel** (Settings → Environment Variables del proyecto):
+
+| Variable | Valor |
+|----------|-------|
+| `DATABASE_URL` | Connection string de Neon |
+| `NEXTAUTH_SECRET` | Secret aleatorio (`openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | URL de tu despliegue en Vercel |
+| `STORAGE_PROVIDER` | `s3` |
+| `STORAGE_ENDPOINT` | `https://<account-id>.r2.cloudflarestorage.com` |
+| `STORAGE_REGION` | `auto` |
+| `STORAGE_ACCESS_KEY` | Access Key ID de Cloudflare R2 |
+| `STORAGE_SECRET_KEY` | Secret Access Key de Cloudflare R2 |
+| `STORAGE_BUCKET` | Nombre de tu bucket R2 |
+| `EMAIL_PROVIDER` | `nodemailer` |
+| `SMTP_HOST` | `smtp.resend.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | `resend` |
+| `SMTP_PASS` | API key de Resend |
+| `SMTP_FROM` | `QAnubis <noreply@tudominio.com>` |
+
+### Desarrollo local
 
 `docker compose up -d` starts all required services:
 
