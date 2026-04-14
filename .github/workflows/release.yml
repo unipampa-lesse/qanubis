@@ -71,6 +71,14 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
+      - name: Bootstrap admin user
+        run: npx tsx prisma/seed.ts
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
       - name: Deploy to Vercel
         run: |
           npx vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --yes \

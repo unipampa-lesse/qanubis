@@ -47,6 +47,49 @@ async function upsertUser(opts: {
 // ---------------------------------------------------------------------------
 
 async function main() {
+	// In production, only create the admin user from env vars and exit.
+	if (process.env.NODE_ENV === "production") {
+		const email = process.env.ADMIN_EMAIL;
+		const password = process.env.ADMIN_PASSWORD;
+
+		if (!email || !password) {
+			throw new Error(
+				"ADMIN_EMAIL and ADMIN_PASSWORD are required in production.",
+			);
+		}
+
+		const existing = await prisma.user.findUnique({
+			where: { email },
+			select: { id: true, role: true },
+		});
+
+		if (existing) {
+			if (existing.role !== "ADMIN") {
+				await prisma.user.update({
+					where: { email },
+					data: { role: "ADMIN" },
+				});
+				console.log(`✅ User ${email} promoted to ADMIN.`);
+			} else {
+				console.log(`✅ Admin ${email} already exists — skipping.`);
+			}
+			return;
+		}
+
+		const hash = await bcrypt.hash(password, 12);
+		await prisma.user.create({
+			data: {
+				name: "Admin",
+				email,
+				password: hash,
+				emailVerified: new Date(),
+				role: "ADMIN",
+			},
+		});
+		console.log(`✅ Admin user ${email} created.`);
+		return;
+	}
+
 	console.log("🌱 Seeding database…");
 
 	// -------------------------------------------------------------------------
