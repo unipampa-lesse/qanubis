@@ -54,7 +54,7 @@ export class S3StorageProvider implements IStorageProvider {
 
 	async getPresignedUrl(
 		key: string,
-		expiresInSeconds = 3600,
+		expiresInSeconds = 300,
 		options?: { filename?: string },
 	): Promise<string> {
 		const command = new GetObjectCommand({

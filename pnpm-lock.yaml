@@ -94,6 +94,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      flatpickr:
+        specifier: ^4.6.13
+        version: 4.6.13
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -188,6 +191,9 @@ importers:
       '@types/bcryptjs':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/flatpickr':
+        specifier: ^3.1.4
+        version: 3.1.4
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
@@ -2344,6 +2350,10 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
+  '@types/flatpickr@3.1.4':
+    resolution: {integrity: sha512-czk8lydTB2qzWBqI6gproY594pg+iEfpHQyrvnyMnMKxvD+2qbrs1g2F8KiWZK173jQMw2C7O9lFjiKeBNub+A==}
+    deprecated: This is a stub types definition. flatpickr provides its own type definitions, so you do not need this installed.
+
   '@types/geojson@7946.0.16':
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
@@ -3199,6 +3209,9 @@ packages:
   find-versions@6.0.0:
     resolution: {integrity: sha512-2kCCtc+JvcZ86IGAz3Z2Y0A1baIz9fL31pH/0S1IqZr9Iwnjq8izfPtrCyQKO6TLMPELLsQMre7VDqeIKCsHkA==}
     engines: {node: '>=18'}
+
+  flatpickr@4.6.13:
+    resolution: {integrity: sha512-97PMG/aywoYpB4IvbvUJi0RQi8vearvU0oov1WW3k0WZPBMrTQVqekSX5CjSG/M4Q3i6A/0FKXC7RyAoAUUSPw==}
 
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
@@ -7773,6 +7786,10 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
+  '@types/flatpickr@3.1.4':
+    dependencies:
+      flatpickr: 4.6.13
+
   '@types/geojson@7946.0.16': {}
 
   '@types/hast@3.0.4':
@@ -8666,6 +8683,8 @@ snapshots:
     dependencies:
       semver-regex: 4.0.5
       super-regex: 1.1.0
+
+  flatpickr@4.6.13: {}
 
   foreground-child@3.3.1:
     dependencies:

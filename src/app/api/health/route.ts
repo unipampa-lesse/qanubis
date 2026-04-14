@@ -11,13 +11,9 @@ export async function GET() {
 	try {
 		await prisma.$queryRaw`SELECT 1`;
 		return Response.json({ status: "ok", db: "ok" });
-	} catch (error) {
+	} catch {
 		return Response.json(
-			{
-				status: "error",
-				db: "unreachable",
-				message: error instanceof Error ? error.message : "unknown error",
-			},
+			{ status: "error", db: "unreachable" },
 			{ status: 503 },
 		);
 	}

@@ -6,6 +6,10 @@ import { getStorageProvider } from "@/providers/storage";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_MIME = "application/pdf";
+const UUID_RE =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// PDF magic bytes: "%PDF-"
+const PDF_MAGIC = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]);
 
 /**
  * POST /api/upload/document
@@ -40,6 +44,12 @@ export async function POST(req: NextRequest) {
 	if (typeof projectId !== "string" || !projectId) {
 		return NextResponse.json(
 			{ error: "projectId is required" },
+			{ status: 400 },
+		);
+	}
+	if (!UUID_RE.test(projectId)) {
+		return NextResponse.json(
+			{ error: "projectId must be a valid UUID" },
 			{ status: 400 },
 		);
 	}
@@ -82,6 +92,17 @@ export async function POST(req: NextRequest) {
 	// Read the file buffer
 	const arrayBuffer = await fileEntry.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);
+
+	// Validate PDF magic bytes (%PDF-) to prevent MIME spoofing
+	if (
+		buffer.length < PDF_MAGIC.length ||
+		!buffer.subarray(0, PDF_MAGIC.length).equals(PDF_MAGIC)
+	) {
+		return NextResponse.json(
+			{ error: "File is not a valid PDF" },
+			{ status: 415 },
+		);
+	}
 
 	// Extract metadata from the PDF
 	let pageCount = 0;

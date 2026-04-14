@@ -34,8 +34,6 @@ export const createTRPCContext = cache(
 				secret: process.env.NEXTAUTH_SECRET,
 			});
 			userId = token?.sub ?? null;
-		} else {
-			userId = headers.get("x-user-id");
 		}
 		return { userId, headers };
 	},

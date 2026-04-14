@@ -16,13 +16,8 @@ export const userRouter = createTRPCRouter({
 			select: { id: true, name: true, email: true, role: true, password: true },
 		});
 		if (!user) return null;
-		return {
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			role: user.role,
-			hasPassword: user.password !== null,
-		};
+		const { password, ...safeUser } = user;
+		return { ...safeUser, hasPassword: password !== null };
 	}),
 
 	/** Update the current user's display name. */
@@ -44,8 +39,8 @@ export const userRouter = createTRPCRouter({
 	updateEmail: protectedProcedure
 		.input(
 			z.object({
-				email: z.string().email(),
-				currentPassword: z.string().min(1),
+				email: z.email(),
+				currentPassword: z.string().min(8),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -78,7 +73,7 @@ export const userRouter = createTRPCRouter({
 	changePassword: protectedProcedure
 		.input(
 			z.object({
-				currentPassword: z.string().min(1),
+				currentPassword: z.string().min(8),
 				newPassword: z.string().min(8),
 			}),
 		)
@@ -213,13 +208,12 @@ export const userRouter = createTRPCRouter({
 			}
 
 			const hash = await bcrypt.hash(input.password, 12);
+			// emailVerified is intentionally omitted — user must confirm their address via email
 			await prisma.user.create({
 				data: {
 					name: `${input.firstName} ${input.lastName}`.trim(),
 					email: input.email,
 					password: hash,
-					// Auto-verify for now — email verification can be added in a future phase
-					emailVerified: new Date(),
 				},
 			});
 
