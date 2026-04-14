@@ -69,9 +69,9 @@ async function main() {
 					where: { email },
 					data: { role: "ADMIN" },
 				});
-				console.log(`✅ User ${email} promoted to ADMIN.`);
+				console.log("✅ User promoted to ADMIN.");
 			} else {
-				console.log(`✅ Admin ${email} already exists — skipping.`);
+				console.log("✅ Admin already exists — skipping.");
 			}
 			return;
 		}
@@ -86,7 +86,7 @@ async function main() {
 				role: "ADMIN",
 			},
 		});
-		console.log(`✅ Admin user ${email} created.`);
+		console.log("✅ Admin user created.");
 		return;
 	}
 
