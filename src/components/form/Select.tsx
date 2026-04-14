@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { ChevronDownIcon } from "@/icons";
+import { FaChevronDown } from "react-icons/fa";
 
 interface Option {
 	value: string;
@@ -62,7 +62,7 @@ const Select: React.FC<SelectProps> = ({
 				))}
 			</select>
 			<span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-				<ChevronDownIcon />
+				<FaChevronDown />
 			</span>
 		</div>
 	);
