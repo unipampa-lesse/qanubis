@@ -156,3 +156,4 @@ sketch
 /public/pdf.worker.min.mjs
 
 .vercel
+.env.production

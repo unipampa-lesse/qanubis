@@ -81,24 +81,7 @@ jobs:
 
       - name: Deploy to Vercel
         run: |
-          npx vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --yes \
-            --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-            --env NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
-            --env NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}" \
-            --env GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
-            --env GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-            --env STORAGE_PROVIDER="${{ secrets.STORAGE_PROVIDER }}" \
-            --env STORAGE_ENDPOINT="${{ secrets.STORAGE_ENDPOINT }}" \
-            --env STORAGE_REGION="${{ secrets.STORAGE_REGION }}" \
-            --env STORAGE_ACCESS_KEY="${{ secrets.STORAGE_ACCESS_KEY }}" \
-            --env STORAGE_SECRET_KEY="${{ secrets.STORAGE_SECRET_KEY }}" \
-            --env STORAGE_BUCKET="${{ secrets.STORAGE_BUCKET }}" \
-            --env EMAIL_PROVIDER="${{ secrets.EMAIL_PROVIDER }}" \
-            --env SMTP_HOST="${{ secrets.SMTP_HOST }}" \
-            --env SMTP_PORT="${{ secrets.SMTP_PORT }}" \
-            --env SMTP_USER="${{ secrets.SMTP_USER }}" \
-            --env SMTP_PASS="${{ secrets.SMTP_PASS }}" \
-            --env SMTP_FROM="${{ secrets.SMTP_FROM }}"
+          npx vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

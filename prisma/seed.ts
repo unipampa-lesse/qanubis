@@ -15,6 +15,22 @@ async function hashPassword(plain: string) {
 	return bcrypt.hash(plain, 12);
 }
 
+async function upsertAdmin(email: string, password: string) {
+	const hash = await hashPassword(password);
+	await prisma.user.upsert({
+		where: { email },
+		update: { role: "ADMIN", emailVerified: new Date() },
+		create: {
+			name: "Admin",
+			email,
+			password: hash,
+			emailVerified: new Date(),
+			role: "ADMIN",
+		},
+	});
+	console.log("✅ Admin upserted");
+}
+
 async function upsertUser(opts: {
 	id: string;
 	email: string;
@@ -58,36 +74,8 @@ async function main() {
 			);
 		}
 
-		const existing = await prisma.user.findUnique({
-			where: { email },
-			select: { id: true, role: true },
-		});
-
-		if (existing) {
-			if (existing.role !== "ADMIN") {
-				await prisma.user.update({
-					where: { email },
-					data: { role: "ADMIN" },
-				});
-				console.log("✅ User promoted to ADMIN.");
-			} else {
-				console.log("✅ Admin already exists — skipping.");
-			}
-			return;
-		}
-
-		const hash = await bcrypt.hash(password, 12);
-		await prisma.user.create({
-			data: {
-				name: "Admin",
-				email,
-				password: hash,
-				emailVerified: new Date(),
-				role: "ADMIN",
-			},
-		});
-		console.log("✅ Admin user created.");
-		return;
+		await upsertAdmin(email, password);
+        return;
 	}
 
 	console.log("🌱 Seeding database…");
@@ -177,7 +165,7 @@ async function main() {
 		},
 	});
 
-	const codeAutonomy = await prisma.code.upsert({
+	await prisma.code.upsert({
 		where: { id: "seed-code-01a" },
 		update: {},
 		create: {
