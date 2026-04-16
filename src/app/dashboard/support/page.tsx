@@ -72,7 +72,10 @@ export default function SupportPage() {
 						onSubmit={(e) => {
 							e.preventDefault();
 							setFormError(null);
-							createTicket.mutate({ subject: subject.trim(), message: message.trim() });
+							createTicket.mutate({
+								subject: subject.trim(),
+								message: message.trim(),
+							});
 						}}
 						className="space-y-4"
 					>
@@ -112,9 +115,7 @@ export default function SupportPage() {
 								className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30"
 							/>
 						</div>
-						{formError && (
-							<p className="text-sm text-error-500">{formError}</p>
-						)}
+						{formError && <p className="text-sm text-error-500">{formError}</p>}
 						<div className="flex justify-end gap-3">
 							<button
 								type="button"
@@ -125,10 +126,14 @@ export default function SupportPage() {
 							</button>
 							<button
 								type="submit"
-								disabled={createTicket.isPending || !subject.trim() || !message.trim()}
+								disabled={
+									createTicket.isPending || !subject.trim() || !message.trim()
+								}
 								className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
 							>
-								{createTicket.isPending ? t.support.submitting : t.support.submit}
+								{createTicket.isPending
+									? t.support.submitting
+									: t.support.submit}
 							</button>
 						</div>
 					</form>

@@ -6,8 +6,8 @@ import { getStorageProvider } from "@/providers/storage";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_MIME = "application/pdf";
-const UUID_RE =
-	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Accepts both UUID (v1-v5) and CUID / CUID2 — any non-empty alphanumeric+dash id
+const PROJECT_ID_RE = /^[a-z0-9][\w-]{1,}$/i;
 // PDF magic bytes: "%PDF-"
 const PDF_MAGIC = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]);
 
@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
-	if (!UUID_RE.test(projectId)) {
+	if (!PROJECT_ID_RE.test(projectId)) {
 		return NextResponse.json(
-			{ error: "projectId must be a valid UUID" },
+			{ error: "projectId is invalid" },
 			{ status: 400 },
 		);
 	}

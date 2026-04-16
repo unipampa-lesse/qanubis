@@ -58,7 +58,9 @@ export function ResetPasswordEmail({ resetUrl }: ResetPasswordEmailProps) {
 	);
 }
 
-export function resetPasswordText({ resetUrl }: ResetPasswordEmailProps): string {
+export function resetPasswordText({
+	resetUrl,
+}: ResetPasswordEmailProps): string {
 	return [
 		"We received a request to reset the password for your QAnubis account.",
 		"",

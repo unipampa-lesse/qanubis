@@ -5,6 +5,7 @@ import type React from "react";
 export const metadata: Metadata = {
 	title: "Administration | QAnubis",
 };
+
 import { prisma } from "@/lib/prisma";
 import { getAuthSession } from "@/server/get-server-session";
 

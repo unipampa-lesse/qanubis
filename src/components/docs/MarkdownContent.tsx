@@ -1,35 +1,49 @@
+import type React from "react";
+import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
-import type { Components } from "react-markdown";
-import type React from "react";
+import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github-dark.css";
 import { MermaidDiagram } from "./MermaidDiagram";
 
 const components: Components = {
 	h1: ({ children, ...props }) => (
-		<h1 {...props} className="mt-8 mb-4 text-3xl font-bold text-gray-900 dark:text-gray-50">
+		<h1
+			{...props}
+			className="mt-8 mb-4 text-3xl font-bold text-gray-900 dark:text-gray-50"
+		>
 			{children}
 		</h1>
 	),
 	h2: ({ children, ...props }) => (
-		<h2 {...props} className="mt-8 mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-50 border-b border-gray-200 dark:border-gray-700 pb-2">
+		<h2
+			{...props}
+			className="mt-8 mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-50 border-b border-gray-200 dark:border-gray-700 pb-2"
+		>
 			{children}
 		</h2>
 	),
 	h3: ({ children, ...props }) => (
-		<h3 {...props} className="mt-6 mb-2 text-xl font-semibold text-gray-800 dark:text-gray-100">
+		<h3
+			{...props}
+			className="mt-6 mb-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
+		>
 			{children}
 		</h3>
 	),
 	h4: ({ children, ...props }) => (
-		<h4 {...props} className="mt-4 mb-2 text-lg font-medium text-gray-800 dark:text-gray-100">
+		<h4
+			{...props}
+			className="mt-4 mb-2 text-lg font-medium text-gray-800 dark:text-gray-100"
+		>
 			{children}
 		</h4>
 	),
 	p: ({ children }) => (
-		<p className="mb-4 leading-7 text-gray-700 dark:text-gray-300">{children}</p>
+		<p className="mb-4 leading-7 text-gray-700 dark:text-gray-300">
+			{children}
+		</p>
 	),
 	ul: ({ children }) => (
 		<ul className="mb-4 ml-6 list-disc space-y-1 text-gray-700 dark:text-gray-300">
@@ -74,7 +88,10 @@ const components: Components = {
 	},
 	pre: ({ children }) => {
 		const child = Array.isArray(children) ? children[0] : children;
-		const el = child as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+		const el = child as React.ReactElement<{
+			className?: string;
+			children?: React.ReactNode;
+		}>;
 		if (el?.props?.className?.includes("language-mermaid")) {
 			// extract raw text recursively in case rehype wrapped content in spans
 			const extractText = (node: React.ReactNode): string => {
@@ -121,7 +138,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
 	return (
 		<ReactMarkdown
 			remarkPlugins={[remarkGfm]}
-		rehypePlugins={[rehypeSlug, [rehypeHighlight, { ignoreMissing: true }]]}
+			rehypePlugins={[rehypeSlug, [rehypeHighlight, { ignoreMissing: true }]]}
 			components={components}
 		>
 			{content}

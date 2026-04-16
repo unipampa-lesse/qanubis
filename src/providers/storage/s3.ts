@@ -6,6 +6,7 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { env } from "@/lib/env";
 import type { IStorageProvider } from "./interface";
 
 /**
@@ -24,13 +25,13 @@ export class S3StorageProvider implements IStorageProvider {
 	private bucket: string;
 
 	constructor() {
-		this.bucket = process.env.STORAGE_BUCKET!;
+		this.bucket = env.STORAGE_BUCKET;
 		this.client = new S3Client({
-			endpoint: process.env.STORAGE_ENDPOINT,
-			region: process.env.STORAGE_REGION ?? "us-east-1",
+			endpoint: env.STORAGE_ENDPOINT,
+			region: env.STORAGE_REGION,
 			credentials: {
-				accessKeyId: process.env.STORAGE_ACCESS_KEY!,
-				secretAccessKey: process.env.STORAGE_SECRET_KEY!,
+				accessKeyId: env.STORAGE_ACCESS_KEY,
+				secretAccessKey: env.STORAGE_SECRET_KEY,
 			},
 			// Required for MinIO and Cloudflare R2 path-style URLs
 			forcePathStyle: true,

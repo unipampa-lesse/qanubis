@@ -24,6 +24,7 @@ export default function NotificationDropdown() {
 	return (
 		<div className="relative">
 			<button
+				type="button"
 				className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
 				onClick={handleClick}
 			>
@@ -35,6 +36,8 @@ export default function NotificationDropdown() {
 					<span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
 				</span>
 				<svg
+					aria-label="Notifications"
+					role="img"
 					className="fill-current"
 					width="20"
 					height="20"
@@ -59,10 +62,13 @@ export default function NotificationDropdown() {
 						Notification
 					</h5>
 					<button
+						type="button"
 						onClick={toggleDropdown}
 						className="text-gray-500 transition dropdown-toggle dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 					>
 						<svg
+							aria-label="Close notifications"
+							role="img"
 							className="fill-current"
 							width="24"
 							height="24"

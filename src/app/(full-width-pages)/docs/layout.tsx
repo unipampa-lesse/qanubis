@@ -1,5 +1,5 @@
-import { DocsSidebar } from "@/components/docs/DocsSidebar";
 import { DocsHeader } from "@/components/docs/DocsHeader";
+import { DocsSidebar } from "@/components/docs/DocsSidebar";
 
 export default function DocsLayout({
 	children,

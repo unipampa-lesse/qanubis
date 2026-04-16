@@ -1,8 +1,8 @@
 "use client";
 
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import clsx from "clsx";
 import { useTranslation } from "@/context/LanguageContext";
 
 export function DocsSidebar() {
@@ -27,7 +27,10 @@ export function DocsSidebar() {
 				{ label: d.nav.features, slug: "features" },
 				{ label: d.nav.domainModel, slug: "domain-model" },
 				{ label: d.nav.architecture, slug: "architecture" },
-				{ label: d.nav.contributionGuidelines, slug: "contribution-guidelines" },
+				{
+					label: d.nav.contributionGuidelines,
+					slug: "contribution-guidelines",
+				},
 			],
 		},
 	];
@@ -44,9 +47,7 @@ export function DocsSidebar() {
 							{group.items.map((item) => {
 								const href = `/docs${item.slug ? `/${item.slug}` : ""}`;
 								const isActive =
-									item.slug === ""
-										? pathname === "/docs"
-										: pathname === href;
+									item.slug === "" ? pathname === "/docs" : pathname === href;
 								return (
 									<li key={item.slug}>
 										<Link

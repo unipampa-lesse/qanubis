@@ -75,7 +75,7 @@ async function main() {
 		}
 
 		await upsertAdmin(email, password);
-        return;
+		return;
 	}
 
 	console.log("🌱 Seeding database…");
@@ -540,13 +540,25 @@ async function main() {
 	console.log("\n✅ Seed complete.\n");
 	console.log("  Accounts:");
 	console.log("    admin@qanubis.local          / admin123  (Admin)");
-	console.log("    owner@qanubis.local           / user123   (Owner of 'Remote Work Study')");
-	console.log("    collaborator@qanubis.local    / user123   (Collaborator on A, Owner of B)");
-	console.log("    viewer@qanubis.local          / user123   (Viewer on 'Remote Work Study')");
-	console.log("    researcher@qanubis.local      / user123   (Collaborator on A — legacy)");
+	console.log(
+		"    owner@qanubis.local           / user123   (Owner of 'Remote Work Study')",
+	);
+	console.log(
+		"    collaborator@qanubis.local    / user123   (Collaborator on A, Owner of B)",
+	);
+	console.log(
+		"    viewer@qanubis.local          / user123   (Viewer on 'Remote Work Study')",
+	);
+	console.log(
+		"    researcher@qanubis.local      / user123   (Collaborator on A — legacy)",
+	);
 	console.log("\n  Projects:");
-	console.log("    Remote Work Study  — owner + collaborator + viewer + 7 codes + 2 memos");
-	console.log("    Interview Archive  — collaborator as owner, owner as viewer + 2 codes + 1 memo");
+	console.log(
+		"    Remote Work Study  — owner + collaborator + viewer + 7 codes + 2 memos",
+	);
+	console.log(
+		"    Interview Archive  — collaborator as owner, owner as viewer + 2 codes + 1 memo",
+	);
 	console.log("\n  Support tickets:");
 	console.log("    #1 IN_PROGRESS — PDF viewer bug (2 replies)");
 	console.log("    #2 RESOLVED    — Excel export question (1 reply)");

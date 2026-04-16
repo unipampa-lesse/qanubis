@@ -26,11 +26,9 @@ export function getEmailProvider(): IEmailProvider {
 			const { NodemailerEmailProvider } =
 				require("./nodemailer") as typeof import("./nodemailer");
 			instance = new NodemailerEmailProvider();
-			break;
+			return instance;
 		}
 		default:
 			throw new Error(`Unknown EMAIL_PROVIDER: "${provider}"`);
 	}
-
-	return instance!;
 }

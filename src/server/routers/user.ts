@@ -53,7 +53,10 @@ export const userRouter = createTRPCRouter({
 			}
 			const valid = await bcrypt.compare(input.currentPassword, user.password);
 			if (!valid) {
-				throw new TRPCError({ code: "UNAUTHORIZED", message: "wrong_password" });
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "wrong_password",
+				});
 			}
 			const conflict = await prisma.user.findUnique({
 				where: { email: input.email },

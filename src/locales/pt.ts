@@ -200,7 +200,8 @@ export const translations: Translations = {
 		loadError: "Falha ao carregar o PDF.",
 		page: "Página",
 		of: "de",
-		scannedWarning: "Este PDF parece ser uma imagem digitalizada sem camada de texto. A seleção de texto e extração de citações não estão disponíveis para este documento.",
+		scannedWarning:
+			"Este PDF parece ser uma imagem digitalizada sem camada de texto. A seleção de texto e extração de citações não estão disponíveis para este documento.",
 
 		// Quote creation
 		quoteButton: "Citar",
@@ -374,7 +375,8 @@ export const translations: Translations = {
 		savingEmail: "Atualizando…",
 		emailSaved: "E-mail atualizado. Use o novo endereço para entrar.",
 		emailTaken: "Este e-mail já está em uso.",
-		oauthEmail: "O e-mail é gerenciado pelo seu provedor de login e não pode ser alterado aqui.",
+		oauthEmail:
+			"O e-mail é gerenciado pelo seu provedor de login e não pode ser alterado aqui.",
 		changePassword: "Alterar senha",
 		currentPassword: "Senha atual",
 		newPassword: "Nova senha (mín. 8 caracteres)",
@@ -382,7 +384,8 @@ export const translations: Translations = {
 		savingPassword: "Atualizando…",
 		passwordSaved: "Senha atualizada.",
 		wrongPassword: "Senha atual incorreta.",
-		oauthAccount: "Sua conta usa login com Google/GitHub — alteração de senha não está disponível.",
+		oauthAccount:
+			"Sua conta usa login com Google/GitHub — alteração de senha não está disponível.",
 	},
 
 	// 404 page

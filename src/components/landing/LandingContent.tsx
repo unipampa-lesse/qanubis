@@ -104,7 +104,9 @@ export default function LandingContent() {
 									<div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-brand-950/60 flex items-center justify-center mb-4">
 										<Icon className="w-5 h-5 text-brand-500" />
 									</div>
-									<h3 className="font-semibold text-sm mb-2">{feature.title}</h3>
+									<h3 className="font-semibold text-sm mb-2">
+										{feature.title}
+									</h3>
 									<p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
 										{feature.description}
 									</p>
@@ -161,7 +163,9 @@ export default function LandingContent() {
 			{/* Footer */}
 			<footer className="border-t border-gray-100 dark:border-gray-800 py-8">
 				<div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400 dark:text-gray-500">
-					<span>© {new Date().getFullYear()} QAnubis. {l.footerCopyright}</span>
+					<span>
+						© {new Date().getFullYear()} QAnubis. {l.footerCopyright}
+					</span>
 					<div className="flex items-center gap-6">
 						<a
 							href="https://github.com/unipampa-lesse/qanubis"
@@ -171,7 +175,7 @@ export default function LandingContent() {
 						>
 							{l.footerGithub}
 						</a>
-                        <Link
+						<Link
 							href="/docs"
 							className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
 						>

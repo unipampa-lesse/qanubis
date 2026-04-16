@@ -113,7 +113,9 @@ export default function SupportTicketPage() {
 							>
 								<div className="mb-2 flex items-center justify-between gap-2">
 									<span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-										{isAdmin ? t.support.supportAgent : (msg.user.name ?? t.support.you)}
+										{isAdmin
+											? t.support.supportAgent
+											: (msg.user.name ?? t.support.you)}
 									</span>
 									<span className="text-xs text-gray-400">
 										{new Date(msg.createdAt).toLocaleString()}

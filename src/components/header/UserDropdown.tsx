@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { FaRegCircleUser } from "react-icons/fa6";
 import {
 	HiArrowRightOnRectangle,
-	HiOutlineBookOpen,
 	HiOutlineCog6Tooth,
 	HiOutlineLifebuoy,
 	HiOutlineUser,
@@ -24,6 +22,7 @@ export default function UserDropdown() {
 	return (
 		<div className="relative">
 			<button
+				type="button"
 				onClick={() => setIsOpen((v) => !v)}
 				className="flex items-center gap-2 dropdown-toggle text-gray-700 dark:text-gray-400"
 			>
@@ -32,6 +31,8 @@ export default function UserDropdown() {
 					{user?.name ?? "…"}
 				</span>
 				<svg
+					aria-label="Toggle menu"
+					role="img"
 					className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
 					width="16"
 					height="16"
@@ -88,7 +89,7 @@ export default function UserDropdown() {
 						</DropdownItem>
 					</li>
 
-                    <li>
+					<li>
 						<DropdownItem
 							onItemClick={() => setIsOpen(false)}
 							tag="a"

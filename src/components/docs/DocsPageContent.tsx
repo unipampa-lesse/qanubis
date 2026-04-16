@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLanguage } from "@/context/LanguageContext";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { MarkdownContent } from "./MarkdownContent";
 
 interface DocsPageContentProps {

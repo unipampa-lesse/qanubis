@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslation } from "@/context/LanguageContext";
 import LanguageSelect from "@/components/common/LanguageSelect";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
+import { useTranslation } from "@/context/LanguageContext";
 
 export function DocsHeader() {
 	const t = useTranslation();

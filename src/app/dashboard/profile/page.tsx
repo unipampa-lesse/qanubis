@@ -84,7 +84,9 @@ export default function ProfilePage() {
 		},
 		onError: (err) => {
 			const text =
-				err.message === "wrong_password" ? t.profile.wrongPassword : err.message;
+				err.message === "wrong_password"
+					? t.profile.wrongPassword
+					: err.message;
 			setPwMsg({ text, error: true });
 		},
 	});
@@ -184,9 +186,7 @@ export default function ProfilePage() {
 						<Msg msg={emailMsg} />
 						<button
 							type="submit"
-							disabled={
-								updateEmail.isPending || !newEmail.trim() || !emailPw
-							}
+							disabled={updateEmail.isPending || !newEmail.trim() || !emailPw}
 							className={BTN_CLS}
 						>
 							{updateEmail.isPending

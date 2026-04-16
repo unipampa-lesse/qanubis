@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
-import { type Language, useLanguage, useTranslation } from "@/context/LanguageContext";
+import {
+	type Language,
+	useLanguage,
+	useTranslation,
+} from "@/context/LanguageContext";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 
@@ -28,7 +32,9 @@ const LanguageSelect: React.FC<Props> = ({ dropUp = false }) => {
 			<Dropdown
 				isOpen={isOpen}
 				onClose={() => setIsOpen(false)}
-				className={dropUp ? "bottom-full mb-2 mt-0 min-w-36 p-1" : "min-w-36 p-1"}
+				className={
+					dropUp ? "bottom-full mb-2 mt-0 min-w-36 p-1" : "min-w-36 p-1"
+				}
 			>
 				{LANGUAGES.map((lang) => (
 					<DropdownItem

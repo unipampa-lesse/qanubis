@@ -12,13 +12,13 @@ import {
 	HiOutlineTag,
 	HiOutlineUsers,
 } from "react-icons/hi2";
-import ConfirmModal from "@/components/ui/ConfirmModal";
 import CodesTab from "@/components/projects/CodesTab";
-import EditProjectModal from "@/components/projects/EditProjectModal";
 import DocumentsTab from "@/components/projects/DocumentsTab";
+import EditProjectModal from "@/components/projects/EditProjectModal";
 import MembersTab from "@/components/projects/MembersTab";
 import MemosTab from "@/components/projects/MemosTab";
 import ReportsTab from "@/components/projects/ReportsTab";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 

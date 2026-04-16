@@ -4,7 +4,9 @@ import { useTranslation } from "@/context/LanguageContext";
 
 type Quote = {
 	document: { id: string; name: string };
-	quoteCodes: { code: { id: string; name: string; color: string; textColor: string } }[];
+	quoteCodes: {
+		code: { id: string; name: string; color: string; textColor: string };
+	}[];
 };
 
 interface SummaryPanelProps {
@@ -94,7 +96,10 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
 							{docRows.map((row) => (
-								<tr key={row.name} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+								<tr
+									key={row.name}
+									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+								>
 									<td className="px-5 py-3 font-medium text-gray-800 dark:text-white/90">
 										{row.name}
 									</td>
@@ -143,7 +148,10 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 										<td className="px-5 py-3">
 											<span
 												className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-												style={{ backgroundColor: row.color, color: row.textColor }}
+												style={{
+													backgroundColor: row.color,
+													color: row.textColor,
+												}}
 											>
 												{row.name}
 											</span>

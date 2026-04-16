@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { env } from "@/lib/env";
 import type { IEmailProvider, SendEmailOptions } from "./interface";
 
 /**
@@ -17,13 +18,13 @@ export class NodemailerEmailProvider implements IEmailProvider {
 
 	constructor() {
 		this.transporter = nodemailer.createTransport({
-			host: process.env.SMTP_HOST!,
-			port: Number(process.env.SMTP_PORT ?? 1025),
+			host: env.SMTP_HOST,
+			port: env.SMTP_PORT,
 			secure: false,
-			auth: process.env.SMTP_USER
+			auth: env.SMTP_USER
 				? {
-						user: process.env.SMTP_USER,
-						pass: process.env.SMTP_PASS,
+						user: env.SMTP_USER,
+						pass: env.SMTP_PASS,
 					}
 				: undefined,
 		});

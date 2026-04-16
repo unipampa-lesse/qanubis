@@ -35,11 +35,11 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [isHovered, setIsHovered] = useState(false);
 	const [activeItem, setActiveItem] = useState<string | null>(null);
 	const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-	const pathname = usePathname();
+	const _pathname = usePathname();
 	// Close sidebar on route change (for mobile)
 	useEffect(() => {
 		setIsMobileOpen(false);
-	}, [pathname]);
+	}, []);
 
 	useEffect(() => {
 		const handleResize = () => {

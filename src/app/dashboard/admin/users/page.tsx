@@ -3,7 +3,6 @@
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
-
 export default function AdminUsersPage() {
 	const t = useTranslation();
 	const utils = trpc.useUtils();
@@ -79,7 +78,9 @@ export default function AdminUsersPage() {
 												: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
 										}`}
 									>
-										{user.role === "ADMIN" ? t.admin.roleAdmin : t.admin.roleUser}
+										{user.role === "ADMIN"
+											? t.admin.roleAdmin
+											: t.admin.roleUser}
 									</span>
 								</td>
 								<td className="px-5 py-3">

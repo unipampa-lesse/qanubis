@@ -52,8 +52,14 @@ const Switch: React.FC<SwitchProps> = ({
 			className={`flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${
 				disabled ? "text-gray-400" : "text-gray-700 dark:text-gray-400"
 			}`}
-			onClick={handleToggle} // Toggle when the label itself is clicked
 		>
+			<input
+				type="checkbox"
+				className="sr-only"
+				checked={isChecked}
+				disabled={disabled}
+				onChange={handleToggle}
+			/>
 			<div className="relative">
 				<div
 					className={`block transition duration-150 ease-linear h-6 w-11 rounded-full ${

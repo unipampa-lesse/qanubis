@@ -84,7 +84,8 @@ export const translations = {
 		setNewPassword: "Set new password",
 		settingPassword: "Updating…",
 		passwordResetSuccess: "Password updated! You can now sign in.",
-		resetTokenInvalid: "This link is invalid or has expired. Please request a new one.",
+		resetTokenInvalid:
+			"This link is invalid or has expired. Please request a new one.",
 		passwordsDoNotMatch: "Passwords do not match.",
 	},
 
@@ -197,7 +198,8 @@ export const translations = {
 		loadError: "Failed to load PDF.",
 		page: "Page",
 		of: "of",
-		scannedWarning: "This PDF appears to be a scanned image without a text layer. Text selection and quote extraction are not available for this document.",
+		scannedWarning:
+			"This PDF appears to be a scanned image without a text layer. Text selection and quote extraction are not available for this document.",
 
 		// Quote creation
 		quoteButton: "Quote",
@@ -378,7 +380,8 @@ export const translations = {
 		savingEmail: "Updating…",
 		emailSaved: "Email updated. Use the new address to sign in.",
 		emailTaken: "This email is already in use.",
-		oauthEmail: "Email is managed by your sign-in provider and cannot be changed here.",
+		oauthEmail:
+			"Email is managed by your sign-in provider and cannot be changed here.",
 		changePassword: "Change password",
 		currentPassword: "Current password",
 		newPassword: "New password (min. 8 characters)",
@@ -386,7 +389,8 @@ export const translations = {
 		savingPassword: "Updating…",
 		passwordSaved: "Password updated.",
 		wrongPassword: "Current password is incorrect.",
-		oauthAccount: "Your account uses Google/GitHub sign-in — password change is not available.",
+		oauthAccount:
+			"Your account uses Google/GitHub sign-in — password change is not available.",
 	},
 
 	// 404 page

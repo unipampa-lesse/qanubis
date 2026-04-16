@@ -436,10 +436,10 @@ export default function PdfViewer({
 					/>
 
 					{/* Highlight overlays */}
-					{highlights.map((h, i) => (
+					{highlights.map((h, _i) => (
 						<button
 							type="button"
-							key={`${h.quoteId}-${i}`}
+							key={`${h.quoteId}-${h.left}-${h.top}`}
 							onClick={() => onHighlightClick(h.quoteId)}
 							style={{
 								position: "absolute",

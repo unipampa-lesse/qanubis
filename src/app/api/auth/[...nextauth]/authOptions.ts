@@ -55,7 +55,7 @@ export const authOptions: AuthOptions = {
 					},
 				});
 
-				if (!user || !user.password) return null;
+				if (!user?.password) return null;
 				if (user.suspended) return null;
 				if (!user.emailVerified) return null;
 

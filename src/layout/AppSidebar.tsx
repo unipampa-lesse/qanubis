@@ -44,11 +44,11 @@ const AppSidebar: React.FC = () => {
 			name: t.nav.support,
 			path: "/dashboard/support",
 		},
-        {
-            icon: <HiOutlineBookOpen />,
-            name: t.nav.docs,
-            path: "/docs",
-	    },
+		{
+			icon: <HiOutlineBookOpen />,
+			name: t.nav.docs,
+			path: "/docs",
+		},
 		...(isAdmin
 			? [
 					{

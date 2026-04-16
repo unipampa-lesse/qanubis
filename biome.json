@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -23,6 +23,37 @@
 			"quoteStyle": "double"
 		}
 	},
+	"css": {
+		"parser": {
+			"cssModules": false,
+			"tailwindDirectives": true
+		},
+		"linter": {
+			"enabled": true
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["src/app/globals.css"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noDescendingSpecificity": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/components/form/MultiSelect.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noStaticElementInteractions": "off"
+					}
+				}
+			}
+		}
+	],
 	"assist": {
 		"enabled": true,
 		"actions": {

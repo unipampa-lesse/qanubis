@@ -254,8 +254,6 @@ export default function DocumentsTab({
 												>
 													<DocTypeIcon mimeType={doc.mimeType} />
 													<input
-														// eslint-disable-next-line jsx-a11y/no-autofocus
-														autoFocus
 														type="text"
 														value={draftName}
 														onChange={(e) => setDraftName(e.target.value)}

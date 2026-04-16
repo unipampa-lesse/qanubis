@@ -5,6 +5,10 @@ export const metadata: Metadata = {
 	title: "Support | QAnubis",
 };
 
-export default function SupportLayout({ children }: { children: React.ReactNode }) {
+export default function SupportLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	return <>{children}</>;
 }

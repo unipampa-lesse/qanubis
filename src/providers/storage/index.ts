@@ -24,11 +24,9 @@ export function getStorageProvider(): IStorageProvider {
 		case "s3": {
 			const { S3StorageProvider } = require("./s3") as typeof import("./s3");
 			instance = new S3StorageProvider();
-			break;
+			return instance;
 		}
 		default:
 			throw new Error(`Unknown STORAGE_PROVIDER: "${provider}"`);
 	}
-
-	return instance!;
 }

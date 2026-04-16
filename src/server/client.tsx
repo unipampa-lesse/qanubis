@@ -18,7 +18,8 @@ function getQueryClient() {
 	if (typeof window === "undefined") {
 		return makeQueryClient();
 	}
-	return (clientQueryClientSingleton ??= makeQueryClient());
+	clientQueryClientSingleton = clientQueryClientSingleton ?? makeQueryClient();
+	return clientQueryClientSingleton;
 }
 function getUrl() {
 	const base = (() => {

@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { DocsPageContent } from "@/components/docs/DocsPageContent";
 
 const PAGE_TITLES: Record<string, string> = {

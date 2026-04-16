@@ -24,8 +24,7 @@ export default function InviteForm() {
 		if (status === "authenticated" && !accept.isPending && !accept.isSuccess) {
 			accept.mutate({ token });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [status]);
+	}, [status, accept.isPending, accept.isSuccess, accept.mutate, token]);
 
 	if (status === "loading" || accept.isPending) {
 		return (
