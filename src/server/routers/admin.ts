@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getStorageProvider } from "@/providers/storage";
 import { adminProcedure, createTRPCRouter } from "../trpc";
 
 export const adminRouter = createTRPCRouter({
@@ -75,6 +76,29 @@ export const adminRouter = createTRPCRouter({
 			orderBy: { createdAt: "desc" },
 		});
 	}),
+
+	/** Admin-level project deletion. Removes all documents from storage. */
+	deleteProject: adminProcedure
+		.input(z.object({ projectId: z.string() }))
+		.mutation(async ({ input }) => {
+			// Delete document files from storage before removing the DB record.
+			const documents = await prisma.document.findMany({
+				where: { projectId: input.projectId },
+				select: { storageKey: true },
+			});
+
+			const storage = getStorageProvider();
+			await Promise.allSettled(
+				documents.map((d) => storage.delete(d.storageKey)),
+			);
+
+			// Cascade deletes handle all related records.
+			await prisma.project.delete({
+				where: { id: input.projectId },
+			});
+
+			return { success: true };
+		}),
 
 	// -------------------------------------------------------------------------
 	// Support tickets

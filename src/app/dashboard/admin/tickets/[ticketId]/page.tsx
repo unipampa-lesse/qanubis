@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineArrowLeft } from "react-icons/hi2";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const STATUS_OPTIONS = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
@@ -21,6 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminTicketDetailPage() {
 	const { ticketId } = useParams<{ ticketId: string }>();
 	const t = useTranslation();
+	const { locale } = useLanguage();
 	const utils = trpc.useUtils();
 
 	const { data: ticket, isLoading } = trpc.admin.getTicket.useQuery({
@@ -110,7 +111,7 @@ export default function AdminTicketDetailPage() {
 								<span className="font-medium text-gray-600 dark:text-gray-300">
 									{msg.user.name ?? "—"}
 								</span>
-								<span>{new Date(msg.createdAt).toLocaleString()}</span>
+								<span>{new Date(msg.createdAt).toLocaleString(locale)}</span>
 							</div>
 							<p className="text-sm text-gray-700 dark:text-gray-300">
 								{msg.content}

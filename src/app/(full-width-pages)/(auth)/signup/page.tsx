@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import SignUpForm from "@/components/auth/SignUpForm";
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-	title: "Sign Up | QAnubis",
-	description: "This is Sign Up page for QAnubis",
+	title: "Sign Up",
+	description:
+		"Create a free QAnubis account to start analyzing qualitative research data with your team.",
 };
 
 export default function SignUp() {
-	return <SignUpForm />;
+	return (
+            <Suspense>
+                <SignUpForm />
+            </Suspense>
+        );
 }

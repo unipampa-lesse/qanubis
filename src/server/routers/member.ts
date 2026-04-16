@@ -143,7 +143,7 @@ export const memberRouter = createTRPCRouter({
 			// Check the signed-in user's email matches the invite.
 			const user = await prisma.user.findUniqueOrThrow({
 				where: { id: ctx.userId },
-				select: { email: true },
+				select: { name: true, email: true },
 			});
 			if (user.email !== invite.email) {
 				throw new TRPCError({
@@ -173,6 +173,35 @@ export const memberRouter = createTRPCRouter({
 					data: { acceptedAt: new Date() },
 				}),
 			]);
+
+			// Notify the project owner that the invite was accepted.
+			const [project, owner] = await Promise.all([
+				prisma.project.findUniqueOrThrow({
+					where: { id: invite.projectId },
+					select: { name: true },
+				}),
+				prisma.projectMember.findFirst({
+					where: { projectId: invite.projectId, role: "OWNER" },
+					select: { user: { select: { email: true } } },
+				}),
+			]);
+
+			if (owner) {
+				const emailContent = await getEmailTemplateProvider().render(
+					"invite-accepted",
+					{
+						memberName: user.name ?? user.email,
+						projectName: project.name,
+						role: invite.role,
+					},
+				);
+				await getEmailProvider().send({
+					to: owner.user.email,
+					subject: emailContent.subject,
+					html: emailContent.html,
+					text: emailContent.text,
+				});
+			}
 
 			return { projectId: invite.projectId };
 		}),

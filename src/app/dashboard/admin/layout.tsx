@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import type React from "react";
 
 export const metadata: Metadata = {
-	title: "Administration | QAnubis",
+	title: "Administration",
 };
 
 import { prisma } from "@/lib/prisma";

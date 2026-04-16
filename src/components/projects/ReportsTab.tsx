@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import ExportPanel from "@/components/reports/ExportPanel";
 import QuoteExplorer from "@/components/reports/QuoteExplorer";
+import StatsPanel from "@/components/reports/StatsPanel";
 import SummaryPanel from "@/components/reports/SummaryPanel";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
@@ -20,7 +21,7 @@ interface ReportsTabProps {
 	projectName: string;
 }
 
-type SubTab = "explorer" | "charts" | "summary" | "export";
+type SubTab = "explorer" | "stats" | "charts" | "summary" | "export";
 
 export default function ReportsTab({
 	projectId,
@@ -35,6 +36,7 @@ export default function ReportsTab({
 
 	const SUB_TABS: { id: SubTab; label: string }[] = [
 		{ id: "explorer", label: t.reports.explorer },
+		{ id: "stats", label: t.reports.stats },
 		{ id: "charts", label: t.reports.charts },
 		{ id: "summary", label: t.reports.summary },
 		{ id: "export", label: t.reports.export },
@@ -76,8 +78,9 @@ export default function ReportsTab({
 			</div>
 
 			{activeSubTab === "explorer" && <QuoteExplorer quotes={safeQuotes} />}
+			{activeSubTab === "stats" && <StatsPanel projectId={projectId} />}
 			{activeSubTab === "charts" && <ChartsPanel quotes={safeQuotes} />}
-			{activeSubTab === "summary" && <SummaryPanel quotes={safeQuotes} />}
+			{activeSubTab === "summary" && <SummaryPanel projectId={projectId} />}
 			{activeSubTab === "export" && (
 				<ExportPanel quotes={safeQuotes} projectName={projectName} />
 			)}

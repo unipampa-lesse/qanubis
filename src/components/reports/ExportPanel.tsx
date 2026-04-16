@@ -217,6 +217,42 @@ export default function ExportPanel({ quotes, projectName }: ExportPanelProps) {
 					</Button>
 				</div>
 			</div>
+
+			{/* JSON export */}
+			<div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/50 sm:col-span-2">
+				<div className="mb-3 flex items-center gap-2">
+					<HiOutlineArrowDownTray className="h-5 w-5 text-brand-500" />
+					<h3 className="font-semibold text-gray-700 dark:text-gray-300">
+						{t.reports.exportJSON}
+					</h3>
+				</div>
+				<p className="mb-4 text-xs text-gray-400">
+					{t.reports.exportJSONHint}
+				</p>
+				<Button
+					size="sm"
+					variant="outline"
+					startIcon={<HiOutlineArrowDownTray className="h-4 w-4" />}
+					onClick={() =>
+						downloadFile(
+							JSON.stringify(
+								quotes.map((q) => ({
+									text: q.text,
+									page: q.page,
+									document: q.document.name,
+									codes: q.quoteCodes.map((qc) => qc.code.name),
+								})),
+								null,
+								2,
+							),
+							`${slug}-quotes.json`,
+							"application/json;charset=utf-8",
+						)
+					}
+				>
+					{t.reports.exportJSON}
+				</Button>
+			</div>
 		</div>
 	);
 }

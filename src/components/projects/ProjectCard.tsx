@@ -2,7 +2,7 @@
 
 import type { ProjectRole } from "@prisma/client";
 import Link from "next/link";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 
 interface ProjectCardProps {
 	id: string;
@@ -26,6 +26,7 @@ export default function ProjectCard({
 	updatedAt,
 }: ProjectCardProps) {
 	const t = useTranslation();
+	const { locale } = useLanguage();
 
 	const roleColorClass: Record<ProjectRole, string> = {
 		OWNER:
@@ -35,10 +36,7 @@ export default function ProjectCard({
 		VIEWER: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
 	};
 
-	const updatedLabel = new Intl.RelativeTimeFormat(
-		typeof window !== "undefined" ? navigator.language : "en",
-		{ numeric: "auto" },
-	).format(
+	const updatedLabel = new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
 		Math.round((updatedAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
 		"day",
 	);

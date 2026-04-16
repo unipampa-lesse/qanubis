@@ -17,6 +17,16 @@ import {
 	resetPasswordSubject,
 	resetPasswordText,
 } from "./templates/ResetPasswordEmail";
+import {
+	VerifyEmailEmail,
+	verifyEmailSubject,
+	verifyEmailText,
+} from "./templates/VerifyEmailEmail";
+import {
+	InviteAcceptedEmail,
+	inviteAcceptedSubject,
+	inviteAcceptedText,
+} from "./templates/InviteAcceptedEmail";
 
 export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 	async render<T extends EmailTemplateName>(
@@ -44,6 +54,28 @@ export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 					subject: resetPasswordSubject(),
 					html,
 					text: resetPasswordText(d),
+				};
+			}
+			case "verify-email": {
+				const d = data as EmailTemplateData["verify-email"];
+				const html = await render(createElement(VerifyEmailEmail, d), {
+					pretty: false,
+				});
+				return {
+					subject: verifyEmailSubject(),
+					html,
+					text: verifyEmailText(d),
+				};
+			}
+			case "invite-accepted": {
+				const d = data as EmailTemplateData["invite-accepted"];
+				const html = await render(createElement(InviteAcceptedEmail, d), {
+					pretty: false,
+				});
+				return {
+					subject: inviteAcceptedSubject(d.memberName, d.projectName),
+					html,
+					text: inviteAcceptedText(d),
 				};
 			}
 			default:

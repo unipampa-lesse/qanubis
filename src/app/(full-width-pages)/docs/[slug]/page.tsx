@@ -1,20 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsPageContent } from "@/components/docs/DocsPageContent";
-
-const PAGE_TITLES: Record<string, string> = {
-	"user-manual": "User Manual",
-	faq: "FAQ",
-	contact: "Contact",
-	"how-to-contribute": "How to Contribute",
-	features: "Features",
-	"domain-model": "Domain Model",
-	architecture: "Architecture",
-	"migration-plan": "Migration Plan",
-	"contribution-guidelines": "Contribution Guidelines",
-};
-
-const VALID_SLUGS = new Set(Object.keys(PAGE_TITLES));
+import { DOC_SLUGS } from "@/lib/docs";
 
 type Params = Promise<{ slug: string }>;
 
@@ -24,21 +11,23 @@ export async function generateMetadata({
 	params: Params;
 }): Promise<Metadata> {
 	const { slug } = await params;
-	const title = PAGE_TITLES[slug];
-	if (!title) return {};
+	const title = DOC_SLUGS[slug as keyof typeof DOC_SLUGS];
+	if (!title) notFound();
 	return {
-		title: `${title} — QAnubis Docs`,
+		title: `${title} — Docs`,
+		description: `QAnubis documentation: ${title}. Learn how to use QAnubis for qualitative research analysis.`,
+		alternates: { canonical: `/docs/${slug}` },
 	};
 }
 
 export function generateStaticParams() {
-	return Object.keys(PAGE_TITLES).map((slug) => ({ slug }));
+	return Object.keys(DOC_SLUGS).map((slug) => ({ slug }));
 }
 
 export default async function DocsPage({ params }: { params: Params }) {
 	const { slug } = await params;
 
-	if (!VALID_SLUGS.has(slug)) {
+	if (!(slug in DOC_SLUGS)) {
 		notFound();
 	}
 

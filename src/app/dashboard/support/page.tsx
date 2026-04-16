@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HiOutlinePlus } from "react-icons/hi2";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -18,6 +18,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function SupportPage() {
 	const t = useTranslation();
+	const { locale } = useLanguage();
 	const router = useRouter();
 	const utils = trpc.useUtils();
 
@@ -195,7 +196,7 @@ export default function SupportPage() {
 										</span>
 									</td>
 									<td className="hidden px-5 py-3 text-xs text-gray-400 md:table-cell">
-										{new Date(ticket.updatedAt).toLocaleDateString()}
+										{new Date(ticket.updatedAt).toLocaleDateString(locale)}
 									</td>
 								</tr>
 							))}

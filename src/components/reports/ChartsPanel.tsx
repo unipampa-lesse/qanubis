@@ -3,6 +3,7 @@
 import * as Plot from "@observablehq/plot";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Code {
 	id: string;
@@ -33,6 +34,17 @@ function PlotChart({
 	useEffect(() => {
 		if (!ref.current || data.length === 0) return;
 		const chart = Plot.plot(options);
+		// Plot renders the color legend as HTML outside the SVG, so the `style`
+		// option does not reach it. Inject a scoped <style> to override.
+		const color =
+			options.style && typeof options.style === "object" && "color" in options.style
+				? String((options.style as { color?: string }).color ?? "")
+				: "";
+		if (color) {
+			const styleEl = document.createElement("style");
+			styleEl.textContent = `figure { color: ${color}; } figure div, figure span, figure label { color: ${color} !important; }`;
+			chart.prepend(styleEl);
+		}
 		ref.current.replaceChildren(chart);
 		return () => chart.remove();
 	});
@@ -52,6 +64,18 @@ function PlotChart({
 
 export default function ChartsPanel({ quotes }: ChartsPanelProps) {
 	const t = useTranslation();
+	const { theme } = useTheme();
+
+	const isDark = theme === "dark";
+	const textColor = isDark ? "#e5e7eb" : "#374151"; // gray-200 : gray-700
+	const gridColor = isDark ? "#374151" : "#e5e7eb"; // gray-700 : gray-200
+	const bgColor = isDark ? "#111827" : "#ffffff"; // gray-900 : white
+
+	const plotStyle = {
+		background: "transparent",
+		color: textColor,
+		fontSize: "12px",
+	};
 
 	// Build quotes × codes matrix
 	const quotesHeatmapRows: { document: string; code: string; count: number }[] =
@@ -112,6 +136,7 @@ export default function ChartsPanel({ quotes }: ChartsPanelProps) {
 				options={{
 					marginLeft: 140,
 					marginBottom: 80,
+					style: plotStyle,
 					x: { domain: allCodes, label: t.reports.code, tickRotate: -40 },
 					y: { domain: allDocs, label: t.reports.document },
 					color: { scheme: "blues", legend: true, label: t.reports.count },
@@ -141,6 +166,7 @@ export default function ChartsPanel({ quotes }: ChartsPanelProps) {
 					options={{
 						marginLeft: 140,
 						marginBottom: 80,
+						style: plotStyle,
 						x: {
 							domain: allCodesForCo,
 							label: t.reports.code,

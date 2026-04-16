@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { signOut } from "next-auth/react";
-import { useState } from "react";
-import { FaRegCircleUser } from "react-icons/fa6";
+import { useEffect, useState } from "react";
 import {
 	HiArrowRightOnRectangle,
 	HiOutlineCog6Tooth,
@@ -10,6 +10,7 @@ import {
 	HiOutlineUser,
 } from "react-icons/hi2";
 import { useTranslation } from "@/context/LanguageContext";
+import { getGravatarUrlAsync } from "@/lib/gravatar";
 import { trpc } from "@/server/client";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
@@ -18,6 +19,13 @@ export default function UserDropdown() {
 	const t = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const { data: user } = trpc.user.me.useQuery();
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (user?.email) {
+			getGravatarUrlAsync(user.email, 80).then(setAvatarUrl);
+		}
+	}, [user?.email]);
 
 	return (
 		<div className="relative">
@@ -26,7 +34,18 @@ export default function UserDropdown() {
 				onClick={() => setIsOpen((v) => !v)}
 				className="flex items-center gap-2 dropdown-toggle text-gray-700 dark:text-gray-400"
 			>
-				<FaRegCircleUser size={22} />
+				{avatarUrl ? (
+					<Image
+						src={avatarUrl}
+						alt="User avatar"
+						width={28}
+						height={28}
+						className="rounded-full"
+						unoptimized
+					/>
+				) : (
+					<span className="inline-block h-7 w-7 rounded-full bg-gray-200 dark:bg-gray-700" />
+				)}
 				<span className="hidden text-sm font-medium sm:block">
 					{user?.name ?? "…"}
 				</span>

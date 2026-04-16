@@ -32,7 +32,7 @@ export default function MemoEditor({
 		onUpdate: handleUpdate,
 		editorProps: {
 			attributes: {
-				class: "focus:outline-none",
+				class: "focus:outline-none memo-editor p-4",
 			},
 		},
 	});

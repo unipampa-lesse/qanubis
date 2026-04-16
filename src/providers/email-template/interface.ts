@@ -8,7 +8,11 @@ export interface RenderedEmail {
  * Known email templates. Add a new entry here each time a new template is created.
  * The union type ensures callers can only reference templates that actually exist.
  */
-export type EmailTemplateName = "project-invite" | "reset-password";
+export type EmailTemplateName =
+	| "project-invite"
+	| "reset-password"
+	| "verify-email"
+	| "invite-accepted";
 
 /** Data shapes expected by each template. */
 export interface EmailTemplateData {
@@ -20,6 +24,14 @@ export interface EmailTemplateData {
 	};
 	"reset-password": {
 		resetUrl: string;
+	};
+	"verify-email": {
+		verifyUrl: string;
+	};
+	"invite-accepted": {
+		memberName: string;
+		projectName: string;
+		role: string;
 	};
 }
 

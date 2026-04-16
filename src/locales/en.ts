@@ -87,6 +87,18 @@ export const translations = {
 		resetTokenInvalid:
 			"This link is invalid or has expired. Please request a new one.",
 		passwordsDoNotMatch: "Passwords do not match.",
+
+		// Email verification
+		verifyEmailTitle: "Verify Your Email",
+		verifyingEmail: "Verifying your email address…",
+		emailVerified: "Your email has been verified! You can now sign in.",
+		verifyTokenInvalid:
+			"This verification link is invalid or has expired.",
+		verifyEmailError: "Something went wrong. Please try again.",
+		verificationEmailSent:
+			"A verification email has been sent to your inbox.",
+		checkInboxMessage:
+			"Please check your email and click the verification link to activate your account.",
 	},
 
 	// Dashboard (project list)
@@ -261,7 +273,19 @@ export const translations = {
 		exportByDocument: "Export by document",
 		exportCSV: "Download CSV",
 		exportTXT: "Download TXT",
+		exportJSON: "Download JSON",
+		exportJSONHint: "Structured data for use with other tools (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "No quotes to export yet.",
+		// Stats
+		stats: "Statistics",
+		totalDocuments: "Documents",
+		totalQuotes: "Quotes",
+		totalCodes: "Codes",
+		totalMemos: "Memos",
+		uncodedQuotes: "Uncoded quotes",
+		codeFrequency: "Code frequency",
+		documentDistribution: "Quotes per document",
+		activityTimeline: "Activity (last 30 days)",
 	},
 
 	// Memos tab
@@ -391,12 +415,33 @@ export const translations = {
 		wrongPassword: "Current password is incorrect.",
 		oauthAccount:
 			"Your account uses Google/GitHub sign-in — password change is not available.",
+		// Delete account
+		deleteAccount: "Delete account",
+		deleteAccountWarning:
+			"This action is permanent and cannot be undone. All your data will be removed.",
+		deleteAccountConfirmPassword:
+			"Enter your current password to confirm account deletion.",
+		deleteAccountConfirmType: 'Type "DELETE" to confirm account deletion.',
+		deleteAccountTypePlaceholder: "Type DELETE",
+		deleteAccountConfirm: "Delete my account",
+		deletingAccount: "Deleting…",
+		deleteAccountSoleOwner:
+			"You are the sole owner of one or more projects. Transfer ownership before deleting your account.",
+		deleteAccountError: "Something went wrong. Please try again.",
 	},
 
 	// 404 page
 	notFound: {
 		heading: "404",
 		message: "We can't seem to find the page you are looking for!",
+		backHome: "Back to Home Page",
+	},
+
+	// Error page
+	errorPage: {
+		heading: "Something went wrong",
+		message: "An unexpected error occurred. Please try again.",
+		retry: "Try again",
 		backHome: "Back to Home Page",
 	},
 

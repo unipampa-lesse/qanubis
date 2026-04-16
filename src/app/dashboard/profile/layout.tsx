@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type React from "react";
 
 export const metadata: Metadata = {
-	title: "Profile | QAnubis",
+	title: "Profile",
 };
 
 export default function ProfileLayout({

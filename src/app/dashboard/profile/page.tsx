@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
@@ -250,6 +251,105 @@ export default function ProfilePage() {
 					</form>
 				)}
 			</div>
+
+			{/* Delete account */}
+			<DeleteAccountSection hasPassword={hasPassword} />
+		</div>
+	);
+}
+
+function DeleteAccountSection({ hasPassword }: { hasPassword: boolean }) {
+	const t = useTranslation();
+	const [showConfirm, setShowConfirm] = useState(false);
+	const [confirmation, setConfirmation] = useState("");
+	const [deleteMsg, setDeleteMsg] = useState<{
+		text: string;
+		error: boolean;
+	} | null>(null);
+
+	const deleteAccount = trpc.user.deleteAccount.useMutation({
+		onSuccess: () => {
+			signOut({ callbackUrl: "/" });
+		},
+		onError: (err) => {
+			const text =
+				err.message === "wrong_password"
+					? t.profile.wrongPassword
+					: err.message === "sole_owner"
+						? t.profile.deleteAccountSoleOwner
+						: t.profile.deleteAccountError;
+			setDeleteMsg({ text, error: true });
+		},
+	});
+
+	return (
+		<div className="rounded-2xl border border-error-200 bg-white p-6 dark:border-error-500/30 dark:bg-transparent">
+			<h2 className="mb-1 text-base font-semibold text-error-600 dark:text-error-400">
+				{t.profile.deleteAccount}
+			</h2>
+			<p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+				{t.profile.deleteAccountWarning}
+			</p>
+
+			{!showConfirm ? (
+				<button
+					type="button"
+					onClick={() => setShowConfirm(true)}
+					className="rounded-lg border border-error-300 bg-white px-4 py-2 text-sm font-medium text-error-600 hover:bg-error-50 dark:border-error-500/30 dark:bg-transparent dark:text-error-400 dark:hover:bg-error-500/10"
+				>
+					{t.profile.deleteAccount}
+				</button>
+			) : (
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						setDeleteMsg(null);
+						deleteAccount.mutate({ confirmation });
+					}}
+					className="space-y-3"
+				>
+					<p className="text-sm text-gray-600 dark:text-gray-400">
+						{hasPassword
+							? t.profile.deleteAccountConfirmPassword
+							: t.profile.deleteAccountConfirmType}
+					</p>
+					<input
+						type={hasPassword ? "password" : "text"}
+						value={confirmation}
+						onChange={(e) => setConfirmation(e.target.value)}
+						placeholder={
+							hasPassword
+								? t.profile.currentPassword
+								: t.profile.deleteAccountTypePlaceholder
+						}
+						required
+						className={INPUT_CLS}
+					/>
+					<Msg msg={deleteMsg} />
+					<div className="flex gap-3">
+						<button
+							type="button"
+							onClick={() => {
+								setShowConfirm(false);
+								setConfirmation("");
+								setDeleteMsg(null);
+							}}
+							className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-400 dark:hover:bg-white/5"
+						>
+							{t.common.cancel}
+						</button>
+						<button
+							type="submit"
+							disabled={deleteAccount.isPending || !confirmation}
+							className="rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600 disabled:opacity-50"
+						>
+							{deleteAccount.isPending
+								? t.profile.deletingAccount
+								: t.profile.deleteAccountConfirm}
+						</button>
+					</div>
+				</form>
+			)}
 		</div>
 	);
 }

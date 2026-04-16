@@ -1,76 +1,36 @@
 "use client";
 
 import { useTranslation } from "@/context/LanguageContext";
-
-type Quote = {
-	document: { id: string; name: string };
-	quoteCodes: {
-		code: { id: string; name: string; color: string; textColor: string };
-	}[];
-};
+import { trpc } from "@/server/client";
 
 interface SummaryPanelProps {
-	quotes: Quote[];
+	projectId: string;
 }
 
-export default function SummaryPanel({ quotes }: SummaryPanelProps) {
+export default function SummaryPanel({ projectId }: SummaryPanelProps) {
 	const t = useTranslation();
+	const { data, isLoading } = trpc.report.summary.useQuery({ projectId });
 
-	if (quotes.length === 0) {
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				{Array.from({ length: 3 }, (_, i) => (
+					<div
+						key={i}
+						className="h-12 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
+					/>
+				))}
+			</div>
+		);
+	}
+
+	if (!data || (data.documents.length === 0 && data.codes.length === 0)) {
 		return (
 			<div className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-400 dark:border-gray-700">
 				{t.reports.noData}
 			</div>
 		);
 	}
-
-	// --- Documents table ---
-	const docMap = new Map<
-		string,
-		{ name: string; quoteCount: number; codeIds: Set<string> }
-	>();
-	for (const q of quotes) {
-		const entry = docMap.get(q.document.id) ?? {
-			name: q.document.name,
-			quoteCount: 0,
-			codeIds: new Set(),
-		};
-		entry.quoteCount++;
-		for (const qc of q.quoteCodes) entry.codeIds.add(qc.code.id);
-		docMap.set(q.document.id, entry);
-	}
-	const docRows = [...docMap.values()].sort((a, b) =>
-		a.name.localeCompare(b.name),
-	);
-
-	// --- Codes table ---
-	const codeMap = new Map<
-		string,
-		{
-			name: string;
-			color: string;
-			textColor: string;
-			quoteCount: number;
-			docIds: Set<string>;
-		}
-	>();
-	for (const q of quotes) {
-		for (const qc of q.quoteCodes) {
-			const entry = codeMap.get(qc.code.id) ?? {
-				name: qc.code.name,
-				color: qc.code.color,
-				textColor: qc.code.textColor,
-				quoteCount: 0,
-				docIds: new Set(),
-			};
-			entry.quoteCount++;
-			entry.docIds.add(q.document.id);
-			codeMap.set(qc.code.id, entry);
-		}
-	}
-	const codeRows = [...codeMap.values()].sort(
-		(a, b) => b.quoteCount - a.quoteCount,
-	);
 
 	return (
 		<div className="space-y-8">
@@ -95,9 +55,9 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
-							{docRows.map((row) => (
+							{data.documents.map((row) => (
 								<tr
-									key={row.name}
+									key={row.id}
 									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
 								>
 									<td className="px-5 py-3 font-medium text-gray-800 dark:text-white/90">
@@ -107,7 +67,7 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 										{row.quoteCount}
 									</td>
 									<td className="px-5 py-3 text-right text-gray-600 dark:text-gray-400">
-										{row.codeIds.size}
+										{row.codesUsed}
 									</td>
 								</tr>
 							))}
@@ -121,7 +81,7 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 				<h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
 					{t.reports.codesTable}
 				</h3>
-				{codeRows.length === 0 ? (
+				{data.codes.length === 0 ? (
 					<p className="text-sm text-gray-400">{t.reports.noData}</p>
 				) : (
 					<div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
@@ -140,9 +100,9 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
-								{codeRows.map((row) => (
+								{data.codes.map((row) => (
 									<tr
-										key={row.name}
+										key={row.id}
 										className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
 									>
 										<td className="px-5 py-3">
@@ -160,7 +120,7 @@ export default function SummaryPanel({ quotes }: SummaryPanelProps) {
 											{row.quoteCount}
 										</td>
 										<td className="px-5 py-3 text-right text-gray-600 dark:text-gray-400">
-											{row.docIds.size}
+											{row.documentsUsed}
 										</td>
 									</tr>
 								))}

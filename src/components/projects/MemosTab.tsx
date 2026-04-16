@@ -10,7 +10,7 @@ import {
 } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const MemoEditor = dynamic(() => import("@/components/memos/MemoEditor"), {
@@ -25,8 +25,8 @@ interface MemosTabProps {
 	currentRole: ProjectRole;
 }
 
-function formatDate(date: Date | string) {
-	return new Date(date).toLocaleDateString(undefined, {
+function formatDate(date: Date | string, locale: string) {
+	return new Date(date).toLocaleDateString(locale, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -37,6 +37,7 @@ type SaveStatus = "idle" | "saving" | "saved";
 
 export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 	const t = useTranslation();
+	const { locale } = useLanguage();
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
 
 	const utils = trpc.useUtils();
@@ -94,11 +95,13 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 	}, [memos]);
 
 	// Focus name input when entering edit mode
+	const prevNameEdit = useRef<string | null>(null);
 	useEffect(() => {
-		if (nameEdit !== null) {
+		if (nameEdit !== null && prevNameEdit.current === null) {
 			nameInputRef.current?.focus();
 			nameInputRef.current?.select();
 		}
+		prevNameEdit.current = nameEdit;
 	}, [nameEdit]);
 
 	const handleContentChange = useCallback(
@@ -197,7 +200,7 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 											<span className="truncate font-medium">{memo.name}</span>
 										</div>
 										<div className="mt-0.5 pl-6 text-xs text-gray-400">
-											{formatDate(memo.updatedAt)}
+											{formatDate(memo.updatedAt, locale)}
 										</div>
 									</button>
 								</li>
@@ -272,7 +275,7 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 							</div>
 
 							<div className="text-xs text-gray-400">
-								{t.memos.lastUpdated} {formatDate(selectedMemo.updatedAt)}{" "}
+								{t.memos.lastUpdated} {formatDate(selectedMemo.updatedAt, locale)}{" "}
 								{t.memos.by} {selectedMemo.createdBy.name ?? "—"}
 							</div>
 

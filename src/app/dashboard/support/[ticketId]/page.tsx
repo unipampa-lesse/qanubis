@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineArrowLeft } from "react-icons/hi2";
-import { useTranslation } from "@/context/LanguageContext";
+import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -19,6 +19,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function SupportTicketPage() {
 	const { ticketId } = useParams<{ ticketId: string }>();
 	const t = useTranslation();
+	const { locale } = useLanguage();
 	const utils = trpc.useUtils();
 
 	const { data: ticket, isLoading } = trpc.support.getMyTicket.useQuery({
@@ -82,7 +83,7 @@ export default function SupportTicketPage() {
 						{ticket.subject}
 					</h1>
 					<p className="mt-0.5 text-xs text-gray-400">
-						{new Date(ticket.createdAt).toLocaleString()}
+						{new Date(ticket.createdAt).toLocaleString(locale)}
 					</p>
 				</div>
 				<span
@@ -118,7 +119,7 @@ export default function SupportTicketPage() {
 											: (msg.user.name ?? t.support.you)}
 									</span>
 									<span className="text-xs text-gray-400">
-										{new Date(msg.createdAt).toLocaleString()}
+										{new Date(msg.createdAt).toLocaleString(locale)}
 									</span>
 								</div>
 								<p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">

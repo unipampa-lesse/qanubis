@@ -8,6 +8,7 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "prisma generate --config prisma/config.ts && next build",
+		"analyze": "ANALYZE=true pnpm build",
 		"start": "next start",
 		"lint": "biome check --write",
 		"lint:check": "biome check",
@@ -39,6 +40,8 @@
 		"@trpc/next": "^11.16.0",
 		"@trpc/react-query": "^11.16.0",
 		"@trpc/server": "^11.16.0",
+		"@vercel/analytics": "^2.0.1",
+		"@vercel/speed-insights": "^2.0.0",
 		"autoprefixer": "^10.5.0",
 		"bcryptjs": "^3.0.3",
 		"client-only": "^0.0.1",
@@ -70,6 +73,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.12",
+		"@next/bundle-analyzer": "^16.2.4",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/commit-analyzer": "^13.0.1",
 		"@semantic-release/git": "^10.0.1",

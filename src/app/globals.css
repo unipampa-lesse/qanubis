@@ -623,6 +623,67 @@
 	@apply !bg-gray-50 dark:!bg-gray-900;
 }
 
+/* Tiptap memo editor */
+.memo-editor {
+	@apply text-sm text-gray-800 dark:text-gray-100;
+}
+
+.memo-editor p,
+.memo-editor li {
+	@apply leading-relaxed;
+}
+
+.memo-editor h2 {
+	@apply text-lg font-semibold text-gray-800 dark:text-gray-100 mt-4 mb-1;
+}
+
+.memo-editor h3 {
+	@apply text-base font-semibold text-gray-800 dark:text-gray-100 mt-3 mb-1;
+}
+
+.memo-editor strong {
+	@apply font-semibold text-gray-900 dark:text-white;
+}
+
+.memo-editor em {
+	@apply italic;
+}
+
+.memo-editor s {
+	@apply line-through;
+}
+
+.memo-editor ul {
+	@apply list-disc pl-5 space-y-0.5;
+}
+
+.memo-editor ol {
+	@apply list-decimal pl-5 space-y-0.5;
+}
+
+.memo-editor blockquote {
+	@apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 text-gray-600 dark:text-gray-400 italic;
+}
+
+.memo-editor code {
+	@apply rounded bg-gray-100 dark:bg-gray-800 px-1 py-0.5 text-xs text-gray-800 dark:text-gray-200;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.memo-editor pre {
+	@apply rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-xs text-gray-800 dark:text-gray-200 overflow-x-auto;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.memo-editor pre code {
+	@apply bg-transparent p-0;
+}
+
+.memo-editor p.is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	@apply text-gray-400 pointer-events-none float-left h-0;
+}
+
 .jvectormap-region.jvectormap-element {
 	@apply !fill-gray-300 hover:!fill-brand-500 dark:!fill-gray-700 dark:hover:!fill-brand-500;
 }

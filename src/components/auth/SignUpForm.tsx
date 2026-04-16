@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
@@ -15,7 +14,6 @@ import { trpc } from "@/server/client";
 
 export default function SignUpForm() {
 	const t = useTranslation();
-	const router = useRouter();
 	const goBack = useGoBack();
 
 	const [firstName, setFirstName] = useState("");
@@ -25,21 +23,11 @@ export default function SignUpForm() {
 	const [agreed, setAgreed] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [registered, setRegistered] = useState(false);
 
 	const register = trpc.user.register.useMutation({
-		onSuccess: async () => {
-			// Auto sign-in after registration
-			const res = await signIn("credentials", {
-				redirect: false,
-				email,
-				password,
-				rememberMe: "false",
-			});
-			if (res?.ok) {
-				router.push("/dashboard");
-			} else {
-				router.push("/signin");
-			}
+		onSuccess: () => {
+			setRegistered(true);
 		},
 		onError: (err) => {
 			setError(
@@ -76,6 +64,24 @@ export default function SignUpForm() {
 							{t.auth.signUpSubtitle}
 						</p>
 					</div>
+					{registered ? (
+						<div className="space-y-4">
+							<div className="rounded-lg border border-success-200 bg-success-50 p-4 dark:border-success-500/30 dark:bg-success-500/10">
+								<p className="text-sm text-success-600 dark:text-success-400">
+									{t.auth.verificationEmailSent}
+								</p>
+							</div>
+							<p className="text-sm text-gray-500 dark:text-gray-400">
+								{t.auth.checkInboxMessage}
+							</p>
+							<Link
+								href="/signin"
+								className="block text-center text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
+							>
+								{t.auth.signIn}
+							</Link>
+						</div>
+					) : (
 					<div>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
 							<button
@@ -257,6 +263,7 @@ export default function SignUpForm() {
 							</p>
 						</div>
 					</div>
+					)}
 				</div>
 			</div>
 		</div>

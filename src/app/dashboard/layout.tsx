@@ -4,7 +4,7 @@ import DashboardLayoutClient from "./DashboardLayoutClient";
 export const metadata: Metadata = {
 	title: {
 		template: "%s — QAnubis",
-		default: "Dashboard — QAnubis",
+		default: "Dashboard",
 	},
 	description: "Manage your qualitative research projects in QAnubis.",
 };

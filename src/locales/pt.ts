@@ -88,6 +88,18 @@ export const translations: Translations = {
 		passwordResetSuccess: "Senha atualizada! Você já pode entrar.",
 		resetTokenInvalid: "Este link é inválido ou expirou. Solicite um novo.",
 		passwordsDoNotMatch: "As senhas não coincidem.",
+
+		// Email verification
+		verifyEmailTitle: "Verifique Seu E-mail",
+		verifyingEmail: "Verificando seu endereço de e-mail…",
+		emailVerified: "Seu e-mail foi verificado! Você já pode entrar.",
+		verifyTokenInvalid:
+			"Este link de verificação é inválido ou expirou.",
+		verifyEmailError: "Algo deu errado. Tente novamente.",
+		verificationEmailSent:
+			"Um e-mail de verificação foi enviado para sua caixa de entrada.",
+		checkInboxMessage:
+			"Verifique seu e-mail e clique no link de verificação para ativar sua conta.",
 	},
 
 	// Dashboard (project list)
@@ -260,7 +272,19 @@ export const translations: Translations = {
 		exportByDocument: "Exportar por documento",
 		exportCSV: "Baixar CSV",
 		exportTXT: "Baixar TXT",
+		exportJSON: "Baixar JSON",
+		exportJSONHint: "Dados estruturados para uso com outras ferramentas (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "Nenhuma citação para exportar ainda.",
+		// Stats
+		stats: "Estatísticas",
+		totalDocuments: "Documentos",
+		totalQuotes: "Citações",
+		totalCodes: "Códigos",
+		totalMemos: "Memorandos",
+		uncodedQuotes: "Citações sem código",
+		codeFrequency: "Frequência de códigos",
+		documentDistribution: "Citações por documento",
+		activityTimeline: "Atividade (últimos 30 dias)",
 	},
 
 	// Memos tab
@@ -386,12 +410,34 @@ export const translations: Translations = {
 		wrongPassword: "Senha atual incorreta.",
 		oauthAccount:
 			"Sua conta usa login com Google/GitHub — alteração de senha não está disponível.",
+		// Delete account
+		deleteAccount: "Excluir conta",
+		deleteAccountWarning:
+			"Esta ação é permanente e não pode ser desfeita. Todos os seus dados serão removidos.",
+		deleteAccountConfirmPassword:
+			"Digite sua senha atual para confirmar a exclusão da conta.",
+		deleteAccountConfirmType:
+			'Digite "DELETE" para confirmar a exclusão da conta.',
+		deleteAccountTypePlaceholder: "Digite DELETE",
+		deleteAccountConfirm: "Excluir minha conta",
+		deletingAccount: "Excluindo…",
+		deleteAccountSoleOwner:
+			"Você é o único dono de um ou mais projetos. Transfira a propriedade antes de excluir sua conta.",
+		deleteAccountError: "Algo deu errado. Tente novamente.",
 	},
 
 	// 404 page
 	notFound: {
 		heading: "404",
 		message: "Não conseguimos encontrar a página que você está procurando!",
+		backHome: "Voltar para a página inicial",
+	},
+
+	// Error page
+	errorPage: {
+		heading: "Algo deu errado",
+		message: "Ocorreu um erro inesperado. Tente novamente.",
+		retry: "Tentar novamente",
 		backHome: "Voltar para a página inicial",
 	},
 

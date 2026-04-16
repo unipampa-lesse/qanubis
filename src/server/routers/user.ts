@@ -211,7 +211,6 @@ export const userRouter = createTRPCRouter({
 			}
 
 			const hash = await bcrypt.hash(input.password, 12);
-			// emailVerified is intentionally omitted — user must confirm their address via email
 			await prisma.user.create({
 				data: {
 					name: `${input.firstName} ${input.lastName}`.trim(),
@@ -220,6 +219,170 @@ export const userRouter = createTRPCRouter({
 				},
 			});
 
+			// Send verification email.
+			await sendVerificationEmail(input.email);
+
+			return { success: true };
+		}),
+
+	/** Resend the email-verification link for the current user. */
+	resendVerificationEmail: protectedProcedure.mutation(async ({ ctx }) => {
+		const user = await prisma.user.findUniqueOrThrow({
+			where: { id: ctx.userId },
+			select: { email: true, emailVerified: true },
+		});
+
+		if (user.emailVerified) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "email_already_verified",
+			});
+		}
+
+		await sendVerificationEmail(user.email);
+		return { success: true };
+	}),
+
+	/** Confirm the email address via token sent by email. */
+	verifyEmail: publicProcedure
+		.input(z.object({ token: z.string().min(1) }))
+		.mutation(async ({ input }) => {
+			const record = await prisma.verificationToken.findUnique({
+				where: { token: input.token },
+			});
+
+			if (!record || record.expires < new Date()) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "invalid_or_expired",
+				});
+			}
+
+			// Only process tokens with the verify-email prefix.
+			if (!record.identifier.startsWith("verify-email:")) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "invalid_or_expired",
+				});
+			}
+
+			const email = record.identifier.replace("verify-email:", "");
+
+			const user = await prisma.user.findUnique({
+				where: { email },
+				select: { id: true },
+			});
+			if (!user) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			await prisma.user.update({
+				where: { id: user.id },
+				data: { emailVerified: new Date() },
+			});
+
+			// Consume the token.
+			await prisma.verificationToken.delete({
+				where: { token: input.token },
+			});
+
+			return { success: true };
+		}),
+
+	/**
+	 * Permanently delete the current user's account.
+	 * Credential users must provide their password; OAuth-only users confirm
+	 * by providing the string "DELETE".
+	 * Fails if the user is the sole OWNER of any project.
+	 */
+	deleteAccount: protectedProcedure
+		.input(
+			z.object({
+				confirmation: z.string().min(1),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: { id: ctx.userId },
+				select: { password: true },
+			});
+
+			// Credential users must confirm with their current password.
+			if (user.password) {
+				const valid = await bcrypt.compare(input.confirmation, user.password);
+				if (!valid) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "wrong_password",
+					});
+				}
+			} else {
+				// OAuth-only users must type "DELETE" to confirm.
+				if (input.confirmation !== "DELETE") {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "confirmation_required",
+					});
+				}
+			}
+
+			// Prevent deletion if user is the sole owner of any project.
+			const ownedProjects = await prisma.projectMember.findMany({
+				where: { userId: ctx.userId, role: "OWNER" },
+				select: { projectId: true },
+			});
+
+			for (const { projectId } of ownedProjects) {
+				const otherOwners = await prisma.projectMember.count({
+					where: {
+						projectId,
+						role: "OWNER",
+						userId: { not: ctx.userId },
+					},
+				});
+				if (otherOwners === 0) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "sole_owner",
+					});
+				}
+			}
+
+			// Delete the user — Prisma cascade handles related records.
+			await prisma.user.delete({ where: { id: ctx.userId } });
+
 			return { success: true };
 		}),
 });
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const VERIFY_EMAIL_TTL_HOURS = 24;
+
+async function sendVerificationEmail(email: string): Promise<void> {
+	// Invalidate any previous verification tokens for this email.
+	await prisma.verificationToken.deleteMany({
+		where: { identifier: `verify-email:${email}` },
+	});
+
+	const token = crypto.randomBytes(32).toString("hex");
+	const expires = new Date(
+		Date.now() + VERIFY_EMAIL_TTL_HOURS * 60 * 60 * 1000,
+	);
+	await prisma.verificationToken.create({
+		data: { identifier: `verify-email:${email}`, token, expires },
+	});
+
+	const verifyUrl = `${env.NEXTAUTH_URL}/auth/verify-email/${token}`;
+	const emailContent = await getEmailTemplateProvider().render("verify-email", {
+		verifyUrl,
+	});
+	await getEmailProvider().send({
+		to: email,
+		subject: emailContent.subject,
+		html: emailContent.html,
+		text: emailContent.text,
+	});
+}
