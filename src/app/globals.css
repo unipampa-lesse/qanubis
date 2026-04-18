@@ -1007,12 +1007,23 @@ option {
 	color: var(--color-gray-100);
 }
 /* ── PDF.js text layer ─────────────────────────────────────────────────────── */
+/* pdfjs-dist v5 uses CSS variables for span sizing/transform.
+   --total-scale-factor:1 because we already pass scaledViewport to TextLayer,
+   so all coordinates are pre-scaled and no additional factor is needed. */
 .pdf-text-layer {
 	position: absolute;
 	inset: 0;
 	overflow: hidden;
 	line-height: 1;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+	forced-color-adjust: none;
+	transform-origin: 0 0;
 	user-select: text;
+
+	--total-scale-factor: 1;
+	--text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size, 1));
+	--min-font-size-inv: calc(1 / var(--min-font-size, 1));
 }
 
 .pdf-text-layer span {
@@ -1021,6 +1032,8 @@ option {
 	white-space: pre;
 	cursor: text;
 	transform-origin: 0% 0%;
+	font-size: calc(var(--text-scale-factor) * var(--font-height, 0px));
+	transform: rotate(var(--rotate, 0deg)) scaleX(var(--scale-x, 1)) scale(var(--min-font-size-inv));
 }
 
 .pdf-text-layer span::selection {

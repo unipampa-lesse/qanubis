@@ -7,10 +7,32 @@ import {
 	projectProcedure,
 } from "../trpc";
 
-const positionSchema = z.object({
-	start: z.number().int().min(0),
-	end: z.number().int().min(0),
+const rectSchema = z.object({
+	x: z.number().min(0).max(2),
+	y: z.number().min(0).max(2),
+	width: z.number().min(0).max(2),
+	height: z.number().min(0).max(2),
 });
+
+/**
+ * Discriminated-union position — add new variants as new document types arrive.
+ *   visual   → PDF / image  (page-relative rects, fractions 0–1)
+ *   temporal → video / audio (millisecond offsets)
+ *   text     → plain-text files (character offsets)
+ */
+const positionSchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("visual"), rects: z.array(rectSchema).min(1) }),
+	z.object({
+		kind: z.literal("temporal"),
+		startMs: z.number().int().min(0),
+		endMs: z.number().int().min(0),
+	}),
+	z.object({
+		kind: z.literal("text"),
+		start: z.number().int().min(0),
+		end: z.number().int().min(0),
+	}),
+]);
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color");
 

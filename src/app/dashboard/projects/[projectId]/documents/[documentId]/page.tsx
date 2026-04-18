@@ -15,6 +15,7 @@ import {
 } from "react-icons/hi2";
 import type {
 	PendingSelection,
+	VisualPosition,
 	QuoteHighlight,
 } from "@/components/projects/PdfViewer";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -56,7 +57,7 @@ type QuoteData = {
 	id: string;
 	text: string;
 	page: number;
-	position: unknown; // Json from Prisma — cast to { start: number; end: number }
+	position: unknown; // Json from Prisma — cast to VisualPosition
 	color: string;
 	createdAt: Date;
 	createdBy: { id: string; name: string | null };
@@ -481,7 +482,7 @@ export default function DocumentViewerPage() {
 	const highlights: QuoteHighlight[] = quotes.map((q) => ({
 		id: q.id,
 		page: q.page,
-		position: q.position as { start: number; end: number },
+		position: (q.position ?? { kind: "visual", rects: [] }) as VisualPosition,
 		color: q.color,
 	}));
 

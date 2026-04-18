@@ -188,7 +188,7 @@ model Quote {
   createdById String
   text        String
   page        Int
-  position    Json // { start: number, end: number } — char offsets in PDF.js text layer
+  position    Json // PositionRect[] — page-relative visual rects [{x,y,width,height}] as 0–1 fractions
   color       String   @default("#fbbf24") // highlight color on the PDF page
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
