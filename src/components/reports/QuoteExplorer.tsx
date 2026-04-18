@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "@/context/LanguageContext";
+import { trpc } from "@/server/client";
 
 interface Code {
 	id: string;
@@ -22,15 +23,33 @@ interface Quote {
 }
 
 interface QuoteExplorerProps {
+	projectId: string;
 	quotes: Quote[];
 }
 
-export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
+export default function QuoteExplorer({ projectId, quotes }: QuoteExplorerProps) {
 	const t = useTranslation();
 	const [docFilter, setDocFilter] = useState("all");
 	const [codeFilter, setCodeFilter] = useState("all");
 	const [search, setSearch] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [noCodeOnly, setNoCodeOnly] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+		return () => clearTimeout(timer);
+	}, [search]);
+
+	const isServerSearch = debouncedSearch.length >= 2;
+
+	const { data: serverResults, isFetching: isSearching } =
+		trpc.report.searchQuotes.useQuery(
+			{ projectId, query: debouncedSearch },
+			{ enabled: isServerSearch },
+		);
+
+	// When server search is active, apply remaining local filters on top
+	const baseQuotes = isServerSearch ? (serverResults ?? []) : quotes;
 
 	const allDocs = Array.from(
 		new Map(quotes.map((q) => [q.document.id, q.document])).values(),
@@ -41,7 +60,7 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 		).values(),
 	);
 
-	const filtered = quotes.filter((q) => {
+	const filtered = baseQuotes.filter((q) => {
 		if (docFilter !== "all" && q.document.id !== docFilter) return false;
 		if (
 			codeFilter !== "all" &&
@@ -49,7 +68,12 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 		)
 			return false;
 		if (noCodeOnly && q.quoteCodes.length > 0) return false;
-		if (search && !q.text.toLowerCase().includes(search.toLowerCase()))
+		// Client-side text filter only when server search is not active
+		if (
+			!isServerSearch &&
+			search &&
+			!q.text.toLowerCase().includes(search.toLowerCase())
+		)
 			return false;
 		return true;
 	});
@@ -58,13 +82,20 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 		<div className="space-y-4">
 			{/* Filters */}
 			<div className="flex flex-wrap gap-2">
-				<input
-					type="search"
-					placeholder="Search quotes…"
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-					className="flex-1 min-w-48 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm focus:border-brand-400 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-				/>
+				<div className="relative flex-1 min-w-48">
+					<input
+						type="search"
+						placeholder={t.reports.searchPlaceholder}
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm focus:border-brand-400 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+					/>
+					{isSearching && (
+						<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+							…
+						</span>
+					)}
+				</div>
 				<select
 					value={docFilter}
 					onChange={(e) => setDocFilter(e.target.value)}

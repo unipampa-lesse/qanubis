@@ -107,6 +107,20 @@ Este é o fluxo central de análise do QAnubis. Deve ser fluido e confiável.
 | Excluir código | Cascata nas citações que usam apenas esse código |
 | Ver contagem de citações por código | |
 | Visualização em árvore de códigos | Client-side, recolhível |
+| **Thread de comentários por código** | Notas analíticas encadeadas em qualquer código; visíveis a todos os membros do projeto |
+
+---
+
+### Notificações
+
+| Funcionalidade | Notas |
+|----------------|-------|
+| Sino de notificações no cabeçalho | Exibe contador de não lidas |
+| Entrega em tempo real via SSE | Badge e lista atualizam automaticamente — sem recarregar a página |
+| Marcar notificação individual como lida | |
+| Marcar todas as notificações como lidas | |
+| Gatilho: novo comentário em uma citação que você criou | Notifica o autor da citação |
+| Gatilho: novo comentário em um código | Notifica o proprietário do projeto |
 
 ---
 
@@ -120,6 +134,7 @@ Memorandos são **compartilhados por todos os membros do projeto** — qualquer 
 | Editar memorando | Qualquer PROPRIETÁRIO ou COLABORADOR pode editar |
 | Excluir memorando | Qualquer PROPRIETÁRIO ou COLABORADOR pode excluir |
 | Listar memorandos por projeto | |
+| **Inserir referência de citação** | Incorpora um bloco clicável vinculado a uma citação do projeto; exibe texto, documento e página |
 
 ---
 
@@ -134,7 +149,7 @@ Todos os gráficos são filtráveis por documento e/ou código.
 | Treemap de códigos | d3-hierarchy | Visão hierárquica com contagens de citações |
 | Tabela resumo de documentos | React | Nome do documento, contagem de citações, códigos usados |
 | Tabela resumo de códigos | React | Nome do código, contagem de citações, documentos |
-| Explorador de citações | React | Navegar/editar citações filtradas por código + documento |
+| Explorador de citações com busca server-side | React | Navegar citações por código, documento ou texto; busca ≥ 2 caracteres dispara consulta Postgres ILIKE |
 
 ---
 
@@ -146,6 +161,8 @@ Todos os gráficos são filtráveis por documento e/ou código.
 | Citações agrupadas por documento | Texto simples | |
 | Citações agrupadas por código | CSV | |
 | Citações agrupadas por documento | CSV | |
+| Citações completas do projeto | JSON | Legível por máquina; compatível com Atlas.ti, NVivo e outras ferramentas CAQDAS |
+| **Relatório narrativo** | Markdown | Relatório estruturado por código → citações → trechos de memorando; ideal para defesa de dissertação ou publicação acadêmica |
 
 ---
 
@@ -166,6 +183,7 @@ Acessível apenas para usuários com `role = ADMIN`. Área separada da aplicaç�
 | Funcionalidade | Notas |
 |----------------|-------|
 | Listar todos os projetos com estatísticas | Contagem de membros, documentos, citações |
+| **Uso de armazenamento por projeto** | Soma do tamanho de todos os arquivos de documentos |
 | Ver membros de qualquer projeto | Somente leitura |
 
 **Métricas de uso**
@@ -197,5 +215,5 @@ Estas funcionalidades são desejáveis, mas não bloquearão o primeiro lançame
 | **Nuvem de palavras dos códigos** | Mesmo motivo acima |
 | **Confiabilidade entre avaliadores** | Requer fluxo de segunda codificação; UX complexa |
 | **Visão de rede/grafo de códigos** | Códigos como nós, co-ocorrência como arestas; novo tipo de visualização |
-| **Busca de texto completo nas citações** | Requer índice de busca (full-text do PostgreSQL ou externo) |
+| **Busca de texto completo nas citações** | ✅ Implementado na v1 — Postgres ILIKE server-side no Explorador de Citações |
 | **Exportação de codebook** (PDF/DOCX formatado) | Necessita de biblioteca de geração de documentos |

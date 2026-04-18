@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { pushSSENotification } from "@/lib/sse-registry";
 import {
 	collaboratorProcedure,
 	createTRPCRouter,
@@ -213,7 +214,7 @@ export const quoteRouter = createTRPCRouter({
 			});
 		}),
 
-	/** Add a comment to a quote. Available to all project members. */
+	/** Add a comment to a quote. Notifies the quote creator if different from commenter. */
 	addComment: projectProcedure
 		.input(
 			z.object({
@@ -225,22 +226,71 @@ export const quoteRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			const quote = await prisma.quote.findFirst({
 				where: { id: input.quoteId, document: { projectId: input.projectId } },
-				select: { id: true },
+				select: {
+					id: true,
+					text: true,
+					createdById: true,
+					document: { select: { id: true, name: true, projectId: true } },
+				},
 			});
 			if (!quote) throw new TRPCError({ code: "NOT_FOUND" });
 
-			return prisma.quoteComment.create({
-				data: {
-					quoteId: input.quoteId,
-					userId: ctx.userId,
-					content: input.content,
-				},
+			const [comment, commenter] = await Promise.all([
+				prisma.quoteComment.create({
+					data: {
+						quoteId: input.quoteId,
+						userId: ctx.userId,
+						content: input.content,
+					},
+					select: {
+						id: true,
+						content: true,
+						createdAt: true,
+						user: { select: { id: true, name: true } },
+					},
+				}),
+				prisma.user.findUnique({
+					where: { id: ctx.userId },
+					select: { name: true },
+				}),
+			]);
+
+			// Notify quote creator (skip if they are the commenter)
+			if (quote.createdById !== ctx.userId) {
+				const notification = await prisma.notification.create({
+					data: {
+						userId: quote.createdById,
+						type: "quote_comment",
+						title: commenter?.name ?? "Alguém",
+						body: input.content.slice(0, 120),
+						link: `/dashboard/projects/${quote.document.projectId}/documents/${quote.document.id}`,
+					},
+				});
+				pushSSENotification(quote.createdById, notification);
+			}
+
+			return comment;
+		}),
+
+	/** List all quotes for a project (used by memo quote picker). */
+	listForProject: projectProcedure
+		.input(z.object({ projectId: z.string() }))
+		.query(async ({ input }) => {
+			return prisma.quote.findMany({
+				where: { document: { projectId: input.projectId } },
 				select: {
 					id: true,
-					content: true,
-					createdAt: true,
-					user: { select: { id: true, name: true } },
+					text: true,
+					page: true,
+					document: { select: { id: true, name: true } },
+					quoteCodes: {
+						select: {
+							code: { select: { id: true, name: true, color: true, textColor: true } },
+						},
+					},
 				},
+				orderBy: [{ document: { name: "asc" } }, { page: "asc" }],
+				take: 500,
 			});
 		}),
 

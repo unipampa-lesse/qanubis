@@ -97,76 +97,94 @@ This is the core analysis workflow of QAnubis. It must be smooth and reliable.
 
 ---
 
-### Code Scheme
+### Esquema de Códigos
 
-| Feature | Notes |
-|---------|-------|
-| Create a code (name, color, description) | |
-| Hierarchical structure (parent-child) | Unlimited depth |
-| Edit code name, color, description | |
-| Delete code | Cascades to quotes with only that code |
-| View quote count per code | |
-| Code tree visualization | Client-side, collapsible |
-
----
-
-### Memos
-
-Memos are **shared by all project members** — everyone with access to the project can see, create, and edit any memo. There is no per-user memo visibility. This matches the collaborative research model where notes are team artifacts.
-
-| Feature | Notes |
-|---------|-------|
-| Create memo (name + rich text content) | Visible to all project members |
-| Edit memo | Any OWNER or COLLABORATOR can edit |
-| Delete memo | Any OWNER or COLLABORATOR can delete |
-| List memos per project | |
+| Funcionalidad | Notas |
+|---------------|-------|
+| Crear código (nombre, color, descripción) | |
+| Estructura jerárquica (padre-hijo) | Profundidad ilimitada |
+| Editar nombre, color y descripción del código | |
+| Eliminar código | Cascada en las citas que solo usan ese código |
+| Ver recuento de citas por código | |
+| Visualización en árbol de códigos | Del lado del cliente, plegable |
+| **Hilo de comentarios por código** | Notas analíticas en cadena en cualquier código; visibles para todos los miembros del proyecto |
 
 ---
 
-### Reports & Visualizations
+### Notificaciones
 
-All charts are filterable by document and/or code.
-
-| Feature | Library | Notes |
-|---------|---------|-------|
-| Quotes × Codes heatmap | Observable Plot | Which codes appear in which documents |
-| Code co-occurrence heatmap | Observable Plot | Which codes appear together in quotes |
-| Codes treemap | d3-hierarchy | Hierarchical view with quote counts |
-| Documents summary table | React | Doc name, quote count, codes used |
-| Codes summary table | React | Code name, quote count, documents |
-| Quote explorer | React | Browse/edit quotes filtered by code + document |
+| Funcionalidad | Notas |
+|---------------|-------|
+| Campana de notificaciones en el encabezado | Muestra el contador de no leídas |
+| Entrega en tiempo real vía SSE | Badge y lista se actualizan automáticamente — sin recargar la página |
+| Marcar notificación individual como leída | |
+| Marcar todas las notificaciones como leídas | |
+| Disparador: nuevo comentario en una cita que creaste | Notifica al autor de la cita |
+| Disparador: nuevo comentario en un código | Notifica al propietario del proyecto |
 
 ---
 
-### Export
+### Memorandos
 
-| Feature | Format | Notes |
-|---------|--------|-------|
-| Quotes grouped by code | Plain text | |
-| Quotes grouped by document | Plain text | |
-| Quotes grouped by code | CSV | |
-| Quotes grouped by document | CSV | |
+Los memorandos son **compartidos por todos los miembros del proyecto** — cualquier persona con acceso al proyecto puede ver, crear y editar cualquier memorando. No hay visibilidad por usuario. Esto corresponde al modelo de investigación colaborativa donde las notas son artefactos del equipo.
+
+| Funcionalidad | Notas |
+|---------------|-------|
+| Crear memorando (nombre + contenido de texto enriquecido) | Visible para todos los miembros del proyecto |
+| Editar memorando | Cualquier PROPIETARIO o COLABORADOR puede editar |
+| Eliminar memorando | Cualquier PROPIETARIO o COLABORADOR puede eliminar |
+| Listar memorandos por proyecto | |
+| **Insertar referencia de cita** | Incrusta un bloque clicable vinculado a una cita del proyecto; muestra texto, documento y página |
 
 ---
 
-### Admin Panel
+### Informes y Visualizaciones
 
-Accessible only to users with `role = ADMIN`. A separate area of the application at `/admin`.
+Todos los gráficos son filtrables por documento y/o código.
 
-**User management**
+| Funcionalidad | Biblioteca | Notas |
+|---------------|-----------|-------|
+| Mapa de calor Citas × Códigos | Observable Plot | Qué códigos aparecen en qué documentos |
+| Mapa de calor de co-ocurrencia de códigos | Observable Plot | Qué códigos aparecen juntos en citas |
+| Treemap de códigos | d3-hierarchy | Vista jerárquica con recuentos de citas |
+| Tabla resumen de documentos | React | Nombre del doc, recuento de citas, códigos usados |
+| Tabla resumen de códigos | React | Nombre del código, recuento de citas, documentos |
+| Explorador de citas con búsqueda del lado del servidor | React | Navegar citas por código, documento o texto; búsqueda ≥ 2 chars dispara consulta Postgres ILIKE |
 
-| Feature | Notes |
-|---------|-------|
-| List all users with stats | Projects count, quotes count, last active |
-| Promote user to admin / revoke admin | |
-| Suspend / reactivate account | Suspended users cannot sign in |
+---
 
-**Projects overview**
+### Exportación
 
-| Feature | Notes |
-|---------|-------|
-| List all projects with stats | Member count, document count, quote count |
-| View members of any project | Read-only |
+| Funcionalidad | Formato | Notas |
+|---------------|---------|-------|
+| Citas agrupadas por código | Texto plano | |
+| Citas agrupadas por documento | Texto plano | |
+| Citas agrupadas por código | CSV | |
+| Citas agrupadas por documento | CSV | |
+| Citas completas del proyecto | JSON | Legible por máquina; compatible con Atlas.ti, NVivo y otras herramientas CAQDAS |
+| **Informe narrativo** | Markdown | Informe estructurado por código → citas → extractos de memorando; ideal para defensa de tesis o publicación académica |
+
+---
+
+### Panel de Administración
+
+Accesible solo para usuarios con `role = ADMIN`. Área separada de la aplicación en `/admin`.
+
+**Gestión de usuarios**
+
+| Funcionalidad | Notas |
+|---------------|-------|
+| Listar todos los usuarios con estadísticas | Recuento de proyectos, citas, última actividad |
+| Promover usuario a admin / revocar admin | |
+| Suspender / reactivar cuenta | Los usuarios suspendidos no pueden iniciar sesión |
+
+**Resumen de proyectos**
+
+| Funcionalidad | Notas |
+|---------------|-------|
+| Listar todos los proyectos con estadísticas | Recuento de miembros, documentos, citas |
+| **Uso de almacenamiento por proyecto** | Suma del tamaño de todos los archivos de documentos |
+| Ver miembros de cualquier proyecto | Solo lectura |
 
 **Usage metrics**
 
@@ -197,7 +215,7 @@ These features are desirable but will not block the first release. They are list
 | **Codes word cloud** | Same as above |
 | **Inter-rater reliability** | Requires a second coding pass workflow; complex UX |
 | **Code network/graph view** | Codes as nodes, co-occurrence as edges; new visualization type |
-| **Full-text search across quotes** | Requires search index (PostgreSQL full-text or external) |
+| **Búsqueda de texto completo en citas** | ✅ Implementado en v1 — Postgres ILIKE del lado del servidor en el Explorador de Citas |
 | **Codebook export** (formatted PDF/DOCX) | Document generation library needed |
 | **Full project export/import** | Complex serialization; useful for backup and portability |
 | **Public share link** (read-only report) | Auth model extension |

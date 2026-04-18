@@ -180,6 +180,14 @@ export const translations: Translations = {
 			"subcódigo(s) direto(s) — eles se tornarão códigos raiz.",
 		quoteSingular: "citação",
 		quotePlural: "citações",
+		// Comments
+		addComment: "Adicionar um comentário…",
+		submitComment: "Enviar",
+		deleteComment: "Excluir comentário",
+		noComments: "Nenhum comentário ainda.",
+		commentSingular: "comentário",
+		commentPlural: "comentários",
+		viewComments: "Comentários",
 	},
 
 	// Members tab
@@ -279,6 +287,9 @@ export const translations: Translations = {
 		codesUsed: "Códigos usados",
 		documentsUsed: "Documentos",
 		noData: "Nenhuma citação ainda.",
+		// Busca no explorador
+		searchPlaceholder: "Buscar citações…",
+		// Export
 		exportByCode: "Exportar por código",
 		exportByDocument: "Exportar por documento",
 		exportCSV: "Baixar CSV",
@@ -286,6 +297,10 @@ export const translations: Translations = {
 		exportJSON: "Baixar JSON",
 		exportJSONHint: "Dados estruturados para uso com outras ferramentas (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "Nenhuma citação para exportar ainda.",
+		exportNarrative: "Relatório Narrativo",
+		exportNarrativeHint: "Relatório estruturado por código → citações → trechos de memorando. Ideal para defesa de dissertação ou publicação acadêmica.",
+		exportMarkdown: "Baixar Markdown",
+		exportNarrativeEmpty: "Adicione códigos e citações para gerar um relatório narrativo.",
 		// Stats
 		stats: "Estatísticas",
 		totalDocuments: "Documentos",
@@ -315,6 +330,18 @@ export const translations: Translations = {
 		lastUpdated: "Última atualização",
 		by: "por",
 		editorPlaceholder: "Comece a escrever suas notas de pesquisa…",
+		quotePicker: "Inserir referência de citação",
+		quotePickerSearch: "Buscar citações…",
+		quotePickerEmpty: "Nenhuma citação encontrada.",
+	},
+
+	// Notificações
+	notifications: {
+		title: "Notificações",
+		empty: "Nenhuma notificação ainda.",
+		markAllRead: "Marcar todas como lidas",
+		newComment: "Novo comentário",
+		viewAll: "Ver todas",
 	},
 
 	// Admin panel
@@ -345,6 +372,7 @@ export const translations: Translations = {
 		codes: "Códigos",
 		memos: "Memorandos",
 		quotes: "Citações",
+		storage: "Armazenamento",
 		ticket: "Chamado",
 		subject: "Assunto",
 		ticketStatus: "Status",

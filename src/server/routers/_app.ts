@@ -4,6 +4,7 @@ import { codeRouter } from "./code";
 import { documentRouter } from "./document";
 import { memberRouter } from "./member";
 import { memoRouter } from "./memo";
+import { notificationRouter } from "./notification";
 import { projectRouter } from "./project";
 import { quoteRouter } from "./quote";
 import { reportRouter } from "./report";
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
 	report: reportRouter,
 	admin: adminRouter,
 	support: supportRouter,
+	notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

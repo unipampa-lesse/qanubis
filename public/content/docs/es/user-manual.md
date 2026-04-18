@@ -186,6 +186,12 @@ Haz clic en el ícono de lápiz en cualquier fila de código.
 
 Haz clic en el ícono de papelera. Un panel de confirmación muestra cuántas citas usan este código y cuántos subcódigos tiene. Eliminar un código borra todas sus asociaciones con citas.
 
+### Comentarios de código
+
+Haz clic en el ícono de **burbuja de chat** en cualquier fila de código para abrir el hilo de comentarios. Escribe una nota y haz clic en **Enviar**. Los comentarios son anotaciones analíticas compartidas con todos los miembros del proyecto.
+
+Para eliminar un comentario, pasa el cursor sobre él y haz clic en el ícono de papelera. Solo puedes eliminar tus propios comentarios (los Propietarios del proyecto pueden eliminar cualquier comentario).
+
 ---
 
 ## Memorandos
@@ -203,6 +209,10 @@ Abre la pestaña **Memorandos** y haz clic en **Nuevo memorando**. El memorando 
 
 El editor admite: negrita, cursiva, tachado, código en línea, encabezados (H2, H3), listas con viñetas, listas numeradas, citas en bloque, bloques de código y deshacer/rehacer.
 
+### Insertar referencia de cita
+
+Haz clic en el ícono de **burbuja de discurso** en la barra de herramientas para abrir el Selector de Citas. Busca o navega las citas del proyecto y haz clic en una para incrustarla como bloque de referencia en el memorando. El bloque muestra el texto de la cita, el nombre del documento y la página, con un enlace para abrir el documento.
+
 ### Eliminar un memorando
 
 Haz clic en el ícono de papelera en el encabezado del memorando (solo Colaborador/Propietario) y confirma el diálogo.
@@ -216,9 +226,10 @@ Abre la pestaña **Informes** para acceder a las herramientas de análisis y exp
 ### Explorador
 
 Filtra citas por:
-- **Documento**  muestra solo las citas de un documento
-- **Código**  muestra solo las citas etiquetadas con un código específico
-- **Búsqueda**  búsqueda de texto libre en el contenido de las citas
+- **Documento** — muestra solo las citas de un documento
+- **Código** — muestra solo las citas etiquetadas con un código específico
+- **Solo sin código** — muestra solo las citas sin ningún código asignado
+- **Búsqueda** — escribe al menos 2 caracteres para activar una búsqueda del lado del servidor en todos los textos de citas del proyecto; consultas más cortas filtran del lado del cliente los datos ya cargados
 
 ### Gráficos
 
@@ -236,11 +247,28 @@ Dos tablas con estadísticas agregadas:
 
 ### Exportar
 
-Descarga tus datos en texto plano o CSV:
-- **Por código**  citas agrupadas bajo cada encabezado de código
-- **Por documento**  citas agrupadas bajo cada encabezado de documento
+Descarga tus datos en varios formatos:
+- **Por código** — citas agrupadas bajo cada encabezado de código (TXT o CSV)
+- **Por documento** — citas agrupadas bajo cada encabezado de documento (TXT o CSV)
+- **JSON** — datos estructurados completos para uso con herramientas externas (Atlas.ti, NVivo, etc.)
+- **Informe Narrativo (Markdown)** — informe estructurado por código → citas → extractos de memorando. Ideal para defensa de tesis o publicación académica. El archivo incluye todos los códigos con al menos una cita, con todas las citas asociadas y el texto completo de los memorandos del proyecto.
 
-Haz clic en **Descargar CSV** o **Descargar TXT** para cualquier agrupación.
+---
+
+## Notificaciones
+
+El ícono de campana en el encabezado superior muestra un badge con el número de notificaciones no leídas.
+
+Haz clic en la campana para abrir el desplegable de notificaciones. Las notificaciones se entregan en tiempo real — no es necesario recargar la página.
+
+### Qué genera una notificación
+
+- Alguien comenta en una **cita que creaste**
+- Alguien comenta en un **código de tu proyecto** (solo propietario del proyecto)
+
+### Marcar como leída
+
+Haz clic en cualquier notificación para marcarla como leída. Usa **Marcar todas como leídas** en la parte superior del desplegable para limpiar todas a la vez.
 
 ---
 
@@ -282,7 +310,7 @@ Lista todos los usuarios registrados con su cantidad de proyectos, citas, rol y 
 
 ### Proyectos
 
-Lista todos los proyectos con conteo de miembros, documentos, códigos, memorandos y citas.
+Lista todos los proyectos con conteo de miembros, documentos, códigos, memorandos, citas y **uso de almacenamiento** (tamaño total de todos los PDFs subidos).
 
 ### Tickets de soporte
 

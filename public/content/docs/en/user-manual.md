@@ -14,8 +14,9 @@ This manual covers every feature available in QAnubis v1. Use the table of conte
 6. [Code scheme](#code-scheme)
 7. [Memos](#memos)
 8. [Reports](#reports)
-9. [Support](#support)
-10. [Admin panel](#admin-panel) *(admin only)*
+9. [Notifications](#notifications)
+10. [Support](#support)
+11. [Admin panel](#admin-panel) *(admin only)*
 
 ---
 
@@ -186,6 +187,12 @@ Click the pencil icon on any code row.
 
 Click the trash icon. A confirmation panel shows how many quotes use this code and how many sub-codes it has. Deleting a code removes all its quote associations.
 
+### Code comments
+
+Click the **chat bubble** icon on any code row to open the comment thread. Type a note and press **Send**. Comments are analytical annotations shared with all project members — useful for discussing the meaning or scope of a code.
+
+To delete a comment, hover over it and click the trash icon. You can only delete your own comments (project Owners can delete any comment).
+
 ---
 
 ## Memos
@@ -203,6 +210,10 @@ Open the **Memos** tab and click **New memo**. The memo opens immediately in the
 
 The editor supports: bold, italic, strikethrough, inline code, headings (H2, H3), bullet lists, numbered lists, blockquotes, code blocks, and undo/redo.
 
+### Insert a quote reference
+
+Click the **speech bubble** icon in the toolbar to open the Quote Picker. Search or browse quotes from the project, then click one to embed it as a reference block in the memo. The block shows the quote text, document name, and page number, with a link to open the document.
+
 ### Delete a memo
 
 Click the trash icon in the memo header (Collaborator/Owner only) and confirm the dialog.
@@ -218,7 +229,8 @@ Open the **Reports** tab for the analysis and export tools. Reports are built fr
 Filter quotes by:
 - **Document** — show only quotes from one document
 - **Code** — show only quotes tagged with a specific code
-- **Search** — free-text search across quote content
+- **Uncoded only** — show only quotes with no code assigned
+- **Search** — type at least 2 characters to trigger a server-side search across all quote texts in the project; shorter queries filter client-side from already-loaded quotes
 
 ### Charts
 
@@ -236,11 +248,28 @@ Two tables with aggregate statistics:
 
 ### Export
 
-Download your data as plain text or CSV:
-- **By code** — quotes grouped under each code heading
-- **By document** — quotes grouped under each document heading
+Download your data in several formats:
+- **By code** — quotes grouped under each code heading (TXT or CSV)
+- **By document** — quotes grouped under each document heading (TXT or CSV)
+- **JSON** — full structured data for use with external tools (Atlas.ti, NVivo, etc.)
+- **Narrative Report (Markdown)** — report structured by code → quotes → memo excerpts. Ideal for thesis defense or academic publication. The file includes every code that has at least one quote, with all associated quotes and the full text of your project memos.
 
-Click **Download CSV** or **Download TXT** for any grouping.
+---
+
+## Notifications
+
+The bell icon in the top header shows a badge with your unread notification count.
+
+Click the bell to open the notification dropdown. Notifications are delivered in real time — you don't need to reload the page.
+
+### What triggers a notification
+
+- Someone comments on a **quote you created**
+- Someone comments on a **code in your project** (project owner only)
+
+### Marking as read
+
+Click any notification to mark it as read. Use **Mark all as read** at the top of the dropdown to clear all at once.
 
 ---
 
@@ -282,7 +311,7 @@ Lists all registered users with their project count, quote count, role, and stat
 
 ### Projects
 
-Lists all projects with member, document, code, memo, and quote counts.
+Lists all projects with member, document, code, memo, quote counts, and **storage usage** (total size of all uploaded PDFs).
 
 ### Support tickets
 

@@ -107,6 +107,20 @@ This is the core analysis workflow of QAnubis. It must be smooth and reliable.
 | Delete code | Cascades to quotes with only that code |
 | View quote count per code | |
 | Code tree visualization | Client-side, collapsible |
+| **Comment thread per code** | Threaded analytical notes attached to any code; visible to all project members |
+
+---
+
+### Notifications
+
+| Feature | Notes |
+|---------|-------|
+| In-app notification bell in the header | Shows unread count badge |
+| Real-time delivery via SSE | Badge and list update automatically — no page reload |
+| Mark individual notification as read | |
+| Mark all notifications as read | |
+| Trigger: new comment on a quote you created | Notifies the quote author |
+| Trigger: new comment on a code | Notifies the project owner |
 
 ---
 
@@ -120,6 +134,7 @@ Memos are **shared by all project members** — everyone with access to the proj
 | Edit memo | Any OWNER or COLLABORATOR can edit |
 | Delete memo | Any OWNER or COLLABORATOR can delete |
 | List memos per project | |
+| **Insert quote reference** | Embed a clickable block linking to a specific project quote; shows text, document, and page |
 
 ---
 
@@ -134,7 +149,7 @@ All charts are filterable by document and/or code.
 | Codes treemap | d3-hierarchy | Hierarchical view with quote counts |
 | Documents summary table | React | Doc name, quote count, codes used |
 | Codes summary table | React | Code name, quote count, documents |
-| Quote explorer | React | Browse/edit quotes filtered by code + document |
+| Quote explorer with server-side search | React | Browse quotes filtered by code, document, or text; search ≥ 2 chars triggers a Postgres ILIKE query |
 
 ---
 
@@ -146,6 +161,8 @@ All charts are filterable by document and/or code.
 | Quotes grouped by document | Plain text | |
 | Quotes grouped by code | CSV | |
 | Quotes grouped by document | CSV | |
+| Full project quotes | JSON | Machine-readable; compatible with Atlas.ti, NVivo, and other CAQDAS tools |
+| **Narrative report** | Markdown | Report structured by code → quotes → memo excerpts; ideal for thesis defense or academic publication |
 
 ---
 
@@ -166,6 +183,7 @@ Accessible only to users with `role = ADMIN`. A separate area of the application
 | Feature | Notes |
 |---------|-------|
 | List all projects with stats | Member count, document count, quote count |
+| **Storage usage per project** | Sum of all document file sizes |
 | View members of any project | Read-only |
 
 **Usage metrics**
@@ -197,7 +215,7 @@ These features are desirable but will not block the first release. They are list
 | **Codes word cloud** | Same as above |
 | **Inter-rater reliability** | Requires a second coding pass workflow; complex UX |
 | **Code network/graph view** | Codes as nodes, co-occurrence as edges; new visualization type |
-| **Full-text search across quotes** | Requires search index (PostgreSQL full-text or external) |
+| **Full-text search across quotes** | ✅ Implemented in v1 — server-side Postgres ILIKE in the Quote Explorer |
 | **Codebook export** (formatted PDF/DOCX) | Document generation library needed |
 | **Full project export/import** | Complex serialization; useful for backup and portability |
 | **Public share link** (read-only report) | Auth model extension |

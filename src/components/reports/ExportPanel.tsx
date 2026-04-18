@@ -4,9 +4,11 @@ import {
 	HiOutlineArrowDownTray,
 	HiOutlineDocumentText,
 	HiOutlineTag,
+	HiOutlineNewspaper,
 } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
+import { trpc } from "@/server/client";
 
 interface Code {
 	id: string;
@@ -22,6 +24,7 @@ interface Quote {
 }
 
 interface ExportPanelProps {
+	projectId: string;
 	quotes: Quote[];
 	projectName: string;
 }
@@ -118,9 +121,82 @@ function buildCsvByDocument(quotes: Quote[]): string {
 	return rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
 }
 
-export default function ExportPanel({ quotes, projectName }: ExportPanelProps) {
+// Recursively extracts plain text from a Tiptap JSON document node.
+function tiptapToText(node: unknown): string {
+	if (!node || typeof node !== "object") return "";
+	const n = node as { type?: string; text?: string; content?: unknown[] };
+	if (typeof n.text === "string") return n.text;
+	if (Array.isArray(n.content)) {
+		const blockTypes = new Set([
+			"paragraph",
+			"heading",
+			"blockquote",
+			"listItem",
+			"bulletList",
+			"orderedList",
+			"codeBlock",
+		]);
+		return (
+			n.content.map(tiptapToText).join("") +
+			(blockTypes.has(n.type ?? "") ? "\n" : "")
+		);
+	}
+	return "";
+}
+
+type NarrativeData = {
+	codes: {
+		id: string;
+		name: string;
+		description: string | null;
+		quotes: { id: string; text: string; page: number; document: { name: string } }[];
+	}[];
+	memos: { id: string; name: string; content: unknown }[];
+};
+
+function buildNarrativeMarkdown(
+	data: NarrativeData,
+	projectName: string,
+): string {
+	const lines: string[] = [];
+	const date = new Date().toLocaleDateString("en-CA"); // ISO date
+	lines.push(`# ${projectName} — Narrative Report`);
+	lines.push(`\n*Generated: ${date}*\n`);
+	lines.push("---\n");
+
+	for (const code of data.codes) {
+		if (code.quotes.length === 0) continue;
+		lines.push(`## ${code.name}`);
+		if (code.description) lines.push(`\n*${code.description}*`);
+		lines.push(`\n*${code.quotes.length} quote(s)*\n`);
+		for (const q of code.quotes) {
+			lines.push(`> "${q.text}"`);
+			lines.push(`> — ${q.document.name}, p. ${q.page}\n`);
+		}
+		lines.push("---\n");
+	}
+
+	if (data.memos.length > 0) {
+		lines.push("## Memos\n");
+		for (const memo of data.memos) {
+			lines.push(`### ${memo.name}\n`);
+			const text = tiptapToText(memo.content).trim();
+			if (text) lines.push(text + "\n");
+		}
+	}
+
+	return lines.join("\n");
+}
+
+export default function ExportPanel({ projectId, quotes, projectName }: ExportPanelProps) {
 	const t = useTranslation();
 	const slug = projectName.toLowerCase().replace(/\s+/g, "-");
+
+	const { data: narrativeData, isLoading: isLoadingNarrative } =
+		trpc.report.narrativeExport.useQuery({ projectId });
+
+	const hasCodesWithQuotes =
+		narrativeData?.codes.some((c) => c.quotes.length > 0) ?? false;
 
 	if (quotes.length === 0) {
 		return (
@@ -252,6 +328,39 @@ export default function ExportPanel({ quotes, projectName }: ExportPanelProps) {
 				>
 					{t.reports.exportJSON}
 				</Button>
+			</div>
+
+			{/* Narrative export */}
+			<div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/50 sm:col-span-2">
+				<div className="mb-3 flex items-center gap-2">
+					<HiOutlineNewspaper className="h-5 w-5 text-brand-500" />
+					<h3 className="font-semibold text-gray-700 dark:text-gray-300">
+						{t.reports.exportNarrative}
+					</h3>
+				</div>
+				<p className="mb-4 text-xs text-gray-400">
+					{t.reports.exportNarrativeHint}
+				</p>
+				{isLoadingNarrative ? (
+					<div className="h-8 w-48 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+				) : !hasCodesWithQuotes ? (
+					<p className="text-xs text-gray-400">{t.reports.exportNarrativeEmpty}</p>
+				) : (
+					<Button
+						size="sm"
+						variant="outline"
+						startIcon={<HiOutlineArrowDownTray className="h-4 w-4" />}
+						onClick={() =>
+							downloadFile(
+								buildNarrativeMarkdown(narrativeData!, projectName),
+								`${slug}-narrative.md`,
+								"text/markdown;charset=utf-8",
+							)
+						}
+					>
+						{t.reports.exportMarkdown}
+					</Button>
+				)}
 			</div>
 		</div>
 	);

@@ -80,7 +80,7 @@ export default function ReportsTab({
 
 			{activeSubTab === "explorer" && (
 				<ErrorBoundary>
-					<QuoteExplorer quotes={safeQuotes} />
+					<QuoteExplorer projectId={projectId} quotes={safeQuotes} />
 				</ErrorBoundary>
 			)}
 			{activeSubTab === "stats" && (
@@ -100,7 +100,7 @@ export default function ReportsTab({
 			)}
 			{activeSubTab === "export" && (
 				<ErrorBoundary>
-					<ExportPanel quotes={safeQuotes} projectName={projectName} />
+					<ExportPanel projectId={projectId} quotes={safeQuotes} projectName={projectName} />
 				</ErrorBoundary>
 			)}
 		</div>

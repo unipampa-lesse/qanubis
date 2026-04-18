@@ -286,6 +286,7 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 								editable={canEdit}
 								placeholder={t.memos.editorPlaceholder}
 								onChange={handleContentChange}
+								projectId={projectId}
 							/>
 						</>
 					) : (

@@ -1,6 +1,9 @@
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { getEmailProvider } from "@/providers/email";
 import { getStorageProvider } from "@/providers/storage";
+
+const log = logger.child({ module: "health" });
 
 type ProbeStatus = "ok" | "degraded";
 
@@ -47,6 +50,10 @@ export async function GET() {
 	]);
 
 	const allOk = db === "ok" && storage === "ok" && email === "ok";
+
+	if (!allOk) {
+		log.warn({ db, storage, email }, "health check degraded");
+	}
 
 	return Response.json(
 		{ status: allOk ? "ok" : "degraded", db, storage, email },

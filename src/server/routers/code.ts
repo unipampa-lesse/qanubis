@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { pushSSENotification } from "@/lib/sse-registry";
 import {
 	collaboratorProcedure,
 	createTRPCRouter,
@@ -24,7 +25,7 @@ export const codeRouter = createTRPCRouter({
 					description: true,
 					parentId: true,
 					createdAt: true,
-					_count: { select: { quoteCodes: true, children: true } },
+					_count: { select: { quoteCodes: true, children: true, comments: true } },
 				},
 				orderBy: { createdAt: "asc" },
 			});
@@ -109,6 +110,103 @@ export const codeRouter = createTRPCRouter({
 			if (!code) throw new TRPCError({ code: "NOT_FOUND" });
 
 			await prisma.code.delete({ where: { id: input.codeId } });
+			return { success: true };
+		}),
+
+	// -------------------------------------------------------------------------
+	// Code comments (T21)
+	// -------------------------------------------------------------------------
+
+	/** List comments for a code (all project members). */
+	listComments: projectProcedure
+		.input(z.object({ projectId: z.string(), codeId: z.string() }))
+		.query(async ({ input }) => {
+			return prisma.codeComment.findMany({
+				where: { codeId: input.codeId },
+				select: {
+					id: true,
+					content: true,
+					createdAt: true,
+					user: { select: { id: true, name: true } },
+				},
+				orderBy: { createdAt: "asc" },
+			});
+		}),
+
+	/** Add a comment to a code. Notifies project owner if different from commenter. */
+	addComment: collaboratorProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				codeId: z.string(),
+				content: z.string().min(1).max(2000),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const code = await prisma.code.findUnique({
+				where: { id: input.codeId, projectId: input.projectId },
+				select: { id: true, name: true, projectId: true },
+			});
+			if (!code) throw new TRPCError({ code: "NOT_FOUND" });
+
+			const [comment, commenter, owner] = await Promise.all([
+				prisma.codeComment.create({
+					data: {
+						codeId: input.codeId,
+						userId: ctx.userId,
+						content: input.content,
+					},
+					select: {
+						id: true,
+						content: true,
+						createdAt: true,
+						user: { select: { id: true, name: true } },
+					},
+				}),
+				prisma.user.findUnique({
+					where: { id: ctx.userId },
+					select: { name: true },
+				}),
+				prisma.projectMember.findFirst({
+					where: { projectId: input.projectId, role: "OWNER" },
+					select: { userId: true },
+				}),
+			]);
+
+			if (owner && owner.userId !== ctx.userId) {
+				const notification = await prisma.notification.create({
+					data: {
+						userId: owner.userId,
+						type: "code_comment",
+						title: commenter?.name ?? "Alguém",
+						body: `${code.name}: ${input.content.slice(0, 100)}`,
+						link: `/dashboard/projects/${input.projectId}`,
+					},
+				});
+				pushSSENotification(owner.userId, notification);
+			}
+
+			return comment;
+		}),
+
+	/** Delete a comment — comment owner or project OWNER only. */
+	deleteComment: collaboratorProcedure
+		.input(z.object({ projectId: z.string(), commentId: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const comment = await prisma.codeComment.findUnique({
+				where: { id: input.commentId },
+				select: {
+					userId: true,
+					code: { select: { projectId: true } },
+				},
+			});
+			if (!comment || comment.code.projectId !== input.projectId) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+			if (comment.userId !== ctx.userId && ctx.member.role !== "OWNER") {
+				throw new TRPCError({ code: "FORBIDDEN" });
+			}
+			await prisma.codeComment.delete({ where: { id: input.commentId } });
 			return { success: true };
 		}),
 });

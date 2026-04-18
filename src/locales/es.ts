@@ -180,6 +180,14 @@ export const translations: Translations = {
 			"subcódigo(s) directo(s) — se convertirán en códigos raíz.",
 		quoteSingular: "cita",
 		quotePlural: "citas",
+		// Comments
+		addComment: "Agregar un comentario…",
+		submitComment: "Enviar",
+		deleteComment: "Eliminar comentario",
+		noComments: "Aún no hay comentarios.",
+		commentSingular: "comentario",
+		commentPlural: "comentarios",
+		viewComments: "Comentarios",
 	},
 
 	// Members tab
@@ -277,6 +285,9 @@ export const translations: Translations = {
 		codesUsed: "Códigos usados",
 		documentsUsed: "Documentos",
 		noData: "Aún no hay citas.",
+		// Búsqueda en el explorador
+		searchPlaceholder: "Buscar citas…",
+		// Export
 		exportByCode: "Exportar por código",
 		exportByDocument: "Exportar por documento",
 		exportCSV: "Descargar CSV",
@@ -284,6 +295,10 @@ export const translations: Translations = {
 		exportJSON: "Descargar JSON",
 		exportJSONHint: "Datos estructurados para uso con otras herramientas (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "Aún no hay citas para exportar.",
+		exportNarrative: "Informe Narrativo",
+		exportNarrativeHint: "Informe estructurado por código → citas → extractos de memorando. Ideal para defensa de tesis o publicación académica.",
+		exportMarkdown: "Descargar Markdown",
+		exportNarrativeEmpty: "Agrega códigos y citas para generar un informe narrativo.",
 		// Stats
 		stats: "Estadísticas",
 		totalDocuments: "Documentos",
@@ -314,6 +329,18 @@ export const translations: Translations = {
 		lastUpdated: "Última actualización",
 		by: "por",
 		editorPlaceholder: "Comienza a escribir tus notas de investigación…",
+		quotePicker: "Insertar referencia de cita",
+		quotePickerSearch: "Buscar citas…",
+		quotePickerEmpty: "No se encontraron citas.",
+	},
+
+	// Notificaciones
+	notifications: {
+		title: "Notificaciones",
+		empty: "Aún no hay notificaciones.",
+		markAllRead: "Marcar todas como leídas",
+		newComment: "Nuevo comentario",
+		viewAll: "Ver todas",
 	},
 
 	// Admin panel
@@ -344,6 +371,7 @@ export const translations: Translations = {
 		codes: "Códigos",
 		memos: "Memorandos",
 		quotes: "Citas",
+		storage: "Almacenamiento",
 		ticket: "Solicitud",
 		subject: "Asunto",
 		ticketStatus: "Estado",

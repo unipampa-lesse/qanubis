@@ -7,7 +7,10 @@ import { cache } from "react";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+
+const log = logger.child({ module: "trpc" });
 
 type HeadersLike = {
 	get(name: string): string | null;
@@ -44,6 +47,12 @@ export const createTRPCContext = cache(
 const t = initTRPC.context<TRPCContext>().create({
 	transformer,
 	errorFormatter({ shape, error }) {
+		if (error.code === "INTERNAL_SERVER_ERROR") {
+			log.error(
+				{ err: error.cause ?? error, path: shape.data.path },
+				"tRPC internal error",
+			);
+		}
 		return {
 			...shape,
 			data: {

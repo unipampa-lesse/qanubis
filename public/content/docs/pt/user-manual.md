@@ -186,6 +186,12 @@ Clique no ícone de lápis em qualquer linha de código.
 
 Clique no ícone de lixeira. Um painel de confirmação mostra quantas citações usam este código e quantos subcódigos ele possui. Excluir um código remove todas as suas associações com citações.
 
+### Comentários de código
+
+Clique no ícone de **balão de chat** em qualquer linha de código para abrir o thread de comentários. Digite uma nota e clique em **Enviar**. Os comentários são anotações analíticas compartilhadas com todos os membros do projeto.
+
+Para excluir um comentário, passe o mouse sobre ele e clique no ícone de lixeira. Você só pode excluir seus próprios comentários (Proprietários do projeto podem excluir qualquer comentário).
+
 ---
 
 ## Memorandos
@@ -203,6 +209,10 @@ Abra a aba **Memorandos** e clique em **Novo memorando**. O memorando abre imedi
 
 O editor suporta: negrito, itálico, tachado, código inline, títulos (H2, H3), listas com marcadores, listas numeradas, citações em bloco, blocos de código e desfazer/refazer.
 
+### Inserir referência de citação
+
+Clique no ícone de **balão de discurso** na barra de ferramentas para abrir o Seletor de Citações. Pesquise ou navegue pelas citações do projeto e clique em uma para incorporá-la como bloco de referência no memorando. O bloco exibe o texto da citação, o nome do documento e a página, com um link para abrir o documento.
+
 ### Excluir um memorando
 
 Clique no ícone de lixeira no cabeçalho do memorando (Colaborador/Proprietário apenas) e confirme o diálogo.
@@ -218,7 +228,8 @@ Abra a aba **Relatórios** para acessar as ferramentas de análise e exportaçã
 Filtre citações por:
 - **Documento** — exibir apenas citações de um documento
 - **Código** — exibir apenas citações marcadas com um código específico
-- **Busca** — pesquisa de texto livre no conteúdo das citações
+- **Apenas sem código** — exibir apenas citações sem nenhum código atribuído
+- **Busca** — digite pelo menos 2 caracteres para acionar uma busca server-side em todos os textos de citações do projeto; consultas menores filtram client-side nos dados já carregados
 
 ### Gráficos
 
@@ -236,11 +247,28 @@ Duas tabelas com estatísticas agregadas:
 
 ### Exportar
 
-Baixe seus dados como texto simples ou CSV:
-- **Por código** — citações agrupadas sob cada título de código
-- **Por documento** — citações agrupadas sob cada título de documento
+Baixe seus dados em vários formatos:
+- **Por código** — citações agrupadas sob cada título de código (TXT ou CSV)
+- **Por documento** — citações agrupadas sob cada título de documento (TXT ou CSV)
+- **JSON** — dados estruturados completos para uso com ferramentas externas (Atlas.ti, NVivo, etc.)
+- **Relatório Narrativo (Markdown)** — relatório estruturado por código → citações → trechos de memorando. Ideal para defesa de dissertação ou publicação acadêmica. O arquivo inclui todos os códigos que possuem pelo menos uma citação, com todas as citações associadas e o texto completo dos memorandos do projeto.
 
-Clique em **Baixar CSV** ou **Baixar TXT** para qualquer agrupamento.
+---
+
+## Notificações
+
+O ícone de sino no cabeçalho superior exibe um badge com o número de notificações não lidas.
+
+Clique no sino para abrir o dropdown de notificações. As notificações são entregues em tempo real — não é necessário recarregar a página.
+
+### O que gera uma notificação
+
+- Alguém comenta em uma **citação que você criou**
+- Alguém comenta em um **código do seu projeto** (somente proprietário do projeto)
+
+### Marcar como lida
+
+Clique em qualquer notificação para marcá-la como lida. Use **Marcar todas como lidas** no topo do dropdown para limpar todas de uma vez.
 
 ---
 
@@ -282,7 +310,7 @@ Lista todos os usuários cadastrados com sua contagem de projetos, citações, f
 
 ### Projetos
 
-Lista todos os projetos com contagens de membros, documentos, códigos, memorandos e citações.
+Lista todos os projetos com contagens de membros, documentos, códigos, memorandos, citações e **uso de armazenamento** (tamanho total de todos os PDFs enviados).
 
 ### Chamados de suporte
 

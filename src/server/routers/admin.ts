@@ -63,18 +63,33 @@ export const adminRouter = createTRPCRouter({
 	// -------------------------------------------------------------------------
 
 	listProjects: adminProcedure.query(async () => {
-		return prisma.project.findMany({
-			select: {
-				id: true,
-				name: true,
-				color: true,
-				createdAt: true,
-				_count: {
-					select: { members: true, documents: true, codes: true, memos: true },
+		const [projects, storageSums] = await Promise.all([
+			prisma.project.findMany({
+				select: {
+					id: true,
+					name: true,
+					color: true,
+					createdAt: true,
+					_count: {
+						select: { members: true, documents: true, codes: true, memos: true },
+					},
 				},
-			},
-			orderBy: { createdAt: "desc" },
-		});
+				orderBy: { createdAt: "desc" },
+			}),
+			prisma.document.groupBy({
+				by: ["projectId"],
+				_sum: { fileSize: true },
+			}),
+		]);
+
+		const storageMap = new Map(
+			storageSums.map((s) => [s.projectId, s._sum.fileSize ?? 0]),
+		);
+
+		return projects.map((p) => ({
+			...p,
+			storageBytes: storageMap.get(p.id) ?? 0,
+		}));
 	}),
 
 	/** Admin-level project deletion. Removes all documents from storage. */

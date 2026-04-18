@@ -1,14 +1,16 @@
 "use client";
 
 import type { ProjectRole } from "@prisma/client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
+	HiOutlineChatBubbleLeftEllipsis,
 	HiOutlineChevronDown,
 	HiOutlineChevronRight,
 	HiOutlinePencil,
 	HiOutlinePlus,
 	HiOutlineTag,
 	HiOutlineTrash,
+	HiOutlineXMark,
 } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
@@ -25,7 +27,7 @@ interface CodeFlat {
 	textColor: string;
 	description: string | null;
 	parentId: string | null;
-	_count: { quoteCodes: number; children: number };
+	_count: { quoteCodes: number; children: number; comments: number };
 }
 
 interface CodeTreeNode extends CodeFlat {
@@ -309,6 +311,137 @@ function DeleteConfirm({ code, projectId, onClose }: DeleteConfirmProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Code comments panel
+// ---------------------------------------------------------------------------
+
+interface CodeCommentsProps {
+	codeId: string;
+	projectId: string;
+	canComment: boolean;
+	onClose: () => void;
+}
+
+function CodeComments({
+	codeId,
+	projectId,
+	canComment,
+	onClose,
+}: CodeCommentsProps) {
+	const t = useTranslation();
+	const utils = trpc.useUtils();
+	const [draft, setDraft] = useState("");
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+	const { data: comments, isLoading } = trpc.code.listComments.useQuery({
+		projectId,
+		codeId,
+	});
+
+	const add = trpc.code.addComment.useMutation({
+		onSuccess: () => {
+			utils.code.listComments.invalidate({ projectId, codeId });
+			utils.code.list.invalidate({ projectId });
+			setDraft("");
+		},
+	});
+
+	const del = trpc.code.deleteComment.useMutation({
+		onSuccess: () => {
+			utils.code.listComments.invalidate({ projectId, codeId });
+			utils.code.list.invalidate({ projectId });
+		},
+	});
+
+	function handleSubmit(e: React.FormEvent) {
+		e.preventDefault();
+		const content = draft.trim();
+		if (!content) return;
+		add.mutate({ projectId, codeId, content });
+	}
+
+	return (
+		<div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+			<div className="mb-3 flex items-center justify-between">
+				<span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+					{t.codes.viewComments}
+				</span>
+				<button
+					type="button"
+					onClick={onClose}
+					className="rounded p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+				>
+					<HiOutlineXMark className="h-4 w-4" />
+				</button>
+			</div>
+
+			{/* Comment list */}
+			<div className="mb-3 space-y-2">
+				{isLoading && (
+					<div className="h-8 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+				)}
+				{!isLoading && comments?.length === 0 && (
+					<p className="text-xs text-gray-400">{t.codes.noComments}</p>
+				)}
+				{comments?.map((c) => (
+					<div key={c.id} className="group flex gap-2">
+						<div className="flex-1 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+							<div className="mb-0.5 flex items-center gap-2">
+								<span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+									{c.user.name ?? "—"}
+								</span>
+								<span className="text-xs text-gray-400">
+									{new Date(c.createdAt).toLocaleDateString()}
+								</span>
+							</div>
+							<p className="whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-300">
+								{c.content}
+							</p>
+						</div>
+						{canComment && (
+							<button
+								type="button"
+								onClick={() => del.mutate({ projectId, commentId: c.id })}
+								disabled={del.isPending}
+								className="self-start rounded p-1 text-gray-300 opacity-0 transition-opacity hover:text-error-500 group-hover:opacity-100 dark:text-gray-600 dark:hover:text-error-400"
+							>
+								<HiOutlineTrash className="h-3.5 w-3.5" />
+							</button>
+						)}
+					</div>
+				))}
+			</div>
+
+			{/* Add comment */}
+			{canComment && (
+				<form onSubmit={handleSubmit} className="flex gap-2">
+					<textarea
+						ref={textareaRef}
+						value={draft}
+						onChange={(e) => setDraft(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && !e.shiftKey) {
+								e.preventDefault();
+								handleSubmit(e as unknown as React.FormEvent);
+							}
+						}}
+						placeholder={t.codes.addComment}
+						rows={2}
+						className="flex-1 resize-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-xs text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30"
+					/>
+					<Button
+						type="submit"
+						size="sm"
+						disabled={!draft.trim() || add.isPending}
+					>
+						{t.codes.submitComment}
+					</Button>
+				</form>
+			)}
+		</div>
+	);
+}
+
+// ---------------------------------------------------------------------------
 // Single tree node (recursive)
 // ---------------------------------------------------------------------------
 
@@ -322,9 +455,9 @@ interface CodeNodeProps {
 function CodeNode({ node, projectId, canEdit, depth }: CodeNodeProps) {
 	const t = useTranslation();
 	const [expanded, setExpanded] = useState(true);
-	const [action, setAction] = useState<"addChild" | "edit" | "delete" | null>(
-		null,
-	);
+	const [action, setAction] = useState<
+		"addChild" | "edit" | "delete" | "comments" | null
+	>(null);
 
 	const hasChildren = node.children.length > 0;
 	const indentStyle = { paddingLeft: `${depth * 24}px` };
@@ -377,9 +510,31 @@ function CodeNode({ node, projectId, canEdit, depth }: CodeNodeProps) {
 					</span>
 				)}
 
+				{/* Comments badge — always visible if there are comments */}
+				{node._count.comments > 0 && action !== "comments" && (
+					<button
+						type="button"
+						onClick={() => setAction("comments")}
+						className="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+					>
+						<HiOutlineChatBubbleLeftEllipsis className="h-3.5 w-3.5" />
+						{node._count.comments}
+					</button>
+				)}
+
 				{/* Action buttons — visible on hover when canEdit */}
 				{canEdit && (
 					<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+						<button
+							type="button"
+							title={t.codes.viewComments}
+							onClick={() =>
+								setAction((a) => (a === "comments" ? null : "comments"))
+							}
+							className="rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+						>
+							<HiOutlineChatBubbleLeftEllipsis className="h-3.5 w-3.5" />
+						</button>
 						<button
 							type="button"
 							title={t.codes.addSubCode}
@@ -447,6 +602,19 @@ function CodeNode({ node, projectId, canEdit, depth }: CodeNodeProps) {
 					<DeleteConfirm
 						code={node}
 						projectId={projectId}
+						onClose={closeAction}
+					/>
+				</div>
+			)}
+			{action === "comments" && (
+				<div
+					style={{ paddingLeft: `${(depth + 1) * 24 + 12}px` }}
+					className="mb-2 pr-3"
+				>
+					<CodeComments
+						codeId={node.id}
+						projectId={projectId}
+						canComment={canEdit}
 						onClose={closeAction}
 					/>
 				</div>

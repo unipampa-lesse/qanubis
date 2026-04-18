@@ -22,6 +22,77 @@ const reportQuoteSelect = {
 
 export const reportRouter = createTRPCRouter({
 	/**
+	 * Server-side full-text search across quote texts for a project.
+	 * Uses Postgres ILIKE via Prisma's insensitive mode — activated when
+	 * the explorer has an active search query.
+	 */
+	searchQuotes: projectProcedure
+		.input(z.object({ projectId: z.string(), query: z.string().min(1) }))
+		.query(async ({ input }) => {
+			return prisma.quote.findMany({
+				where: {
+					document: { projectId: input.projectId },
+					text: { contains: input.query, mode: "insensitive" },
+				},
+				select: reportQuoteSelect,
+				orderBy: [
+					{ document: { name: "asc" } },
+					{ page: "asc" },
+					{ createdAt: "asc" },
+				],
+			});
+		}),
+
+	/**
+	 * Narrative export data: codes (sorted by quote count) with their quotes,
+	 * plus all project memos (with full Tiptap JSON content).
+	 */
+	narrativeExport: projectProcedure
+		.input(z.object({ projectId: z.string() }))
+		.query(async ({ input }) => {
+			const [codes, memos] = await Promise.all([
+				prisma.code.findMany({
+					where: { projectId: input.projectId },
+					select: {
+						id: true,
+						name: true,
+						description: true,
+						quoteCodes: {
+							select: {
+								quote: {
+									select: {
+										id: true,
+										text: true,
+										page: true,
+										document: { select: { name: true } },
+									},
+								},
+							},
+							orderBy: { quote: { document: { name: "asc" } } },
+						},
+					},
+				}),
+				prisma.memo.findMany({
+					where: { projectId: input.projectId },
+					select: { id: true, name: true, content: true },
+					orderBy: { updatedAt: "desc" },
+				}),
+			]);
+
+			return {
+				codes: codes
+					.map((c) => ({
+						id: c.id,
+						name: c.name,
+						description: c.description,
+						quotes: c.quoteCodes.map((qc) => qc.quote),
+					}))
+					.sort((a, b) => b.quotes.length - a.quotes.length),
+				memos,
+			};
+		}),
+
+	/**
 	 * All quotes for a project across every document.
 	 * Used by the quote explorer, heatmaps, and export.
 	 */

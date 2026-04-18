@@ -75,9 +75,11 @@ model User {
   projectInvites ProjectInvite[]
   quotes         Quote[]
   quoteComments  QuoteComment[]
+  codeComments   CodeComment[]
   memos          Memo[]
   supportTickets SupportTicket[]
   ticketMessages TicketMessage[]
+  notifications  Notification[]
 }
 
 // ---------------------------------------------------------------------------
@@ -175,10 +177,11 @@ model Code {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  parent     Code?       @relation("CodeHierarchy", fields: [parentId], references: [id])
-  children   Code[]      @relation("CodeHierarchy")
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent     Code?         @relation("CodeHierarchy", fields: [parentId], references: [id])
+  children   Code[]        @relation("CodeHierarchy")
   quoteCodes QuoteCode[]
+  comments   CodeComment[]
 
   @@index([projectId])
   @@index([parentId])
@@ -231,6 +234,21 @@ model QuoteComment {
   user  User  @relation(fields: [userId], references: [id])
 
   @@index([quoteId])
+  @@index([userId])
+}
+
+model CodeComment {
+  id        String   @id @default(cuid())
+  codeId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  code Code @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([codeId])
   @@index([userId])
 }
 
@@ -293,4 +311,24 @@ model TicketMessage {
 
   @@index([ticketId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "quote_comment" | "code_comment" | "member_joined"
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, read])
 }

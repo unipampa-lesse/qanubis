@@ -178,6 +178,14 @@ export const translations = {
 			"direct sub-code(s) — they will become root-level codes.",
 		quoteSingular: "quote",
 		quotePlural: "quotes",
+		// Comments
+		addComment: "Add a comment…",
+		submitComment: "Send",
+		deleteComment: "Delete comment",
+		noComments: "No comments yet.",
+		commentSingular: "comment",
+		commentPlural: "comments",
+		viewComments: "Comments",
 	},
 
 	// Members tab
@@ -279,6 +287,8 @@ export const translations = {
 		codesUsed: "Codes used",
 		documentsUsed: "Documents",
 		noData: "No quotes yet.",
+		// Explorer search
+		searchPlaceholder: "Search quotes…",
 		// Export
 		exportByCode: "Export by code",
 		exportByDocument: "Export by document",
@@ -287,6 +297,10 @@ export const translations = {
 		exportJSON: "Download JSON",
 		exportJSONHint: "Structured data for use with other tools (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "No quotes to export yet.",
+		exportNarrative: "Narrative Report",
+		exportNarrativeHint: "Report structured by code → quotes → memo excerpts. Ideal for thesis defense or academic publication.",
+		exportMarkdown: "Download Markdown",
+		exportNarrativeEmpty: "Add codes and quotes to generate a narrative report.",
 		// Stats
 		stats: "Statistics",
 		totalDocuments: "Documents",
@@ -315,6 +329,18 @@ export const translations = {
 		lastUpdated: "Last updated",
 		by: "by",
 		editorPlaceholder: "Start writing your research notes…",
+		quotePicker: "Insert quote reference",
+		quotePickerSearch: "Search quotes…",
+		quotePickerEmpty: "No quotes found.",
+	},
+
+	// Notifications
+	notifications: {
+		title: "Notifications",
+		empty: "No notifications yet.",
+		markAllRead: "Mark all as read",
+		newComment: "New comment",
+		viewAll: "View all",
 	},
 
 	// Admin panel
@@ -349,6 +375,7 @@ export const translations = {
 		codes: "Codes",
 		memos: "Memos",
 		quotes: "Quotes",
+		storage: "Storage",
 		// Tickets page
 		ticket: "Ticket",
 		subject: "Subject",

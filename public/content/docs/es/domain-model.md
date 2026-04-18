@@ -97,6 +97,26 @@ erDiagram
         datetime updatedAt
     }
 
+    CodeComment {
+        string id PK
+        string codeId FK
+        string userId FK
+        string content
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Notification {
+        string id PK
+        string userId FK
+        string type
+        string title
+        string body "nullable"
+        string link "nullable"
+        boolean read
+        datetime createdAt
+    }
+
     Memo {
         string id PK
         string projectId FK
@@ -156,9 +176,13 @@ erDiagram
 
     Code ||--o{ Code : "parent of"
     Code ||--o{ QuoteCode : "used in"
+    Code ||--o{ CodeComment : "has"
 
     Quote ||--o{ QuoteCode : "tagged with"
     Quote ||--o{ QuoteComment : "annotated by"
+
+    User ||--o{ CodeComment : "writes"
+    User ||--o{ Notification : "receives"
 
     SupportTicket ||--o{ TicketMessage : "has"
 ```
@@ -240,9 +264,21 @@ Las coordenadas de cada rectángulo se expresan como fracciones de las dimension
 
 ---
 
+### CodeComment
+
+Notas analíticas en cadena adjuntas a un `Code`. Cualquier miembro del proyecto puede leer todos los comentarios; agregar o eliminar requiere rol COLABORADOR o PROPIETARIO. Eliminar un comentario está permitido al autor del comentario o al PROPIETARIO del proyecto.
+
+---
+
+### Notification
+
+Almacena notificaciones in-app para un usuario. El campo `type` identifica el evento disparador (ej.: `quote_comment`, `code_comment`). El campo `link` es un deep-link opcional dentro de la aplicación. Las notificaciones se entregan en tiempo real vía SSE — el flag `read` es activado por el usuario en el desplegable de notificaciones.
+
+---
+
 ### Memo
 
-`content` stores the Tiptap editor JSON document (not raw HTML). This allows structured editing and future rendering flexibility.
+`content` almacena el documento JSON del editor Tiptap (no HTML crudo). Esto permite una edición estructurada y flexibilidad de renderizado futura. Los memorandos pueden incrustar bloques `quoteReference` — nodos Tiptap personalizados que almacenan una referencia a una cita específica del proyecto (quoteId, texto, documento, página).
 
 ---
 

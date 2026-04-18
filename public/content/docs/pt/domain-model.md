@@ -97,6 +97,26 @@ erDiagram
         datetime updatedAt
     }
 
+    CodeComment {
+        string id PK
+        string codeId FK
+        string userId FK
+        string content
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Notification {
+        string id PK
+        string userId FK
+        string type
+        string title
+        string body "nullable"
+        string link "nullable"
+        boolean read
+        datetime createdAt
+    }
+
     Memo {
         string id PK
         string projectId FK
@@ -156,9 +176,13 @@ erDiagram
 
     Code ||--o{ Code : "parent of"
     Code ||--o{ QuoteCode : "used in"
+    Code ||--o{ CodeComment : "has"
 
     Quote ||--o{ QuoteCode : "tagged with"
     Quote ||--o{ QuoteComment : "annotated by"
+
+    User ||--o{ CodeComment : "writes"
+    User ||--o{ Notification : "receives"
 
     SupportTicket ||--o{ TicketMessage : "has"
 ```
@@ -240,9 +264,21 @@ As coordenadas de cada retângulo são expressas como frações das dimensões d
 
 ---
 
+### CodeComment (Comentário de Código)
+
+Notas analíticas em cadeia anexadas a um `Code`. Qualquer membro do projeto pode ler todos os comentários; adicionar ou excluir requer papel COLABORADOR ou PROPRIETÁRIO. Excluir um comentário é permitido ao autor do comentário ou ao PROPRIETÁRIO do projeto.
+
+---
+
+### Notification (Notificação)
+
+Armazena notificações in-app para um usuário. O campo `type` identifica o evento disparador (ex.: `quote_comment`, `code_comment`). O campo `link` é um deep-link opcional dentro da aplicação. As notificações são entregues em tempo real via SSE — o flag `read` é alterado pelo usuário no dropdown de notificações.
+
+---
+
 ### Memo (Memorando)
 
-`content` armazena o documento JSON do editor Tiptap (não HTML bruto). Isso permite edição estruturada e flexibilidade futura de renderização.
+`content` armazena o documento JSON do editor Tiptap (não HTML bruto). Isso permite edição estruturada e flexibilidade futura de renderização. Memorandos podem incorporar blocos `quoteReference` — nós Tiptap customizados que armazenam uma referência a uma citação específica do projeto (quoteId, texto, documento, página).
 
 ---
 

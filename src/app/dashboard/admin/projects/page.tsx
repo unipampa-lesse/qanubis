@@ -5,6 +5,13 @@ import { HiOutlineMagnifyingGlass, HiOutlineTrash } from "react-icons/hi2";
 import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
+function formatBytes(bytes: number): string {
+	if (bytes === 0) return "0 B";
+	const units = ["B", "KB", "MB", "GB"];
+	const i = Math.floor(Math.log(bytes) / Math.log(1024));
+	return `${(bytes / 1024 ** i).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
 export default function AdminProjectsPage() {
 	const t = useTranslation();
 	const { locale } = useLanguage();
@@ -83,6 +90,9 @@ export default function AdminProjectsPage() {
 								<th className="hidden px-5 py-3 text-center font-medium text-gray-500 dark:text-gray-400 md:table-cell">
 									{t.admin.memos}
 								</th>
+								<th className="hidden px-5 py-3 text-right font-medium text-gray-500 dark:text-gray-400 lg:table-cell">
+									{t.admin.storage}
+								</th>
 								<th className="px-5 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
 									{t.common.actions}
 								</th>
@@ -119,6 +129,9 @@ export default function AdminProjectsPage() {
 									</td>
 									<td className="hidden px-5 py-3 text-center text-gray-500 dark:text-gray-400 md:table-cell">
 										{project._count.memos}
+									</td>
+									<td className="hidden px-5 py-3 text-right text-gray-500 dark:text-gray-400 lg:table-cell">
+										{formatBytes(project.storageBytes)}
 									</td>
 									<td className="px-5 py-3 text-right">
 										{deletingId === project.id ? (

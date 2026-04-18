@@ -97,6 +97,26 @@ erDiagram
         datetime updatedAt
     }
 
+    CodeComment {
+        string id PK
+        string codeId FK
+        string userId FK
+        string content
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Notification {
+        string id PK
+        string userId FK
+        string type
+        string title
+        string body "nullable"
+        string link "nullable"
+        boolean read
+        datetime createdAt
+    }
+
     Memo {
         string id PK
         string projectId FK
@@ -156,9 +176,13 @@ erDiagram
 
     Code ||--o{ Code : "parent of"
     Code ||--o{ QuoteCode : "used in"
+    Code ||--o{ CodeComment : "has"
 
     Quote ||--o{ QuoteCode : "tagged with"
     Quote ||--o{ QuoteComment : "annotated by"
+
+    User ||--o{ CodeComment : "writes"
+    User ||--o{ Notification : "receives"
 
     SupportTicket ||--o{ TicketMessage : "has"
 ```
@@ -240,9 +264,21 @@ Each rectangle's coordinates are expressed as fractions of the page dimensions (
 
 ---
 
+### CodeComment
+
+Threaded analytical notes attached to a `Code`. Any project member can read all comments; adding or deleting requires COLLABORATOR or OWNER role. Deleting a comment is allowed for the comment author or a project OWNER.
+
+---
+
+### Notification
+
+Stores in-app notifications for a user. The `type` field identifies the trigger event (e.g. `quote_comment`, `code_comment`). The `link` field is an optional deep-link into the application. Notifications are delivered in real-time via SSE — the `read` flag is toggled by the user in the notification dropdown.
+
+---
+
 ### Memo
 
-`content` stores the Tiptap editor JSON document (not raw HTML). This allows structured editing and future rendering flexibility.
+`content` stores the Tiptap editor JSON document (not raw HTML). This allows structured editing and future rendering flexibility. Memos can embed `quoteReference` blocks — custom Tiptap nodes that store a reference to a specific project quote (quoteId, text, document, page).
 
 ---
 
