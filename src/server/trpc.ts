@@ -5,6 +5,7 @@ import { getToken } from "next-auth/jwt";
 import { cache } from "react";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 
 type HeadersLike = {
@@ -31,7 +32,7 @@ export const createTRPCContext = cache(
 		if (opts?.req) {
 			const token = await getToken({
 				req: opts.req as NextRequest,
-				secret: process.env.NEXTAUTH_SECRET,
+				secret: env.NEXTAUTH_SECRET,
 			});
 			userId = token?.sub ?? null;
 		}

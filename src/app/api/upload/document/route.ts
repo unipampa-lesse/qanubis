@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { env } from "@/lib/env";
 import { extractPdfMetadata } from "@/lib/pdf";
 import { prisma } from "@/lib/prisma";
 import { getStorageProvider } from "@/providers/storage";
@@ -24,7 +25,7 @@ const PDF_MAGIC = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]);
  */
 export async function POST(req: NextRequest) {
 	// Auth check
-	const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+	const token = await getToken({ req, secret: env.NEXTAUTH_SECRET });
 	if (!token?.sub) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
@@ -130,9 +131,9 @@ export async function POST(req: NextRequest) {
 	});
 
 	const storageKey = `projects/${projectId}/documents/${document.id}.pdf`;
+	const storage = getStorageProvider();
 
 	try {
-		const storage = getStorageProvider();
 		await storage.upload(storageKey, buffer, ALLOWED_MIME);
 	} catch (err) {
 		// Roll back the DB record if storage upload fails

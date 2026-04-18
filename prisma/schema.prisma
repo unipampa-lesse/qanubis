@@ -204,7 +204,7 @@ model Quote {
   quoteCodes QuoteCode[]
   comments   QuoteComment[]
 
-  @@index([documentId])
+  @@index([documentId, page, createdAt])
   @@index([createdById])
 }
 
@@ -216,6 +216,7 @@ model QuoteCode {
   code  Code  @relation(fields: [codeId], references: [id], onDelete: Cascade)
 
   @@id([quoteId, codeId])
+  @@index([codeId])
 }
 
 model QuoteComment {

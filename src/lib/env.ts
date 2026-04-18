@@ -6,7 +6,7 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
 
 	// NextAuth
-	NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
+	NEXTAUTH_SECRET: z.string().min(32, "NEXTAUTH_SECRET must be at least 32 characters"),
 	NEXTAUTH_URL: z.string().url("NEXTAUTH_URL must be a valid URL"),
 
 	// Google OAuth — optional
@@ -16,6 +16,10 @@ const envSchema = z.object({
 	// GitHub OAuth — optional
 	GITHUB_CLIENT_ID: z.string().optional(),
 	GITHUB_CLIENT_SECRET: z.string().optional(),
+
+	// Upstash Redis — required in production for rate limiting; omit in local dev
+	UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
 	// Storage
 	STORAGE_PROVIDER: z.enum(["s3"]).default("s3"),

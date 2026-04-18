@@ -112,17 +112,18 @@ export const userRouter = createTRPCRouter({
 	 * whether the email exists in the system.
 	 */
 	requestPasswordReset: publicProcedure
-		.input(z.object({ email: z.string().email() }))
+		.input(z.object({ email: z.email() }))
 		.mutation(async ({ input, ctx }) => {
 			const ip =
 				ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-			if (
-				!checkRateLimit(`reset:${input.email}`, {
+			const [allowedByEmail, allowedByIp] = await Promise.all([
+				checkRateLimit(`reset:${input.email}`, {
 					windowMs: 15 * 60 * 1000,
 					max: 5,
-				}) ||
-				!checkRateLimit(`reset-ip:${ip}`, { windowMs: 15 * 60 * 1000, max: 10 })
-			) {
+				}),
+				checkRateLimit(`reset-ip:${ip}`, { windowMs: 15 * 60 * 1000, max: 10 }),
+			]);
+			if (!allowedByEmail || !allowedByIp) {
 				throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
 			}
 
@@ -207,21 +208,18 @@ export const userRouter = createTRPCRouter({
 			z.object({
 				firstName: z.string().min(1),
 				lastName: z.string().min(1),
-				email: z.string().email(),
+				email: z.email(),
 				password: z.string().min(8),
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
 			const ip =
 				ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-			if (
-				!checkRateLimit(`register:${ip}`, {
-					windowMs: 60 * 60 * 1000,
-					max: 10,
-				})
-			) {
-				throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
-			}
+			const allowed = await checkRateLimit(`register:${ip}`, {
+				windowMs: 60 * 60 * 1000,
+				max: 10,
+			});
+			if (!allowed) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
 
 			const existing = await prisma.user.findUnique({
 				where: { email: input.email },
