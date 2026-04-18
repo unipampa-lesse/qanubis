@@ -19,12 +19,17 @@ export default function InviteForm() {
 		},
 	});
 
-	// Auto-accept once the session is authenticated
+	// Auto-accept once the session is authenticated (run once; stop on error)
 	useEffect(() => {
-		if (status === "authenticated" && !accept.isPending && !accept.isSuccess) {
+		if (
+			status === "authenticated" &&
+			!accept.isPending &&
+			!accept.isSuccess &&
+			!accept.isError
+		) {
 			accept.mutate({ token });
 		}
-	}, [status, accept.isPending, accept.isSuccess, accept.mutate, token]);
+	}, [status, accept.isPending, accept.isSuccess, accept.isError, accept.mutate, token]);
 
 	if (status === "loading" || accept.isPending) {
 		return (
@@ -54,9 +59,19 @@ export default function InviteForm() {
 	}
 
 	if (accept.isError) {
+		const code = accept.error.data?.code;
+		const errorMessage =
+			code === "NOT_FOUND"
+				? t.invite.errorNotFound
+				: code === "BAD_REQUEST"
+					? t.invite.errorExpired
+					: code === "FORBIDDEN"
+						? t.invite.errorWrongEmail
+						: t.invite.errorGeneric;
+
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center gap-4">
-				<p className="text-sm text-error-500">{accept.error.message}</p>
+				<p className="text-sm text-error-500">{errorMessage}</p>
 				<Button variant="outline" onClick={() => router.push("/dashboard")}>
 					{t.invite.goToDashboard}
 				</Button>

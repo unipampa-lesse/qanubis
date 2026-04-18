@@ -467,6 +467,10 @@ export const translations: Translations = {
 		signInPrompt: "Entre na sua conta para aceitar este convite.",
 		signIn: "Entrar",
 		goToDashboard: "Ir para o painel",
+		errorNotFound: "Convite não encontrado ou já utilizado.",
+		errorExpired: "Este convite expirou.",
+		errorWrongEmail: "Este convite foi enviado para outro endereço de e-mail.",
+		errorGeneric: "Não foi possível aceitar o convite. Tente novamente.",
 	},
 
 	// Public landing page

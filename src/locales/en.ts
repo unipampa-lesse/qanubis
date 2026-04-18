@@ -471,6 +471,10 @@ export const translations = {
 		signInPrompt: "Sign in to accept this invitation.",
 		signIn: "Sign in",
 		goToDashboard: "Go to dashboard",
+		errorNotFound: "Invitation not found or already used.",
+		errorExpired: "This invitation has expired.",
+		errorWrongEmail: "This invitation was sent to a different email address.",
+		errorGeneric: "Could not accept the invitation. Please try again.",
 	},
 
 	// Public landing page

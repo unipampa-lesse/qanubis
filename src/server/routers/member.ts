@@ -145,7 +145,7 @@ export const memberRouter = createTRPCRouter({
 				where: { id: ctx.userId },
 				select: { name: true, email: true },
 			});
-			if (user.email !== invite.email) {
+			if (user.email.toLowerCase() !== invite.email.toLowerCase()) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "This invitation was sent to a different email address",

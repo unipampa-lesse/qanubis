@@ -451,6 +451,10 @@ export const translations: Translations = {
 		signInPrompt: "Inicia sesión para aceptar esta invitación.",
 		signIn: "Iniciar sesión",
 		goToDashboard: "Ir al panel",
+		errorNotFound: "Invitación no encontrada o ya utilizada.",
+		errorExpired: "Esta invitación ha expirado.",
+		errorWrongEmail: "Esta invitación fue enviada a otro correo electrónico.",
+		errorGeneric: "No se pudo aceptar la invitación. Inténtalo de nuevo.",
 	},
 
 	// 404 page
