@@ -652,7 +652,7 @@ export default function DocumentViewerPage() {
 			{/* Split layout */}
 			<div className="flex min-h-0 flex-1 gap-6">
 				{/* PDF viewer */}
-				<div className="min-w-0 flex-1 overflow-auto">
+				<div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
 					{urlLoading ? (
 						<div className="flex h-64 items-center justify-center text-sm text-gray-400">
 							<span className="animate-pulse">{t.viewer.loading}</span>
