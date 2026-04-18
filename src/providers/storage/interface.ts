@@ -28,4 +28,9 @@ export interface IStorageProvider {
 	 * Check whether an object exists.
 	 */
 	exists(key: string): Promise<boolean>;
+
+	/**
+	 * Verify connectivity to object storage. Throws on failure.
+	 */
+	ping(): Promise<void>;
 }

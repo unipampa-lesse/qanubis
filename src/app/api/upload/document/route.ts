@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { env } from "@/lib/env";
 import { extractPdfMetadata } from "@/lib/pdf";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { getStorageProvider } from "@/providers/storage";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -30,6 +31,14 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 	const userId = token.sub;
+
+	const allowed = await checkRateLimit(`upload:${userId}`, {
+		windowMs: 60 * 60 * 1000,
+		max: 30,
+	});
+	if (!allowed) {
+		return NextResponse.json({ error: "Too many uploads" }, { status: 429 });
+	}
 
 	let formData: FormData;
 	try {

@@ -39,4 +39,8 @@ export class NodemailerEmailProvider implements IEmailProvider {
 			text: options.text,
 		});
 	}
+
+	async ping(): Promise<void> {
+		await this.transporter.verify();
+	}
 }

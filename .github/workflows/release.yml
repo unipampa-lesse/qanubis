@@ -30,6 +30,13 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - name: Install dependencies
         run: pnpm install
 
@@ -60,6 +67,13 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - name: Install dependencies
         run: pnpm install
 
@@ -72,9 +86,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Bootstrap admin user
-        run: npx tsx prisma/seed.ts
+        run: npx tsx prisma/seed-admin.ts
         env:
-          NODE_ENV: production
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}

@@ -106,7 +106,24 @@ export const authOptions: AuthOptions = {
 				token.exp =
 					Math.floor(Date.now() / 1000) +
 					(rememberMe ? REMEMBER_ME_MAX_AGE : DEFAULT_MAX_AGE);
+				token.checkedAt = Math.floor(Date.now() / 1000);
+				return token;
 			}
+
+			// Re-verify user status every 5 minutes to catch suspensions mid-session.
+			const now = Math.floor(Date.now() / 1000);
+			const checkedAt = (token.checkedAt as number | undefined) ?? 0;
+			if (now - checkedAt > 5 * 60) {
+				const dbUser = await prisma.user.findUnique({
+					where: { id: token.sub },
+					select: { suspended: true, emailVerified: true },
+				});
+				if (!dbUser || dbUser.suspended || !dbUser.emailVerified) {
+					return { ...token, exp: 0 };
+				}
+				token.checkedAt = now;
+			}
+
 			return token;
 		},
 	},

@@ -7,4 +7,9 @@ export interface SendEmailOptions {
 
 export interface IEmailProvider {
 	send(options: SendEmailOptions): Promise<void>;
+
+	/**
+	 * Verify connectivity to the mail server. Throws on failure.
+	 */
+	ping(): Promise<void>;
 }

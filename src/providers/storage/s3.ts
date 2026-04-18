@@ -1,6 +1,7 @@
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadBucketCommand,
 	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
@@ -83,5 +84,9 @@ export class S3StorageProvider implements IStorageProvider {
 		} catch {
 			return false;
 		}
+	}
+
+	async ping(): Promise<void> {
+		await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
 	}
 }
