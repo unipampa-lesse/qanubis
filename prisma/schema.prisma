@@ -132,6 +132,7 @@ model ProjectInvite {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdBy User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
+  @@index([projectId])
   @@index([token])
   @@index([email])
 }
@@ -155,6 +156,8 @@ model Document {
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   quotes  Quote[]
+
+  @@index([projectId])
 }
 
 // ---------------------------------------------------------------------------
@@ -176,6 +179,9 @@ model Code {
   parent     Code?       @relation("CodeHierarchy", fields: [parentId], references: [id])
   children   Code[]      @relation("CodeHierarchy")
   quoteCodes QuoteCode[]
+
+  @@index([projectId])
+  @@index([parentId])
 }
 
 // ---------------------------------------------------------------------------
@@ -242,6 +248,9 @@ model Memo {
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdBy User    @relation(fields: [createdById], references: [id])
+
+  @@index([projectId])
+  @@index([createdById])
 }
 
 // ---------------------------------------------------------------------------

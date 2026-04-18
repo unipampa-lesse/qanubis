@@ -13,6 +13,10 @@ const envSchema = z.object({
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),
 
+	// GitHub OAuth — optional
+	GITHUB_CLIENT_ID: z.string().optional(),
+	GITHUB_CLIENT_SECRET: z.string().optional(),
+
 	// Storage
 	STORAGE_PROVIDER: z.enum(["s3"]).default("s3"),
 	STORAGE_ENDPOINT: z.string().min(1, "STORAGE_ENDPOINT is required"),

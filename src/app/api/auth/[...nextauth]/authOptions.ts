@@ -5,6 +5,7 @@ import type { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 
 const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
@@ -25,11 +26,11 @@ export const authOptions: AuthOptions = {
 					}),
 				]
 			: []),
-		...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+		...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
 			? [
 					GithubProvider({
-						clientId: process.env.GITHUB_CLIENT_ID,
-						clientSecret: process.env.GITHUB_CLIENT_SECRET,
+						clientId: env.GITHUB_CLIENT_ID,
+						clientSecret: env.GITHUB_CLIENT_SECRET,
 					}),
 				]
 			: []),

@@ -73,9 +73,15 @@ export const reportRouter = createTRPCRouter({
 			]);
 
 			// Build code → {quoteCount, docIds} map
-			const codeStats = new Map<string, { quoteCount: number; docIds: Set<string> }>();
+			const codeStats = new Map<
+				string,
+				{ quoteCount: number; docIds: Set<string> }
+			>();
 			for (const qc of quoteCodes) {
-				const entry = codeStats.get(qc.codeId) ?? { quoteCount: 0, docIds: new Set() };
+				const entry = codeStats.get(qc.codeId) ?? {
+					quoteCount: 0,
+					docIds: new Set(),
+				};
 				entry.quoteCount++;
 				entry.docIds.add(qc.quote.documentId);
 				codeStats.set(qc.codeId, entry);

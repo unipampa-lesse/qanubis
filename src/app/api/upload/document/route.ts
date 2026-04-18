@@ -145,10 +145,23 @@ export async function POST(req: NextRequest) {
 	}
 
 	// Update the record with the real storage key
-	const updated = await prisma.document.update({
-		where: { id: document.id },
-		data: { storageKey },
-	});
+	let updated: typeof document;
+	try {
+		updated = await prisma.document.update({
+			where: { id: document.id },
+			data: { storageKey },
+		});
+	} catch (err) {
+		await Promise.allSettled([
+			storage.delete(storageKey),
+			prisma.document.delete({ where: { id: document.id } }),
+		]);
+		console.error("[upload/document] db finalize failed:", err);
+		return NextResponse.json(
+			{ error: "Failed to finalize upload" },
+			{ status: 500 },
+		);
+	}
 
 	return NextResponse.json(updated, { status: 201 });
 }

@@ -8,10 +8,10 @@ import {
 } from "../trpc";
 
 const rectSchema = z.object({
-	x: z.number().min(0).max(2),
-	y: z.number().min(0).max(2),
-	width: z.number().min(0).max(2),
-	height: z.number().min(0).max(2),
+	x: z.number().min(0).max(1),
+	y: z.number().min(0).max(1),
+	width: z.number().min(0).max(1),
+	height: z.number().min(0).max(1),
 });
 
 /**

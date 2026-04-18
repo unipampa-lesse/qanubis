@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { getEmailProvider } from "@/providers/email";
 import { getEmailTemplateProvider } from "@/providers/email-template";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -112,7 +113,19 @@ export const userRouter = createTRPCRouter({
 	 */
 	requestPasswordReset: publicProcedure
 		.input(z.object({ email: z.string().email() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
+			const ip =
+				ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+			if (
+				!checkRateLimit(`reset:${input.email}`, {
+					windowMs: 15 * 60 * 1000,
+					max: 5,
+				}) ||
+				!checkRateLimit(`reset-ip:${ip}`, { windowMs: 15 * 60 * 1000, max: 10 })
+			) {
+				throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+			}
+
 			const user = await prisma.user.findUnique({
 				where: { email: input.email },
 				select: { id: true, password: true },
@@ -198,7 +211,18 @@ export const userRouter = createTRPCRouter({
 				password: z.string().min(8),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
+			const ip =
+				ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+			if (
+				!checkRateLimit(`register:${ip}`, {
+					windowMs: 60 * 60 * 1000,
+					max: 10,
+				})
+			) {
+				throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+			}
+
 			const existing = await prisma.user.findUnique({
 				where: { email: input.email },
 				select: { id: true },
