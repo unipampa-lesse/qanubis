@@ -28,7 +28,7 @@ const securityHeaders = [
 			"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 			"img-src 'self' data: blob: https://www.gravatar.com https://www.google-analytics.com",
 			"font-src 'self' https://fonts.gstatic.com",
-			"connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com",
+			`connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com${isDev ? " http://localhost:9000" : ""}${process.env.STORAGE_PUBLIC_URL ? ` ${process.env.STORAGE_PUBLIC_URL}` : ""}`,
 			"frame-ancestors 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
