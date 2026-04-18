@@ -80,6 +80,8 @@ Para rodar o QAnubis localmente para desenvolvimento ou testes, siga os passos a
 
     > **E-mails locais:** todos os e-mails (verificação, redefinição de senha, convites) são interceptados pelo MailHog e nunca chegam em um inbox real. Acesse **http://localhost:8025** para lê-los. É assim que você obtém o link de verificação após criar uma conta localmente.
 
+    > **Console MinIO:** acesse **http://localhost:9001** e entre com `minioadmin` / `minioadmin`. Daqui você pode navegar pelos arquivos enviados, inspecionar o conteúdo do bucket e excluir objetos diretamente — útil ao testar os fluxos de upload e exclusão de documentos.
+
 4. **Instale as dependências**
     ```bash
     pnpm install
@@ -105,6 +107,8 @@ Para rodar o QAnubis localmente para desenvolvimento ou testes, siga os passos a
     | researcher@qanubis.local | user123 | User | Conta de compatibilidade |
 
     O seed também cria dois projetos de exemplo, códigos com hierarquia, memorandos e chamados de suporte para você explorar todas as funcionalidades imediatamente.
+
+    > **Prisma Studio:** execute `pnpm prisma:studio` a qualquer momento para abrir um navegador visual do banco de dados em **http://localhost:5555**. Útil para inspecionar registros, editar dados manualmente e verificar se as operações estão sendo persistidas corretamente.
 
 6. **Inicie o servidor de desenvolvimento**
     ```bash
