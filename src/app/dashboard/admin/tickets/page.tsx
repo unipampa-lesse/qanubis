@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { useLanguage, useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
@@ -13,10 +15,32 @@ const STATUS_COLORS: Record<string, string> = {
 	CLOSED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
+const SELECT_CLASS =
+	"h-9 appearance-none rounded-lg border border-gray-300 bg-white px-3 pr-8 text-sm text-gray-700 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800";
+
+type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+
 export default function AdminTicketsPage() {
 	const t = useTranslation();
 	const { locale } = useLanguage();
 	const { data: tickets, isLoading } = trpc.admin.listTickets.useQuery();
+
+	const [search, setSearch] = useState("");
+	const [statusFilter, setStatusFilter] = useState<"" | TicketStatus>("");
+
+	const filtered = useMemo(() => {
+		if (!tickets) return [];
+		const q = search.trim().toLowerCase();
+		return tickets.filter((tk) => {
+			const matchSearch =
+				!q ||
+				tk.subject.toLowerCase().includes(q) ||
+				(tk.user.name ?? "").toLowerCase().includes(q) ||
+				tk.user.email.toLowerCase().includes(q);
+			const matchStatus = !statusFilter || tk.status === statusFilter;
+			return matchSearch && matchStatus;
+		});
+	}, [tickets, search, statusFilter]);
 
 	function statusLabel(status: string) {
 		const map: Record<string, string> = {
@@ -47,9 +71,40 @@ export default function AdminTicketsPage() {
 				{t.admin.tickets}
 			</h1>
 
-			{!tickets || tickets.length === 0 ? (
+			{/* Filters */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="relative flex-1">
+					<HiOutlineMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+					<input
+						type="text"
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						placeholder={t.admin.searchTickets}
+						className="h-9 w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-4 text-sm text-gray-700 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+					/>
+				</div>
+				<div className="relative">
+					<select
+						value={statusFilter}
+						onChange={(e) =>
+							setStatusFilter(e.target.value as "" | TicketStatus)
+						}
+						className={SELECT_CLASS}
+					>
+						<option value="">{t.admin.filterAllStatuses}</option>
+						<option value="OPEN">{t.admin.statusOpen}</option>
+						<option value="IN_PROGRESS">{t.admin.statusInProgress}</option>
+						<option value="RESOLVED">{t.admin.statusResolved}</option>
+						<option value="CLOSED">{t.admin.statusClosed}</option>
+					</select>
+				</div>
+			</div>
+
+			{filtered.length === 0 ? (
 				<div className="rounded-xl border border-dashed border-gray-300 py-16 text-center text-sm text-gray-400 dark:border-gray-700">
-					{t.admin.noTickets}
+					{tickets && tickets.length > 0
+						? t.admin.noResults
+						: t.admin.noTickets}
 				</div>
 			) : (
 				<div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
@@ -71,7 +126,7 @@ export default function AdminTicketsPage() {
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
-							{tickets.map((ticket) => (
+							{filtered.map((ticket) => (
 								<tr
 									key={ticket.id}
 									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"

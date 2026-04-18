@@ -364,6 +364,12 @@ export const translations = {
 		messages: "messages",
 		roleUser: "User",
 		roleAdmin: "Admin",
+		searchUsers: "Search by name or email…",
+		searchProjects: "Search by name…",
+		searchTickets: "Search by subject or user…",
+		filterAllRoles: "All roles",
+		filterAllStatuses: "All statuses",
+		noResults: "No results found.",
 	},
 
 	// Support tickets (user-facing)
@@ -392,6 +398,9 @@ export const translations = {
 		messages: "messages",
 		supportAgent: "Support",
 		you: "You",
+		searchPlaceholder: "Search by subject…",
+		filterAllStatuses: "All statuses",
+		noResults: "No tickets found.",
 	},
 
 	// Profile page
