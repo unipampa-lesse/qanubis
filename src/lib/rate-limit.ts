@@ -34,6 +34,17 @@ interface Entry {
 
 const store = new Map<string, Entry>();
 
+// Periodic sweep to evict all expired entries and prevent unbounded Map growth
+// across long-running processes (dev server, tests). Skip in edge runtimes.
+if (typeof setInterval !== "undefined") {
+	setInterval(() => {
+		const now = Date.now();
+		for (const [k, entry] of store) {
+			if (now > entry.resetAt) store.delete(k);
+		}
+	}, 5 * 60 * 1000).unref?.();
+}
+
 function checkInMemory(key: string, opts: RateLimitOptions): boolean {
 	const now = Date.now();
 	const entry = store.get(key);

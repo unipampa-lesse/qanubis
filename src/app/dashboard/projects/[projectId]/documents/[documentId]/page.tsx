@@ -19,6 +19,7 @@ import type {
 	QuoteHighlight,
 } from "@/components/projects/PdfViewer";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
@@ -444,10 +445,10 @@ export default function DocumentViewerPage() {
 
 	// Fetch presigned URL
 	const { data: urlData, isLoading: urlLoading } =
-		trpc.document.getViewUrl.useQuery({
-			projectId,
-			documentId,
-		});
+		trpc.document.getViewUrl.useQuery(
+			{ projectId, documentId },
+			{ staleTime: 25 * 60 * 1000, refetchInterval: 25 * 60 * 1000 },
+		);
 
 	// Fetch quotes
 	const { data: quotes = [] } = trpc.quote.list.useQuery({
@@ -518,14 +519,16 @@ export default function DocumentViewerPage() {
 							<span className="animate-pulse">{t.viewer.loading}</span>
 						</div>
 					) : urlData?.url ? (
-						<PdfViewer
-							url={urlData.url}
-							quotes={highlights}
-							selectedQuoteId={selectedQuoteId}
-							canEdit={canEdit}
-							onSelection={handleSelection}
-							onHighlightClick={setSelectedQuoteId}
-						/>
+						<ErrorBoundary>
+							<PdfViewer
+								url={urlData.url}
+								quotes={highlights}
+								selectedQuoteId={selectedQuoteId}
+								canEdit={canEdit}
+								onSelection={handleSelection}
+								onHighlightClick={setSelectedQuoteId}
+							/>
+						</ErrorBoundary>
 					) : (
 						<p className="text-sm text-error-500">{t.viewer.loadError}</p>
 					)}

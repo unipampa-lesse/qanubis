@@ -6,6 +6,7 @@ import ExportPanel from "@/components/reports/ExportPanel";
 import QuoteExplorer from "@/components/reports/QuoteExplorer";
 import StatsPanel from "@/components/reports/StatsPanel";
 import SummaryPanel from "@/components/reports/SummaryPanel";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
@@ -77,12 +78,30 @@ export default function ReportsTab({
 				))}
 			</div>
 
-			{activeSubTab === "explorer" && <QuoteExplorer quotes={safeQuotes} />}
-			{activeSubTab === "stats" && <StatsPanel projectId={projectId} />}
-			{activeSubTab === "charts" && <ChartsPanel quotes={safeQuotes} />}
-			{activeSubTab === "summary" && <SummaryPanel projectId={projectId} />}
+			{activeSubTab === "explorer" && (
+				<ErrorBoundary>
+					<QuoteExplorer quotes={safeQuotes} />
+				</ErrorBoundary>
+			)}
+			{activeSubTab === "stats" && (
+				<ErrorBoundary>
+					<StatsPanel projectId={projectId} />
+				</ErrorBoundary>
+			)}
+			{activeSubTab === "charts" && (
+				<ErrorBoundary>
+					<ChartsPanel quotes={safeQuotes} />
+				</ErrorBoundary>
+			)}
+			{activeSubTab === "summary" && (
+				<ErrorBoundary>
+					<SummaryPanel projectId={projectId} />
+				</ErrorBoundary>
+			)}
 			{activeSubTab === "export" && (
-				<ExportPanel quotes={safeQuotes} projectName={projectName} />
+				<ErrorBoundary>
+					<ExportPanel quotes={safeQuotes} projectName={projectName} />
+				</ErrorBoundary>
 			)}
 		</div>
 	);

@@ -41,7 +41,7 @@ export const documentRouter = createTRPCRouter({
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
 
 			const storage = getStorageProvider();
-			const url = await storage.getPresignedUrl(doc.storageKey, 3600);
+			const url = await storage.getPresignedUrl(doc.storageKey, 1800);
 			return { url };
 		}),
 
