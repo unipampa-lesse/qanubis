@@ -62,7 +62,7 @@ export class S3StorageProvider implements IStorageProvider {
 			Bucket: this.bucket,
 			Key: key,
 			...(options?.filename && {
-				ResponseContentDisposition: `attachment; filename="${options.filename}"`,
+				ResponseContentDisposition: `attachment; filename="${options.filename.replace(/[\r\n"\\]/g, "").slice(0, 200)}"`,
 			}),
 		});
 		return getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });

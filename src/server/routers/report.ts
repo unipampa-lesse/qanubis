@@ -158,15 +158,13 @@ export const reportRouter = createTRPCRouter({
 					},
 				}),
 				// Quotes per day (last 30 days)
-				prisma.$queryRawUnsafe<{ date: string; count: bigint }[]>(
-					`SELECT DATE("createdAt") as date, COUNT(*)::bigint as count
-					 FROM "Quote"
-					 WHERE "documentId" IN (SELECT id FROM "Document" WHERE "projectId" = $1)
-					 AND "createdAt" >= NOW() - INTERVAL '30 days'
-					 GROUP BY DATE("createdAt")
-					 ORDER BY date ASC`,
-					input.projectId,
-				),
+				prisma.$queryRaw<{ date: string; count: bigint }[]>`
+					SELECT DATE("createdAt") as date, COUNT(*)::bigint as count
+					FROM "Quote"
+					WHERE "documentId" IN (SELECT id FROM "Document" WHERE "projectId" = ${input.projectId})
+					AND "createdAt" >= NOW() - INTERVAL '30 days'
+					GROUP BY DATE("createdAt")
+					ORDER BY date ASC`,
 			]);
 
 			// Resolve document names for the per-document breakdown

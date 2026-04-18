@@ -179,6 +179,18 @@ export const quoteRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input }) => {
+			const quote = await prisma.quote.findFirst({
+				where: { id: input.quoteId, document: { projectId: input.projectId } },
+				select: { id: true },
+			});
+			if (!quote) throw new TRPCError({ code: "NOT_FOUND" });
+
+			const code = await prisma.code.findUnique({
+				where: { id: input.codeId, projectId: input.projectId },
+				select: { id: true },
+			});
+			if (!code) throw new TRPCError({ code: "NOT_FOUND" });
+
 			await prisma.quoteCode.deleteMany({
 				where: { quoteId: input.quoteId, codeId: input.codeId },
 			});
