@@ -107,6 +107,7 @@ export const translations = {
 		subtitle: "Your research projects and collaborations",
 		newProject: "New project",
 		noProjects: "No projects yet. Create your first one to get started.",
+		noResults: "No projects match your search.",
 		memberSingular: "member",
 		memberPlural: "members",
 		documentSingular: "document",
@@ -114,6 +115,10 @@ export const translations = {
 		codeSingular: "code",
 		codePlural: "codes",
 		updatedPrefix: "Updated",
+		searchPlaceholder: "Search by name or description…",
+		roleAll: "All roles",
+		sortNewest: "Newest first",
+		sortOldest: "Oldest first",
 	},
 
 	// Create project modal
