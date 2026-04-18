@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { extractPdfMetadata } from "@/lib/pdf";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStorageProvider } from "@/providers/storage";
+
+const log = logger.child({ module: "upload/document" });
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_MIME = "application/pdf";
@@ -147,7 +150,7 @@ export async function POST(req: NextRequest) {
 	} catch (err) {
 		// Roll back the DB record if storage upload fails
 		await prisma.document.delete({ where: { id: document.id } });
-		console.error("[upload/document] storage upload failed:", err);
+		log.error({ err }, "storage upload failed");
 		return NextResponse.json(
 			{ error: "Storage upload failed" },
 			{ status: 502 },
@@ -166,7 +169,7 @@ export async function POST(req: NextRequest) {
 			storage.delete(storageKey),
 			prisma.document.delete({ where: { id: document.id } }),
 		]);
-		console.error("[upload/document] db finalize failed:", err);
+		log.error({ err }, "db finalize failed");
 		return NextResponse.json(
 			{ error: "Failed to finalize upload" },
 			{ status: 500 },
