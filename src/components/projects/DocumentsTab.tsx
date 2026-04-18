@@ -307,8 +307,25 @@ export default function DocumentsTab({
 										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
 											{doc.fileSize > 0 ? formatBytes(doc.fileSize) : "—"}
 										</td>
-										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 md:table-cell">
-											{doc._count.quotes}
+										<td className="hidden px-5 py-3 md:table-cell">
+											<div className="flex flex-col gap-1">
+												<span className="text-gray-500 dark:text-gray-400">
+													{doc._count.quotes}
+												</span>
+												{doc._count.quotes > 0 && (
+													<div
+														className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"
+														title={`${doc.codedQuoteCount}/${doc._count.quotes} ${t.documents.codingProgress}`}
+													>
+														<div
+															className="h-full rounded-full bg-brand-500 transition-[width]"
+															style={{
+																width: `${Math.round((doc.codedQuoteCount / doc._count.quotes) * 100)}%`,
+															}}
+														/>
+													</div>
+												)}
+											</div>
 										</td>
 										<td className="px-5 py-3 text-right">
 											{!isEditing && (

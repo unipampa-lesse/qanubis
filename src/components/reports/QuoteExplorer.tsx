@@ -30,6 +30,7 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 	const [docFilter, setDocFilter] = useState("all");
 	const [codeFilter, setCodeFilter] = useState("all");
 	const [search, setSearch] = useState("");
+	const [noCodeOnly, setNoCodeOnly] = useState(false);
 
 	const allDocs = Array.from(
 		new Map(quotes.map((q) => [q.document.id, q.document])).values(),
@@ -47,6 +48,7 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 			!q.quoteCodes.some(({ code }) => code.id === codeFilter)
 		)
 			return false;
+		if (noCodeOnly && q.quoteCodes.length > 0) return false;
 		if (search && !q.text.toLowerCase().includes(search.toLowerCase()))
 			return false;
 		return true;
@@ -87,6 +89,20 @@ export default function QuoteExplorer({ quotes }: QuoteExplorerProps) {
 						</option>
 					))}
 				</select>
+				<button
+					type="button"
+					onClick={() => {
+						setNoCodeOnly((v) => !v);
+						setCodeFilter("all");
+					}}
+					className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+						noCodeOnly
+							? "border-brand-400 bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
+							: "border-gray-200 bg-white text-gray-500 dark:border-gray-700 dark:bg-gray-900"
+					}`}
+				>
+					{t.reports.uncodedOnly}
+				</button>
 				<span className="self-center text-xs text-gray-400">
 					{filtered.length} {t.reports.quoteCount}
 				</span>

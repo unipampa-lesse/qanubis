@@ -13,21 +13,36 @@ export const documentRouter = createTRPCRouter({
 	list: projectProcedure
 		.input(z.object({ projectId: z.string() }))
 		.query(async ({ input }) => {
-			return prisma.document.findMany({
-				where: { projectId: input.projectId },
-				select: {
-					id: true,
-					name: true,
-					description: true,
-					mimeType: true,
-					pageCount: true,
-					fileSize: true,
-					extractedTitle: true,
-					createdAt: true,
-					_count: { select: { quotes: true } },
-				},
-				orderBy: { createdAt: "desc" },
-			});
+			const [docs, codedGroups] = await Promise.all([
+				prisma.document.findMany({
+					where: { projectId: input.projectId },
+					select: {
+						id: true,
+						name: true,
+						description: true,
+						mimeType: true,
+						pageCount: true,
+						fileSize: true,
+						extractedTitle: true,
+						createdAt: true,
+						_count: { select: { quotes: true } },
+					},
+					orderBy: { createdAt: "desc" },
+				}),
+				prisma.quote.groupBy({
+					by: ["documentId"],
+					where: {
+						document: { projectId: input.projectId },
+						quoteCodes: { some: {} },
+					},
+					_count: { id: true },
+				}),
+			]);
+			const codedMap = new Map(codedGroups.map((g) => [g.documentId, g._count.id]));
+			return docs.map((doc) => ({
+				...doc,
+				codedQuoteCount: codedMap.get(doc.id) ?? 0,
+			}));
 		}),
 
 	/** Get a presigned URL to view (GET) a document PDF. Available to all members. */

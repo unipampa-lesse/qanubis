@@ -206,6 +206,7 @@ function QuoteComments({
 function QuoteCard({
 	quote,
 	projectId,
+	documentId,
 	codes,
 	isSelected,
 	currentUserId,
@@ -214,6 +215,7 @@ function QuoteCard({
 }: {
 	quote: QuoteData;
 	projectId: string;
+	documentId: string;
 	codes: CodeData[];
 	isSelected: boolean;
 	currentUserId: string;
@@ -228,10 +230,45 @@ function QuoteCard({
 	const utils = trpc.useUtils();
 
 	const assignCode = trpc.quote.assignCode.useMutation({
-		onSuccess: () => utils.quote.list.invalidate({ projectId }),
+		onMutate: async ({ quoteId, codeId }) => {
+			await utils.quote.list.cancel({ projectId, documentId });
+			const prev = utils.quote.list.getData({ projectId, documentId });
+			utils.quote.list.setData({ projectId, documentId }, (old) =>
+				old?.map((q) => {
+					if (q.id !== quoteId) return q;
+					const code = codes.find((c) => c.id === codeId);
+					if (!code) return q;
+					return { ...q, quoteCodes: [...q.quoteCodes, { code }] };
+				}),
+			);
+			return { prev };
+		},
+		onError: (_e, _v, ctx) => {
+			if (ctx?.prev)
+				utils.quote.list.setData({ projectId, documentId }, ctx.prev);
+		},
+		onSettled: () => utils.quote.list.invalidate({ projectId, documentId }),
 	});
 	const removeCode = trpc.quote.removeCode.useMutation({
-		onSuccess: () => utils.quote.list.invalidate({ projectId }),
+		onMutate: async ({ quoteId, codeId }) => {
+			await utils.quote.list.cancel({ projectId, documentId });
+			const prev = utils.quote.list.getData({ projectId, documentId });
+			utils.quote.list.setData({ projectId, documentId }, (old) =>
+				old?.map((q) => {
+					if (q.id !== quoteId) return q;
+					return {
+						...q,
+						quoteCodes: q.quoteCodes.filter((qc) => qc.code.id !== codeId),
+					};
+				}),
+			);
+			return { prev };
+		},
+		onError: (_e, _v, ctx) => {
+			if (ctx?.prev)
+				utils.quote.list.setData({ projectId, documentId }, ctx.prev);
+		},
+		onSettled: () => utils.quote.list.invalidate({ projectId, documentId }),
 	});
 	const deleteQuote = trpc.quote.delete.useMutation({
 		onSuccess: () => utils.quote.list.invalidate({ projectId }),
@@ -435,6 +472,10 @@ export default function DocumentViewerPage() {
 	const utils = trpc.useUtils();
 
 	const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+	const [pendingSelection, setPendingSelection] = useState<
+		(PendingSelection & { color: string }) | null
+	>(null);
+	const [pendingCodeIds, setPendingCodeIds] = useState<string[]>([]);
 
 	// Derive current role (default COLLABORATOR while loading)
 	const { data: members } = trpc.member.list.useQuery({ projectId });
@@ -459,23 +500,40 @@ export default function DocumentViewerPage() {
 	// Fetch codes
 	const { data: codes = [] } = trpc.code.list.useQuery({ projectId });
 
-	// Create quote mutation
+	const assignCode = trpc.quote.assignCode.useMutation();
+
+	// Create quote mutation — chains code assignments from the pending modal
 	const createQuote = trpc.quote.create.useMutation({
-		onSuccess: (newQuote) => {
+		onSuccess: async (newQuote) => {
+			if (pendingCodeIds.length > 0) {
+				await Promise.all(
+					pendingCodeIds.map((codeId) =>
+						assignCode.mutateAsync({ projectId, quoteId: newQuote.id, codeId }),
+					),
+				);
+			}
 			utils.quote.list.invalidate({ projectId, documentId });
 			setSelectedQuoteId(newQuote.id);
+			setPendingSelection(null);
+			setPendingCodeIds([]);
 		},
 	});
 
 	function handleSelection(selection: PendingSelection) {
 		const color = QUOTE_COLORS[quotes.length % QUOTE_COLORS.length];
+		setPendingSelection({ ...selection, color });
+		setPendingCodeIds([]);
+	}
+
+	function confirmCreateQuote() {
+		if (!pendingSelection) return;
 		createQuote.mutate({
 			projectId,
 			documentId,
-			text: selection.text,
-			page: selection.page,
-			position: selection.position,
-			color,
+			text: pendingSelection.text,
+			page: pendingSelection.page,
+			position: pendingSelection.position,
+			color: pendingSelection.color,
 		});
 	}
 
@@ -509,6 +567,87 @@ export default function DocumentViewerPage() {
 					{t.viewer.backToProject}
 				</Link>
 			</div>
+
+			{/* Quote creation modal */}
+			{pendingSelection && (
+				<div className="fixed inset-0 z-[100000] flex items-center justify-center">
+					<div
+						className="absolute inset-0 bg-black/50"
+						onClick={() => {
+							setPendingSelection(null);
+							setPendingCodeIds([]);
+						}}
+						aria-hidden
+					/>
+					<div className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-5 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+						<h3 className="mb-3 text-sm font-semibold text-gray-800 dark:text-white">
+							{t.viewer.quoteCreateTitle}
+						</h3>
+						<blockquote
+							className="mb-4 line-clamp-4 rounded-lg border-l-4 bg-gray-50 px-3 py-2 text-xs italic text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+							style={{ borderColor: pendingSelection.color }}
+						>
+							"{pendingSelection.text}"
+						</blockquote>
+						{codes.length > 0 && (
+							<div className="mb-4">
+								<p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+									{t.viewer.quoteCreateCodes}
+								</p>
+								<div className="flex flex-wrap gap-1.5">
+									{(codes as CodeData[]).map((code) => {
+										const active = pendingCodeIds.includes(code.id);
+										return (
+											<button
+												key={code.id}
+												type="button"
+												onClick={() =>
+													setPendingCodeIds((prev) =>
+														active
+															? prev.filter((id) => id !== code.id)
+															: [...prev, code.id],
+													)
+												}
+												className={`rounded-full px-2.5 py-1 text-xs font-medium transition-opacity ${active ? "opacity-100 ring-2 ring-offset-1 ring-black/20" : "opacity-60 hover:opacity-90"}`}
+												style={{
+													backgroundColor: code.color,
+													color: code.textColor,
+												}}
+											>
+												{code.name}
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						)}
+						<div className="flex justify-end gap-2">
+							<button
+								type="button"
+								onClick={() => {
+									setPendingSelection(null);
+									setPendingCodeIds([]);
+								}}
+								className="rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+							>
+								{t.common.cancel}
+							</button>
+							<button
+								type="button"
+								disabled={createQuote.isPending}
+								onClick={confirmCreateQuote}
+								className="rounded-lg bg-brand-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+							>
+								{createQuote.isPending
+									? "…"
+									: pendingCodeIds.length > 0
+										? t.viewer.quoteCreateConfirm
+										: t.viewer.quoteCreateSkip}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Split layout */}
 			<div className="flex min-h-0 flex-1 gap-6">
@@ -569,6 +708,7 @@ export default function DocumentViewerPage() {
 												key={quote.id}
 												quote={quote}
 												projectId={projectId}
+												documentId={documentId}
 												codes={codes as CodeData[]}
 												isSelected={selectedQuoteId === quote.id}
 												currentUserId={session?.user?.id ?? ""}

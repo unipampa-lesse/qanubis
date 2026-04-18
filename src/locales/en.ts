@@ -201,6 +201,7 @@ export const translations = {
 		pages: "Pages",
 		size: "Size",
 		quotes: "Quotes",
+		codingProgress: "coded",
 		noDocuments: "No documents yet.",
 		noDocumentsHint: "Upload a PDF to get started.",
 		deleteDocument: "Delete document",
@@ -242,6 +243,10 @@ export const translations = {
 		deleteComment: "Delete comment",
 		noComments: "No comments yet.",
 		allCodesAssigned: "All codes assigned.",
+		quoteCreateTitle: "New quote",
+		quoteCreateCodes: "Assign codes (optional)",
+		quoteCreateConfirm: "Create",
+		quoteCreateSkip: "Create without codes",
 		changeHighlightColor: "Change highlight color",
 	},
 
@@ -257,6 +262,7 @@ export const translations = {
 		allCodes: "All codes",
 		noQuotes: "No quotes match the current filters.",
 		quoteCount: "quote(s)",
+		uncodedOnly: "Uncoded only",
 		page: "p.",
 		// Charts
 		quotesHeatmapTitle: "Quotes × Codes",
