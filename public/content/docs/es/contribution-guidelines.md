@@ -82,11 +82,13 @@ Para ejecutar QAnubis localmente para desarrollo o pruebas, sigue los pasos a co
     ```
 
 5. **Configura la base de datos**
+
+    Genera el cliente Prisma, aplica las migraciones y carga los datos de ejemplo en un solo paso:
     ```bash
     pnpm prisma:generate
-    pnpm prisma:migrate
-    pnpm prisma:seed
+    pnpm setup
     ```
+    > En la primera ejecución de migraciones se pedirá un nombre — escribe `initial` y presiona Enter.
 
     El seed crea las siguientes cuentas:
 

@@ -77,7 +77,8 @@ erDiagram
         string createdById FK
         string text
         int page
-        json position "start and end char offsets within page text layer"
+        json position "rectángulos visuales relativos a la página [{x,y,width,height}] como fracciones 0-1"
+        string color "color de resaltado en hex, por defecto #fbbf24"
         datetime createdAt
         datetime updatedAt
     }
@@ -225,15 +226,17 @@ The full text content of the PDF is **not** stored. PDF.js extracts the text lay
 
 ### Quote & QuoteCode
 
-`position` stores the character offsets within the PDF.js text layer for the selected page:
+`position` almacena un array de rectángulos visuales relativos a la página, producidos por la capa de texto de PDF.js en el momento de la selección:
 
 ```json
-{ "start": 142, "end": 310 }
+[{ "x": 0.12, "y": 0.34, "width": 0.45, "height": 0.02 }]
 ```
 
-This is sufficient to re-render the highlight overlay when the document is reopened. The `page` field is stored separately for quick filtering (e.g. "show all quotes on page 3").
+Las coordenadas de cada rectángulo se expresan como fracciones de las dimensiones de la página (0–1), haciéndolas independientes de resolución y zoom. Cuando el visor renderiza, estos rectángulos se multiplican por el tamaño actual del canvas para posicionar el resaltado.
 
-`QuoteCode` is a pure join table — a quote can have multiple codes, and a code can be used in multiple quotes.
+`color` es el color hexadecimal de resaltado elegido por el investigador (por defecto `#fbbf24`). El campo `page` se almacena separadamente para filtrado rápido (ej: "mostrar todas las citas de la página 3").
+
+`QuoteCode` es una tabla de unión pura — una cita puede tener múltiples códigos, y un código puede usarse en múltiples citas.
 
 ---
 
@@ -265,9 +268,9 @@ Ownership via `ProjectMember` (role = OWNER) keeps the model consistent — memb
 
 Page count is small (one integer) and enables the document listing UI with no storage calls. Full text can be megabytes per document — storing it would bloat the database and provide no benefit until v2 full-text search is implemented.
 
-### Why character offsets for quote position?
+### Why fractional visual rects for quote position?
 
-Bounding-box coordinates (x/y/width/height) are tied to the zoom level at the time of selection and require recalculation on every render. Character offsets within the PDF.js text layer are stable across zoom levels and simpler to store. The highlight is re-derived from the offset when the viewer renders.
+Storing bounding-box coordinates as fractions of the page dimensions (0–1) makes them zoom- and resolution-independent. The highlight overlay is re-derived at render time by multiplying the stored fractions by the current canvas size. This avoids recalculating positions stored at a specific zoom level and handles PDF pages of varying sizes correctly.
 
 ### Why Tiptap JSON for memo content?
 

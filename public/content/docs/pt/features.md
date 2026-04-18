@@ -26,12 +26,12 @@ Uma UI/UX de qualidade é um requisito de primeira classe no QAnubis, não uma r
 
 | Funcionalidade | Notas |
 |----------------|-------|
-| Cadastro com e-mail e senha | E-mail verificado automaticamente no cadastro; verificação por e-mail é fase futura |
+| Cadastro com e-mail e senha | ✅ Implementado — um e-mail de verificação é enviado após o cadastro; o link deve ser clicado antes do primeiro login |
 | Login com e-mail e senha | ✅ Implementado |
 | Login com Google OAuth | ✅ Implementado — opcional, habilitado via env `GOOGLE_CLIENT_ID` |
 | Login com GitHub OAuth | ✅ Implementado — opcional, habilitado via env `GITHUB_CLIENT_ID` |
 | Lembrar-me (sessão de 30 dias) | ✅ Implementado — sessão padrão é 24 h; marcar "Manter sessão" estende para 30 dias |
-| Redefinição de senha por e-mail | UI implementada; envio de e-mail integrado em fase futura |
+| Redefinição de senha por e-mail | ✅ Implementado — envia um link de redefinição para o endereço informado |
 | Perfil de usuário (nome + troca de senha) | ✅ Implementado — avatar é v2 |
 
 ---
@@ -51,6 +51,7 @@ Projetos são o container principal de todo o material de pesquisa. **Colaboraç
 | **Sair de um projeto** | Para não-proprietários |
 | **Remover um membro** | Somente proprietário |
 | Listar todos os projetos do usuário | Próprios + compartilhados |
+| **Busca e filtro de projetos** | Busca por nome ou descrição; filtra por papel (Proprietário/Colaborador/Visualizador); ordena por mais recente |
 
 **Definição de funções:**
 

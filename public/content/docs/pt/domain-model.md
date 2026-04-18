@@ -77,7 +77,8 @@ erDiagram
         string createdById FK
         string text
         int page
-        json position "start and end char offsets within page text layer"
+        json position "retângulos visuais relativos à página [{x,y,width,height}] como frações 0-1"
+        string color "cor de destaque em hex, padrão #fbbf24"
         datetime createdAt
         datetime updatedAt
     }
@@ -225,13 +226,15 @@ O conteúdo de texto completo do PDF **não é** armazenado. O PDF.js extrai a c
 
 ### Quote & QuoteCode (Citação)
 
-`position` armazena os deslocamentos de caracteres dentro da camada de texto do PDF.js para a página selecionada:
+`position` armazena um array de retângulos visuais relativos à página, produzidos pela camada de texto do PDF.js no momento da seleção:
 
 ```json
-{ "start": 142, "end": 310 }
+[{ "x": 0.12, "y": 0.34, "width": 0.45, "height": 0.02 }]
 ```
 
-Isso é suficiente para re-renderizar o destaque quando o documento é reaberto. O campo `page` é armazenado separadamente para filtragem rápida (ex: "mostrar todas as citações da página 3").
+As coordenadas de cada retângulo são expressas como frações das dimensões da página (0–1), tornando-as independentes de resolução e zoom. Quando o visualizador renderiza, esses retos são multiplicados pelo tamanho atual do canvas para posicionar o destaque.
+
+`color` é a cor hexadecimal de destaque escolhida pelo pesquisador (padrão `#fbbf24`). O campo `page` é armazenado separadamente para filtragem rápida (ex: "mostrar todas as citações da página 3").
 
 `QuoteCode` é uma tabela de junção pura — uma citação pode ter múltiplos códigos, e um código pode ser usado em múltiplas citações.
 
@@ -265,9 +268,9 @@ Propriedade via `ProjectMember` (role = OWNER) mantém o modelo consistente — 
 
 O número de páginas é pequeno (um inteiro) e habilita a UI de listagem de documentos sem chamadas ao armazenamento. O texto completo pode ter megabytes por documento — armazená-lo inflaria o banco de dados sem trazer benefício até que a busca de texto completo da v2 seja implementada.
 
-### Por que deslocamentos de caracteres para a posição da citação?
+### Por que retângulos visuais fracionários para a posição da citação?
 
-Coordenadas de bounding-box (x/y/largura/altura) estão atreladas ao nível de zoom no momento da seleção e exigem recalculação a cada renderização. Deslocamentos de caracteres dentro da camada de texto do PDF.js são estáveis independentemente do zoom e mais simples de armazenar. O destaque é re-derivado do deslocamento quando o visualizador renderiza.
+Armazenar as coordenadas do bounding-box como frações das dimensões da página (0–1) as torna independentes de zoom e resolução. O destaque é re-derivado no momento da renderização multiplicando as frações armazenadas pelo tamanho atual do canvas. Isso evita ter que recalcular posições salvas em um zoom específico e lida corretamente com páginas de diferentes tamanhos.
 
 ### Por que JSON do Tiptap para o conteúdo do memorando?
 

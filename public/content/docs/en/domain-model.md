@@ -77,7 +77,8 @@ erDiagram
         string createdById FK
         string text
         int page
-        json position "start and end char offsets within page text layer"
+        json position "page-relative visual rects [{x,y,width,height}] as 0-1 fractions"
+        string color "highlight color hex, default #fbbf24"
         datetime createdAt
         datetime updatedAt
     }
@@ -225,13 +226,15 @@ The full text content of the PDF is **not** stored. PDF.js extracts the text lay
 
 ### Quote & QuoteCode
 
-`position` stores the character offsets within the PDF.js text layer for the selected page:
+`position` stores an array of page-relative visual bounding rectangles produced by the PDF.js text layer at selection time:
 
 ```json
-{ "start": 142, "end": 310 }
+[{ "x": 0.12, "y": 0.34, "width": 0.45, "height": 0.02 }]
 ```
 
-This is sufficient to re-render the highlight overlay when the document is reopened. The `page` field is stored separately for quick filtering (e.g. "show all quotes on page 3").
+Each rectangle's coordinates are expressed as fractions of the page dimensions (0–1), making them resolution- and zoom-independent. When the viewer renders, these rects are multiplied by the current canvas size to position the highlight overlay.
+
+`color` is the highlight hex color chosen by the researcher (defaults to `#fbbf24`). The `page` field is stored separately for quick filtering (e.g. "show all quotes on page 3").
 
 `QuoteCode` is a pure join table — a quote can have multiple codes, and a code can be used in multiple quotes.
 
@@ -265,9 +268,9 @@ Ownership via `ProjectMember` (role = OWNER) keeps the model consistent — memb
 
 Page count is small (one integer) and enables the document listing UI with no storage calls. Full text can be megabytes per document — storing it would bloat the database and provide no benefit until v2 full-text search is implemented.
 
-### Why character offsets for quote position?
+### Why fractional visual rects for quote position?
 
-Bounding-box coordinates (x/y/width/height) are tied to the zoom level at the time of selection and require recalculation on every render. Character offsets within the PDF.js text layer are stable across zoom levels and simpler to store. The highlight is re-derived from the offset when the viewer renders.
+Storing bounding-box coordinates as fractions of the page dimensions (0–1) makes them zoom- and resolution-independent. The highlight overlay is re-derived at render time by multiplying the stored fractions by the current canvas size. This avoids having to recalculate positions stored at a specific zoom level and handles PDF pages of varying sizes correctly.
 
 ### Why Tiptap JSON for memo content?
 

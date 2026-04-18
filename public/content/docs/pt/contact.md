@@ -1,5 +1,5 @@
 # Contato
 
-Para qualquer dúvida ou suporte, entre em contato conosco pelo [e-mail](mailto:email@email).
+Para relatar bugs, sugerir funcionalidades ou tirar dúvidas gerais, abra uma issue na nossa [página de Issues no GitHub](https://github.com/unipampa-lesse/qanubis/issues).
 
-Estamos aqui para ajudá-lo com qualquer pergunta ou problema relacionado ao QAnubis.
+Para suporte dentro da aplicação, use a seção **Suporte** na barra lateral para abrir um ticket — os administradores da plataforma responderão por lá.

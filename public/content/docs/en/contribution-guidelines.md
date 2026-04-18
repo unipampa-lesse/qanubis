@@ -77,20 +77,12 @@ To run QAnubis locally for development or testing purposes, follow these steps.
     ```
 
 5. **Set up the database**
-    Generate Prisma client:
+    Generate the Prisma client, apply migrations, and seed dev data in one step:
     ```bash
     pnpm prisma:generate
+    pnpm setup
     ```
-
-    Apply migrations (you'll be prompted for a migration name on the very first run — type `initial` and press Enter):
-    ```bash
-    pnpm prisma:migrate
-    ```
-
-    Seed sample data and dev users:
-    ```bash
-    pnpm prisma:seed
-    ```
+    > On the very first migration run you'll be prompted for a name — type `initial` and press Enter.
 
     This creates the following seed accounts:
 

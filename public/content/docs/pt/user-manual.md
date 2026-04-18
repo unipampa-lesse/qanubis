@@ -23,7 +23,7 @@ Este manual cobre todas as funcionalidades disponíveis no QAnubis v1. Use o ín
 
 ### Criar conta
 
-Acesse `/auth/signup` e preencha seu primeiro nome, sobrenome, e-mail e uma senha de pelo menos 8 caracteres. Sua conta fica ativa imediatamente — sem necessidade de verificação de e-mail.
+Acesse `/auth/signup` e preencha seu primeiro nome, sobrenome, e-mail e uma senha de pelo menos 8 caracteres. Após o envio, um link de verificação é enviado para o seu e-mail — clique nele para ativar a conta antes de fazer login.
 
 ### Entrar
 

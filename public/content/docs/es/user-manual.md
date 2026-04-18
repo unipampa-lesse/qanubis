@@ -23,7 +23,7 @@ Este manual cubre todas las funcionalidades disponibles en QAnubis v1. Usa el í
 
 ### Crear cuenta
 
-Accede a `/auth/signup` y completa tu nombre, apellido, correo electrónico y una contraseña de al menos 8 caracteres. Tu cuenta queda activa de inmediato, sin verificación de correo.
+Accede a `/auth/signup` y completa tu nombre, apellido, correo electrónico y una contraseña de al menos 8 caracteres. Tras enviar el formulario, se envía un enlace de verificación a tu correo — haz clic en él para activar tu cuenta antes de iniciar sesión.
 
 ### Iniciar sesión
 

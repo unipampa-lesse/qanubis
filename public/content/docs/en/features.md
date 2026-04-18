@@ -26,12 +26,12 @@ Good UI/UX is a first-class requirement of QAnubis, not an afterthought. Researc
 
 | Feature | Notes |
 |---------|-------|
-| Sign up with email and password | Email auto-verified on registration; email verification flow is a future phase |
+| Sign up with email and password | ✅ Implemented — a verification email is sent after signup; the link must be clicked before signing in |
 | Sign in with email and password | ✅ Implemented |
 | Sign in with Google OAuth | ✅ Implemented — optional, enabled via `GOOGLE_CLIENT_ID` env var |
 | Sign in with GitHub OAuth | ✅ Implemented — optional, enabled via `GITHUB_CLIENT_ID` env var |
 | Remember me (30-day session) | ✅ Implemented — default session is 24 h; checking "Keep me logged in" extends to 30 days |
-| Password reset via email | UI implemented; email delivery wired in a future phase |
+| Password reset via email | ✅ Implemented — sends a reset link to the provided email address |
 | User profile (display name + password change) | ✅ Implemented — avatar is v2 |
 
 ---
@@ -51,6 +51,7 @@ Projects are the top-level container for all research material. **Collaboration 
 | **Leave a project** | For non-owners |
 | **Remove a member** | Owner only |
 | List all projects the user belongs to | Own + shared |
+| **Search and filter projects** | Search by name or description; filter by role (Owner/Collaborator/Viewer); sort by last updated |
 
 **Role definitions:**
 
@@ -202,5 +203,5 @@ These features are desirable but will not block the first release. They are list
 | **Public share link** (read-only report) | Auth model extension |
 | **Change history** for quotes and codes | Audit log table |
 | **XLSX export** | Additional export format |
-| **Multi-language UI** | ✅ PT/EN implemented — additional languages are v2 |
+| **Additional language support** | ✅ PT, EN, and ES implemented — further languages are v2 |
 | **Mobile-optimized layout** | Requires separate UX design for small screens |

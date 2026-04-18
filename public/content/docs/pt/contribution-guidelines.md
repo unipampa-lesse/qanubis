@@ -85,20 +85,12 @@ Para rodar o QAnubis localmente para desenvolvimento ou testes, siga os passos a
 
 5. **Configure o banco de dados**
 
-    Gere o cliente Prisma:
+    Gere o cliente Prisma, aplique as migrations e popule os dados em um único passo:
     ```bash
     pnpm prisma:generate
+    pnpm setup
     ```
-
-    Aplique as migrations (na primeira vez, será pedido um nome — digite `initial` e pressione Enter):
-    ```bash
-    pnpm prisma:migrate
-    ```
-
-    Popule com dados de exemplo:
-    ```bash
-    pnpm prisma:seed
-    ```
+    > Na primeira execução das migrations você será perguntado pelo nome — digite `initial` e pressione Enter.
 
     O seed cria as seguintes contas:
 

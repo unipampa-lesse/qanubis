@@ -23,7 +23,7 @@ This manual covers every feature available in QAnubis v1. Use the table of conte
 
 ### Sign up
 
-Visit `/auth/signup` and fill in your first name, last name, email, and a password of at least 8 characters. Your account is active immediately — no email verification required.
+Visit `/auth/signup` and fill in your first name, last name, email, and a password of at least 8 characters. After submitting, a verification link is sent to your email — click it to activate your account before signing in.
 
 ### Sign in
 
