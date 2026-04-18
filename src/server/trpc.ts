@@ -1,4 +1,5 @@
 import type { ProjectRole } from "@prisma/client";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -56,7 +57,28 @@ const t = initTRPC.context<TRPCContext>().create({
 
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const publicProcedure = t.procedure;
+
+const tracer = trace.getTracer("qanubis/trpc");
+
+const tracingMiddleware = t.middleware(async ({ path, type, next }) => {
+	return tracer.startActiveSpan(`trpc.${type}.${path}`, async (span) => {
+		try {
+			const result = await next();
+			if (!result.ok) {
+				span.setStatus({ code: SpanStatusCode.ERROR });
+			}
+			return result;
+		} catch (err) {
+			span.setStatus({ code: SpanStatusCode.ERROR });
+			span.recordException(err as Error);
+			throw err;
+		} finally {
+			span.end();
+		}
+	});
+});
+
+export const publicProcedure = t.procedure.use(tracingMiddleware);
 
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 	if (!ctx.userId) {
