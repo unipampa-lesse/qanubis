@@ -32,7 +32,7 @@ export class NodemailerEmailProvider implements IEmailProvider {
 
 	async send(options: SendEmailOptions): Promise<void> {
 		await this.transporter.sendMail({
-			from: process.env.SMTP_FROM ?? "QAnubis <noreply@qanubis.app>",
+			from: env.SMTP_FROM,
 			to: Array.isArray(options.to) ? options.to.join(", ") : options.to,
 			subject: options.subject,
 			html: options.html,

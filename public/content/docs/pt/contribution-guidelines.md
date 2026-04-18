@@ -78,6 +78,8 @@ Para rodar o QAnubis localmente para desenvolvimento ou testes, siga os passos a
     | Console MinIO (armazenamento) | http://localhost:9001 |
     | MailHog (captura de e-mails) | http://localhost:8025 |
 
+    > **E-mails locais:** todos os e-mails (verificação, redefinição de senha, convites) são interceptados pelo MailHog e nunca chegam em um inbox real. Acesse **http://localhost:8025** para lê-los. É assim que você obtém o link de verificação após criar uma conta localmente.
+
 4. **Instale as dependências**
     ```bash
     pnpm install

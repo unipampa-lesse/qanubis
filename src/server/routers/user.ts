@@ -132,7 +132,7 @@ export const userRouter = createTRPCRouter({
 				data: { identifier: input.email, token, expires },
 			});
 
-			const resetUrl = `${env.NEXTAUTH_URL}/auth/reset-password/${token}`;
+			const resetUrl = `${env.NEXTAUTH_URL}/reset-password/${token}`;
 			const emailContent = await getEmailTemplateProvider().render(
 				"reset-password",
 				{ resetUrl },
@@ -375,7 +375,7 @@ async function sendVerificationEmail(email: string): Promise<void> {
 		data: { identifier: `verify-email:${email}`, token, expires },
 	});
 
-	const verifyUrl = `${env.NEXTAUTH_URL}/auth/verify-email/${token}`;
+	const verifyUrl = `${env.NEXTAUTH_URL}/verify-email/${token}`;
 	const emailContent = await getEmailTemplateProvider().render("verify-email", {
 		verifyUrl,
 	});

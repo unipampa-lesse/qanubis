@@ -71,6 +71,8 @@ To run QAnubis locally for development or testing purposes, follow these steps.
     | MinIO console (object storage) | http://localhost:9001 |
     | MailHog (email catcher) | http://localhost:8025 |
 
+    > **Local email:** All emails (verification, password reset, invites) are intercepted by MailHog and never reach a real inbox. Open **http://localhost:8025** to read them. This is how you get the verification link after signing up locally.
+
 4. **Install dependencies**
     ```bash
     pnpm install
