@@ -307,8 +307,7 @@ export const translations: Translations = {
 		totalMemos: "Memorandos",
 		uncodedQuotes: "Citas sin código",
 		codeFrequency: "Frecuencia de códigos",
-		documentDistribution: "Citas por documento",
-		activityTimeline: "Actividad (últimos 30 días)",
+		documentDistribution: "Citas por documento"
 	},
 
 	// Memos tab

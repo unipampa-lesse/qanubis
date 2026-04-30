@@ -129,37 +129,6 @@ export default function StatsPanel({ projectId }: StatsPanelProps) {
 					</div>
 				</div>
 			)}
-
-			{/* Activity timeline (last 30 days) */}
-			{stats.quotesOverTime.length > 0 && (
-				<div>
-					<h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-						{t.reports.activityTimeline}
-					</h3>
-					<div className="flex items-end gap-px h-24">
-						{stats.quotesOverTime.map((d) => {
-							const max = Math.max(
-								...stats.quotesOverTime.map((x) => x.count),
-							);
-							const pct = max > 0 ? (d.count / max) * 100 : 0;
-							return (
-								<div
-									key={d.date}
-									className="flex-1 rounded-t bg-brand-500/70 dark:bg-brand-400/60"
-									style={{ height: `${Math.max(pct, 4)}%` }}
-									title={`${d.date}: ${d.count}`}
-								/>
-							);
-						})}
-					</div>
-					<div className="mt-1 flex justify-between text-xs text-gray-400">
-						<span>{stats.quotesOverTime[0]?.date}</span>
-						<span>
-							{stats.quotesOverTime[stats.quotesOverTime.length - 1]?.date}
-						</span>
-					</div>
-				</div>
-			)}
 		</div>
 	);
 }
