@@ -20,6 +20,11 @@ export interface IStorageProvider {
 	): Promise<string>;
 
 	/**
+	 * Download an object and return its contents as a Buffer.
+	 */
+	download(key: string): Promise<Buffer>;
+
+	/**
 	 * Delete an object from storage.
 	 */
 	delete(key: string): Promise<void>;

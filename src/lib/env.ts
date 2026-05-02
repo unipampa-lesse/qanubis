@@ -21,8 +21,11 @@ const envSchema = z.object({
 	UPSTASH_REDIS_REST_URL: z.string().url().optional(),
 	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
-	// Storage
+	// Providers
 	STORAGE_PROVIDER: z.enum(["s3"]).default("s3"),
+	BIBTEX_PARSER_PROVIDER: z.enum(["default"]).default("default"),
+	ENRICHMENT_PROVIDER: z.enum(["crossref"]).default("crossref"),
+	ENRICHMENT_CONTACT_EMAIL: z.string().email().optional(),
 	STORAGE_ENDPOINT: z.string().min(1, "STORAGE_ENDPOINT is required"),
 	STORAGE_REGION: z.string().default("us-east-1"),
 	STORAGE_ACCESS_KEY: z.string().min(1, "STORAGE_ACCESS_KEY is required"),

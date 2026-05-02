@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../trpc";
 import { adminRouter } from "./admin";
+import { bibtexRouter } from "./bibtex";
 import { codeRouter } from "./code";
 import { documentRouter } from "./document";
 import { memberRouter } from "./member";
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
 	project: projectRouter,
 	member: memberRouter,
 	document: documentRouter,
+	bibtex: bibtexRouter,
 	code: codeRouter,
 	quote: quoteRouter,
 	memo: memoRouter,

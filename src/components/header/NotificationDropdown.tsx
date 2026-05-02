@@ -102,21 +102,18 @@ export default function NotificationDropdown() {
 								{t.notifications.empty}
 							</p>
 						)}
-						{notifications.map((n) => (
-							<button
-								key={n.id}
-								type="button"
-								onClick={() => {
-									if (!n.read) markRead.mutate({ notificationId: n.id });
-									setOpen(false);
-								}}
-								className={`w-full border-b border-gray-100 px-4 py-3 text-left last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03] ${
-									!n.read ? "bg-brand-50/50 dark:bg-brand-900/10" : ""
-								}`}
-							>
+						{notifications.map((n) => {
+							const rowClass = `block w-full border-b border-gray-100 px-4 py-3 text-left last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03] ${
+								!n.read ? "bg-brand-50/50 dark:bg-brand-900/10" : ""
+							}`;
+							const handleClick = () => {
+								if (!n.read) markRead.mutate({ notificationId: n.id });
+								setOpen(false);
+							};
+							const body = (
 								<div className="flex items-start gap-2">
 									<HiOutlineChatBubbleLeft className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-500" />
-									<div className="min-w-0">
+									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium text-gray-800 dark:text-white/90">
 											{n.title}
 										</p>
@@ -125,22 +122,32 @@ export default function NotificationDropdown() {
 												{n.body}
 											</p>
 										)}
-										{n.link && (
-											<Link
-												href={n.link}
-												onClick={(e) => e.stopPropagation()}
-												className="text-xs text-brand-600 hover:underline dark:text-brand-400"
-											>
-												ver →
-											</Link>
-										)}
 									</div>
 									{!n.read && (
 										<span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
 									)}
 								</div>
-							</button>
-						))}
+							);
+							return n.link ? (
+								<Link
+									key={n.id}
+									href={n.link}
+									onClick={handleClick}
+									className={rowClass}
+								>
+									{body}
+								</Link>
+							) : (
+								<button
+									key={n.id}
+									type="button"
+									onClick={handleClick}
+									className={rowClass}
+								>
+									{body}
+								</button>
+							);
+						})}
 					</div>
 				</div>
 			)}

@@ -69,6 +69,18 @@ export class S3StorageProvider implements IStorageProvider {
 		return getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
 	}
 
+	async download(key: string): Promise<Buffer> {
+		const { Body } = await this.client.send(
+			new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+		);
+		if (!Body) throw new Error("Empty response body from storage");
+		const chunks: Uint8Array[] = [];
+		for await (const chunk of Body as AsyncIterable<Uint8Array>) {
+			chunks.push(chunk);
+		}
+		return Buffer.concat(chunks);
+	}
+
 	async delete(key: string): Promise<void> {
 		await this.client.send(
 			new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),

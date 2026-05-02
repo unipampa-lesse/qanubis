@@ -2,13 +2,17 @@
 
 import type { ProjectRole } from "@prisma/client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import {
 	HiOutlineArrowDownTray,
 	HiOutlineArrowUpTray,
+	HiOutlineBookOpen,
 	HiOutlineCheck,
+	HiOutlineChevronDown,
+	HiOutlineChevronUp,
 	HiOutlineDocumentText,
 	HiOutlinePencilSquare,
+	HiOutlineSparkles,
 	HiOutlineTrash,
 	HiOutlineXMark,
 } from "react-icons/hi2";
@@ -23,13 +27,6 @@ interface DocumentsTabProps {
 
 const MAX_MB = 50;
 
-function formatBytes(bytes: number) {
-	if (bytes < 1024) return `${bytes} B`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-/** Small icon + colored badge showing the document type (e.g. "PDF"). */
 function DocTypeIcon({
 	mimeType,
 	size = "sm",
@@ -70,13 +67,9 @@ function DownloadButton({
 	const [fetch, setFetch] = useState(false);
 	const { data, isFetching } = trpc.document.getDownloadUrl.useQuery(
 		{ projectId, documentId },
-		{
-			enabled: fetch,
-			retry: false,
-		},
+		{ enabled: fetch, retry: false },
 	);
 
-	// Once the URL arrives, trigger the download and reset
 	if (data?.url && fetch) {
 		const a = document.createElement("a");
 		a.href = data.url;
@@ -104,18 +97,41 @@ export default function DocumentsTab({
 }: DocumentsTabProps) {
 	const t = useTranslation();
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
+
+	// PDF upload (new document)
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [uploading, setUploading] = useState(false);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 
-	// Inline rename state
+	// BibTeX import panel
+	const [showImport, setShowImport] = useState(false);
+	const [bibtexText, setBibtexText] = useState("");
+	const [importResult, setImportResult] = useState<{
+		imported: number;
+		skipped: number;
+	} | null>(null);
+
+	// Attach PDF to existing bib-only document
+	const bibPdfRef = useRef<HTMLInputElement>(null);
+	const [attachingPdfFor, setAttachingPdfFor] = useState<string | null>(null);
+	const [attachError, setAttachError] = useState<string | null>(null);
+
+	// .bib file upload (populates textarea)
+	const bibFileRef = useRef<HTMLInputElement>(null);
+
+	// Expanded metadata row
+	const [expandedId, setExpandedId] = useState<string | null>(null);
+
+	// Inline rename
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [draftName, setDraftName] = useState("");
 
 	const utils = trpc.useUtils();
+
 	const { data: documents, isLoading } = trpc.document.list.useQuery({
 		projectId,
 	});
+
 	const remove = trpc.document.delete.useMutation({
 		onSuccess: () => utils.document.list.invalidate({ projectId }),
 	});
@@ -125,17 +141,25 @@ export default function DocumentsTab({
 			setEditingId(null);
 		},
 	});
+	const importMutation = trpc.bibtex.importText.useMutation({
+		onSuccess: (result) => {
+			setImportResult(result);
+			setBibtexText("");
+			utils.document.list.invalidate({ projectId });
+		},
+	});
+	const enrichMutation = trpc.bibtex.triggerEnrichment.useMutation({
+		onSuccess: () => utils.document.list.invalidate({ projectId }),
+	});
 
 	function startEdit(id: string, currentName: string) {
 		setEditingId(id);
 		setDraftName(currentName);
 	}
-
 	function cancelEdit() {
 		setEditingId(null);
 		setDraftName("");
 	}
-
 	function commitEdit(documentId: string) {
 		const trimmed = draftName.trim();
 		if (!trimmed) return cancelEdit();
@@ -145,19 +169,15 @@ export default function DocumentsTab({
 	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
 		if (!file) return;
-
 		if (file.size > MAX_MB * 1024 * 1024) {
 			setUploadError(`File exceeds the ${MAX_MB} MB limit`);
 			return;
 		}
-
 		setUploadError(null);
 		setUploading(true);
-
 		const form = new FormData();
 		form.set("projectId", projectId);
 		form.set("file", file);
-
 		try {
 			const res = await fetch("/api/upload/document", {
 				method: "POST",
@@ -176,18 +196,77 @@ export default function DocumentsTab({
 		}
 	}
 
+	async function handleBibPdfChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		const documentId = attachingPdfFor;
+		if (!file || !documentId) return;
+		setAttachError(null);
+		const form = new FormData();
+		form.set("projectId", projectId);
+		form.set("documentId", documentId);
+		form.set("file", file);
+		try {
+			const res = await fetch("/api/upload/bibtex-pdf", {
+				method: "POST",
+				body: form,
+			});
+			if (!res.ok) {
+				const body = await res.json().catch(() => ({}));
+				throw new Error((body as { error?: string }).error ?? "Upload failed");
+			}
+			await utils.document.list.invalidate({ projectId });
+		} catch (err) {
+			setAttachError(err instanceof Error ? err.message : "Upload failed");
+		} finally {
+			setAttachingPdfFor(null);
+			if (bibPdfRef.current) bibPdfRef.current.value = "";
+		}
+	}
+
+	function handleBibFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = (ev) => {
+			const text = ev.target?.result;
+			if (typeof text === "string") {
+				setBibtexText(text);
+				setShowImport(true);
+				setImportResult(null);
+			}
+		};
+		reader.readAsText(file);
+		if (bibFileRef.current) bibFileRef.current.value = "";
+	}
+
 	return (
 		<div className="space-y-4">
-			{/* Upload button */}
+			{/* Hidden file inputs */}
+			<input
+				ref={fileRef}
+				type="file"
+				accept="application/pdf"
+				className="sr-only"
+				onChange={handleFileChange}
+			/>
+			<input
+				ref={bibPdfRef}
+				type="file"
+				accept="application/pdf"
+				className="sr-only"
+				onChange={handleBibPdfChange}
+			/>
+			<input
+				ref={bibFileRef}
+				type="file"
+				accept=".bib,.txt"
+				className="sr-only"
+				onChange={handleBibFileChange}
+			/>
+
+			{/* Action buttons row */}
 			{canEdit && (
-				<div className="flex items-center gap-3">
-					<input
-						ref={fileRef}
-						type="file"
-						accept="application/pdf"
-						className="sr-only"
-						onChange={handleFileChange}
-					/>
+				<div className="flex flex-wrap items-center gap-3">
 					<Button
 						size="sm"
 						variant="outline"
@@ -197,9 +276,92 @@ export default function DocumentsTab({
 					>
 						{uploading ? t.documents.uploading : t.documents.upload}
 					</Button>
+
+					<Button
+						size="sm"
+						variant="outline"
+						startIcon={<HiOutlineBookOpen className="h-4 w-4" />}
+						onClick={() => {
+							setShowImport(!showImport);
+							setImportResult(null);
+						}}
+					>
+						{t.bibliography.importBibtex}
+					</Button>
+
 					{uploadError && (
 						<span className="text-sm text-error-500">{uploadError}</span>
 					)}
+					{attachError && (
+						<span className="text-sm text-error-500">{attachError}</span>
+					)}
+				</div>
+			)}
+
+			{/* BibTeX import panel */}
+			{canEdit && showImport && (
+				<div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+					<div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-800">
+						<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+							{t.bibliography.importBibtex}
+						</span>
+						<button
+							type="button"
+							onClick={() => setShowImport(false)}
+							className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+						>
+							<HiOutlineChevronUp className="h-4 w-4" />
+						</button>
+					</div>
+					<div className="px-4 pb-4 pt-3">
+						<div className="mb-2 flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => bibFileRef.current?.click()}
+								className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+							>
+								<HiOutlineArrowUpTray className="h-3.5 w-3.5" />
+								{t.bibliography.uploadBibFile}
+							</button>
+							<span className="text-xs text-gray-400">{t.bibliography.orPaste}</span>
+						</div>
+						<textarea
+							value={bibtexText}
+							onChange={(e) => setBibtexText(e.target.value)}
+							placeholder={t.bibliography.importPlaceholder}
+							rows={8}
+							className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+						/>
+						<div className="mt-2 flex items-center gap-3">
+							<Button
+								size="sm"
+								variant="primary"
+								disabled={!bibtexText.trim() || importMutation.isPending}
+								onClick={() => {
+									const trimmed = bibtexText.trim();
+									if (!trimmed) return;
+									setImportResult(null);
+									importMutation.mutate({ projectId, bibtex: trimmed });
+								}}
+							>
+								{importMutation.isPending
+									? t.bibliography.importing
+									: t.bibliography.importButton}
+							</Button>
+							{importResult && (
+								<span className="text-xs text-gray-500 dark:text-gray-400">
+									{importResult.imported} {t.bibliography.importedCount}
+									{importResult.skipped > 0 &&
+										`, ${importResult.skipped} ${t.bibliography.skippedCount}`}
+								</span>
+							)}
+							{importMutation.error && (
+								<span className="text-xs text-error-500">
+									{importMutation.error.message}
+								</span>
+							)}
+						</div>
+					</div>
 				</div>
 			)}
 
@@ -222,10 +384,10 @@ export default function DocumentsTab({
 									{t.documents.document}
 								</th>
 								<th className="hidden px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 sm:table-cell">
-									{t.documents.pages}
+									{t.documents.status}
 								</th>
 								<th className="hidden px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 sm:table-cell">
-									{t.documents.size}
+									{t.documents.pages}
 								</th>
 								<th className="hidden px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 md:table-cell">
 									{t.documents.quotes}
@@ -238,11 +400,24 @@ export default function DocumentsTab({
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
 							{documents.map((doc) => {
 								const isEditing = editingId === doc.id;
+								const hasPdf = !!doc.storageKey;
+								const isBib = doc.source === "bibtex";
+								const isAttaching = attachingPdfFor === doc.id;
+								const isExpanded = expandedId === doc.id;
+								const hasMeta =
+									isBib &&
+									(doc.abstract ||
+										doc.authors.length > 0 ||
+										doc.journal ||
+										doc.doi ||
+										doc.year);
+
 								return (
+									<Fragment key={doc.id}>
 									<tr
-										key={doc.id}
 										className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
 									>
+										{/* Document name */}
 										<td className="px-5 py-3">
 											{isEditing ? (
 												<form
@@ -281,32 +456,69 @@ export default function DocumentsTab({
 														<HiOutlineXMark className="h-4 w-4" />
 													</button>
 												</form>
-											) : (
+											) : hasPdf ? (
 												<Link
 													href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
 													className="flex items-center gap-2 hover:underline"
 												>
 													<DocTypeIcon mimeType={doc.mimeType} />
-													<div>
+													<div className="min-w-0">
 														<div className="font-medium text-gray-800 dark:text-white/90">
 															{doc.name}
 														</div>
-														{doc.extractedTitle &&
-															doc.extractedTitle !== doc.name && (
-																<div className="text-xs text-gray-400">
-																	{doc.extractedTitle}
-																</div>
-															)}
+														<div className="truncate text-xs text-gray-400">
+															{doc.authors.length > 0
+																? `${doc.authors.slice(0, 2).join("; ")}${doc.authors.length > 2 ? " et al." : ""}`
+																: doc.extractedTitle && doc.extractedTitle !== doc.name
+																	? doc.extractedTitle
+																	: null}
+														</div>
 													</div>
 												</Link>
+											) : (
+												<div className="flex items-center gap-2">
+													<DocTypeIcon mimeType={doc.mimeType} />
+													<div className="min-w-0">
+														<div className="font-medium text-gray-800 dark:text-white/90">
+															{doc.name}
+														</div>
+														{doc.authors.length > 0 && (
+															<div className="truncate text-xs text-gray-400">
+																{doc.authors.slice(0, 2).join("; ")}
+																{doc.authors.length > 2 ? " et al." : ""}
+															</div>
+														)}
+													</div>
+												</div>
 											)}
 										</td>
+
+										{/* Status column */}
+										<td className="hidden px-5 py-3 sm:table-cell">
+											<div className="flex items-center gap-1.5">
+												{hasPdf ? (
+													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-success-700 ring-1 ring-success-200 dark:text-success-400 dark:ring-success-800">
+														PDF
+													</span>
+												) : (
+													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700">
+														{t.documents.noPdf}
+													</span>
+												)}
+												{isBib && (
+													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-brand-600 ring-1 ring-brand-200 dark:text-brand-400 dark:ring-brand-800">
+														Ref
+													</span>
+												)}
+											</div>
+										</td>
+
+										{/* Pages */}
 										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
 											{doc.pageCount > 0 ? doc.pageCount : "—"}
 										</td>
-										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
-											{doc.fileSize > 0 ? formatBytes(doc.fileSize) : "—"}
-										</td>
+
+										{/* Quotes + progress */}
 										<td className="hidden px-5 py-3 md:table-cell">
 											<div className="flex flex-col gap-1">
 												<span className="text-gray-500 dark:text-gray-400">
@@ -327,14 +539,72 @@ export default function DocumentsTab({
 												)}
 											</div>
 										</td>
+
+										{/* Actions */}
 										<td className="px-5 py-3 text-right">
 											{!isEditing && (
-												<div className="flex justify-end gap-2">
-													<DownloadButton
-														projectId={projectId}
-														documentId={doc.id}
-														title={t.documents.download}
-													/>
+												<div className="flex items-center justify-end gap-2">
+													{/* Expand metadata — bib docs with any metadata */}
+													{hasMeta && (
+														<button
+															type="button"
+															title={isExpanded ? t.common.collapse : t.common.expand}
+															onClick={() =>
+																setExpandedId(isExpanded ? null : doc.id)
+															}
+															className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
+														>
+															{isExpanded ? (
+																<HiOutlineChevronUp className="h-4 w-4" />
+															) : (
+																<HiOutlineChevronDown className="h-4 w-4" />
+															)}
+														</button>
+													)}
+
+													{/* Attach PDF — bib docs without PDF */}
+													{isBib && !hasPdf && canEdit && (
+														<button
+															type="button"
+															title={t.bibliography.uploadPdf}
+															disabled={isAttaching}
+															onClick={() => {
+																setAttachingPdfFor(doc.id);
+																bibPdfRef.current?.click();
+															}}
+															className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
+														>
+															<HiOutlineArrowUpTray className="h-4 w-4" />
+														</button>
+													)}
+
+													{/* Enrich — bib docs with DOI, not yet enriched */}
+													{isBib && doc.doi && !doc.enriched && canEdit && (
+														<button
+															type="button"
+															title={t.bibliography.enrich}
+															disabled={enrichMutation.isPending}
+															onClick={() =>
+																enrichMutation.mutate({
+																	projectId,
+																	documentId: doc.id,
+																})
+															}
+															className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
+														>
+															<HiOutlineSparkles className="h-4 w-4" />
+														</button>
+													)}
+
+													{/* Download — only when PDF exists */}
+													{hasPdf && (
+														<DownloadButton
+															projectId={projectId}
+															documentId={doc.id}
+															title={t.documents.download}
+														/>
+													)}
+
 													{canEdit && (
 														<>
 															<button
@@ -364,6 +634,75 @@ export default function DocumentsTab({
 											)}
 										</td>
 									</tr>
+									{isExpanded && hasMeta && (
+										<tr className="bg-gray-50/70 dark:bg-white/[0.015]">
+											<td colSpan={5} className="px-8 pb-4 pt-2">
+												<dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-xs sm:grid-cols-2">
+													{doc.authors.length > 0 && (
+														<>
+															<dt className="font-medium text-gray-500 dark:text-gray-400">
+																{t.bibliography.authors}
+															</dt>
+															<dd className="text-gray-700 dark:text-gray-300">
+																{doc.authors.join("; ")}
+															</dd>
+														</>
+													)}
+													{doc.year && (
+														<>
+															<dt className="font-medium text-gray-500 dark:text-gray-400">
+																{t.bibliography.year}
+															</dt>
+															<dd className="text-gray-700 dark:text-gray-300">
+																{doc.year}
+															</dd>
+														</>
+													)}
+													{doc.journal && (
+														<>
+															<dt className="font-medium text-gray-500 dark:text-gray-400">
+																{t.bibliography.venue}
+															</dt>
+															<dd className="text-gray-700 dark:text-gray-300">
+																{doc.journal}
+																{doc.volume && `, ${t.bibliography.vol} ${doc.volume}`}
+																{doc.issue && `(${doc.issue})`}
+																{doc.pages && `, ${doc.pages}`}
+															</dd>
+														</>
+													)}
+													{doc.doi && (
+														<>
+															<dt className="font-medium text-gray-500 dark:text-gray-400">
+																DOI
+															</dt>
+															<dd>
+																<a
+																	href={`https://doi.org/${doc.doi}`}
+																	target="_blank"
+																	rel="noreferrer"
+																	className="break-all text-brand-600 hover:underline dark:text-brand-400"
+																>
+																	{doc.doi}
+																</a>
+															</dd>
+														</>
+													)}
+													{doc.abstract && (
+														<>
+															<dt className="col-span-full font-medium text-gray-500 dark:text-gray-400">
+																{t.bibliography.abstract}
+															</dt>
+															<dd className="col-span-full leading-relaxed text-gray-700 dark:text-gray-300">
+																{doc.abstract}
+															</dd>
+														</>
+													)}
+												</dl>
+											</td>
+										</tr>
+									)}
+									</Fragment>
 								);
 							})}
 						</tbody>
@@ -372,20 +711,29 @@ export default function DocumentsTab({
 			) : (
 				<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center dark:border-gray-700">
 					<DocTypeIcon mimeType="application/pdf" size="lg" />
-					<p className="text-sm text-gray-500 dark:text-gray-400">
+					<p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
 						{t.documents.noDocuments}
 						{canEdit && ` ${t.documents.noDocumentsHint}`}
 					</p>
 					{canEdit && (
-						<Button
-							size="sm"
-							variant="outline"
-							className="mt-4"
-							startIcon={<HiOutlineArrowUpTray className="h-4 w-4" />}
-							onClick={() => fileRef.current?.click()}
-						>
-							{t.documents.upload}
-						</Button>
+						<div className="mt-4 flex gap-2">
+							<Button
+								size="sm"
+								variant="outline"
+								startIcon={<HiOutlineArrowUpTray className="h-4 w-4" />}
+								onClick={() => fileRef.current?.click()}
+							>
+								{t.documents.upload}
+							</Button>
+							<Button
+								size="sm"
+								variant="outline"
+								startIcon={<HiOutlineBookOpen className="h-4 w-4" />}
+								onClick={() => setShowImport(true)}
+							>
+								{t.bibliography.importBibtex}
+							</Button>
+						</div>
 					)}
 				</div>
 			)}

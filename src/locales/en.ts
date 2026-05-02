@@ -21,6 +21,8 @@ export const translations = {
 		required: "required",
 		loading: "Loading...",
 		actions: "Actions",
+		expand: "Show details",
+		collapse: "Hide details",
 	},
 
 	// Sidebar navigation
@@ -151,6 +153,7 @@ export const translations = {
 		codes: "Codes",
 		memos: "Memos",
 		reports: "Reports",
+		bibliography: "Bibliography",
 	},
 
 	// Codes tab
@@ -215,6 +218,8 @@ export const translations = {
 		deleteDocument: "Delete document",
 		renameDocument: "Rename document",
 		download: "Download PDF",
+		noPdf: "No PDF",
+		status: "Status",
 	},
 
 	// Document viewer + quote workflow
@@ -583,6 +588,37 @@ export const translations = {
 		footerDocs: "Documentation",
 		footerSignIn: "Sign in",
 		footerSignUp: "Sign up",
+	},
+
+	// Bibliography tab
+	bibliography: {
+		importBibtex: "Import BibTeX",
+		importPlaceholder: "Paste your .bib content here…",
+		importButton: "Import",
+		importing: "Importing…",
+		importedCount: "imported",
+		skippedCount: "skipped (duplicate)",
+		noEntries: "No bibliography entries yet.",
+		noEntriesHint: "Import a .bib file to get started.",
+		reference: "Reference",
+		year: "Year",
+		venue: "Venue",
+		enriched: "Enriched",
+		pending: "Pending",
+		viewPdf: "View PDF",
+		uploadPdf: "Upload PDF",
+		uploadingPdf: "Uploading…",
+		enrich: "Enrich metadata",
+		deleteEntry: "Delete entry",
+		deleteConfirm: "will be permanently removed.",
+		abstract: "Abstract",
+		openForCoding: "Open for coding",
+		openingForCoding: "Opening…",
+		linkedToDocument: "In Documents",
+		uploadBibFile: "Upload .bib file",
+		orPaste: "or paste below",
+		authors: "Authors",
+		vol: "vol.",
 	},
 
 	// Docs section

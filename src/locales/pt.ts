@@ -23,6 +23,8 @@ export const translations: Translations = {
 		required: "obrigatório",
 		loading: "Carregando...",
 		actions: "Ações",
+		expand: "Ver detalhes",
+		collapse: "Ocultar detalhes",
 	},
 
 	// Sidebar navigation
@@ -152,6 +154,7 @@ export const translations: Translations = {
 		codes: "Códigos",
 		memos: "Memorandos",
 		reports: "Relatórios",
+		bibliography: "Bibliografia",
 	},
 
 	// Codes tab
@@ -217,6 +220,8 @@ export const translations: Translations = {
 		deleteDocument: "Excluir documento",
 		renameDocument: "Renomear documento",
 		download: "Baixar PDF",
+		noPdf: "Sem PDF",
+		status: "Status",
 	},
 
 	// Document viewer + quote workflow
@@ -580,6 +585,37 @@ export const translations: Translations = {
 		footerDocs: "Documentação",
 		footerSignIn: "Entrar",
 		footerSignUp: "Criar conta",
+	},
+
+	// Bibliography tab
+	bibliography: {
+		importBibtex: "Importar BibTeX",
+		importPlaceholder: "Cole o conteúdo do seu arquivo .bib aqui…",
+		importButton: "Importar",
+		importing: "Importando…",
+		importedCount: "importado(s)",
+		skippedCount: "ignorado(s) (duplicado)",
+		noEntries: "Nenhuma referência bibliográfica ainda.",
+		noEntriesHint: "Importe um arquivo .bib para começar.",
+		reference: "Referência",
+		year: "Ano",
+		venue: "Veículo",
+		enriched: "Enriquecido",
+		pending: "Pendente",
+		viewPdf: "Ver PDF",
+		uploadPdf: "Enviar PDF",
+		uploadingPdf: "Enviando…",
+		enrich: "Enriquecer metadados",
+		deleteEntry: "Excluir entrada",
+		deleteConfirm: "será removido permanentemente.",
+		abstract: "Resumo",
+		openForCoding: "Abrir para codificação",
+		openingForCoding: "Abrindo…",
+		linkedToDocument: "Em Documentos",
+		uploadBibFile: "Enviar arquivo .bib",
+		orPaste: "ou cole abaixo",
+		authors: "Autores",
+		vol: "vol.",
 	},
 
 	// Docs section

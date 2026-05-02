@@ -9,6 +9,8 @@ import { useState } from "react";
 import {
 	HiOutlineArrowLeft,
 	HiOutlineChatBubbleLeftRight,
+	HiOutlineChevronDown,
+	HiOutlineChevronUp,
 	HiOutlineTag,
 	HiOutlineTrash,
 	HiOutlineXMark,
@@ -471,6 +473,7 @@ export default function DocumentViewerPage() {
 	const t = useTranslation();
 	const utils = trpc.useUtils();
 
+	const [showAbstract, setShowAbstract] = useState(false);
 	const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 	const [pendingSelection, setPendingSelection] = useState<
 		(PendingSelection & { color: string }) | null
@@ -483,6 +486,9 @@ export default function DocumentViewerPage() {
 		members?.find((m) => m.user.id === session?.user?.id)?.role ??
 		"COLLABORATOR";
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
+
+	// Fetch document metadata (title, authors, bib info for header)
+	const { data: document } = trpc.document.get.useQuery({ projectId, documentId });
 
 	// Fetch presigned URL
 	const { data: urlData, isLoading: urlLoading } =
@@ -558,7 +564,7 @@ export default function DocumentViewerPage() {
 	return (
 		<div className="flex h-full flex-col gap-4">
 			{/* Header */}
-			<div className="flex items-center gap-3">
+			<div className="space-y-1.5">
 				<Link
 					href={`/dashboard/projects/${projectId}`}
 					className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -566,6 +572,66 @@ export default function DocumentViewerPage() {
 					<HiOutlineArrowLeft className="h-4 w-4" />
 					{t.viewer.backToProject}
 				</Link>
+
+				{document && (
+					<div>
+						<h1 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+							{document.name}
+						</h1>
+
+						{document.authors.length > 0 && (
+							<p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+								{document.authors.join("; ")}
+							</p>
+						)}
+
+						{(document.year || document.journal || document.doi) && (
+							<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400 dark:text-gray-500">
+								{document.year && <span>{document.year}</span>}
+								{document.journal && (
+									<span>
+										{document.journal}
+										{document.volume && ` · vol. ${document.volume}`}
+										{document.issue && `(${document.issue})`}
+										{document.pages && `, ${document.pages}`}
+									</span>
+								)}
+								{document.doi && (
+									<a
+										href={`https://doi.org/${document.doi}`}
+										target="_blank"
+										rel="noreferrer"
+										className="hover:text-brand-600 hover:underline dark:hover:text-brand-400"
+									>
+										DOI: {document.doi}
+									</a>
+								)}
+							</div>
+						)}
+
+						{document.abstract && (
+							<div className="mt-1.5">
+								<button
+									type="button"
+									onClick={() => setShowAbstract((v) => !v)}
+									className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+								>
+									{showAbstract ? (
+										<HiOutlineChevronUp className="h-3.5 w-3.5" />
+									) : (
+										<HiOutlineChevronDown className="h-3.5 w-3.5" />
+									)}
+									{t.bibliography.abstract}
+								</button>
+								{showAbstract && (
+									<p className="mt-1.5 max-w-3xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+										{document.abstract}
+									</p>
+								)}
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 
 			{/* Quote creation modal */}
