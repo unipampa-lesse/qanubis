@@ -9,7 +9,7 @@ QAnubis is a CAQDAS (Computer Assisted Qualitative Data Analysis Software) desig
 
 ## Documentation
 
-[Documentation](https://github.com/unipampa-lesse/qanubis/wiki)
+[Documentation](https://github.com/unipampa-lesse/qanubis/blob/main/public/content/docs/en/home.md)
 
 ## Run Locally
 
@@ -28,6 +28,9 @@ docker compose up -d
 
 # 4. Install dependencies
 pnpm install
+
+# 5. Prisma generates the client based on the schema
+pnpm prisma:generate
 
 # 5. Run database migrations and seed sample data
 pnpm setup
