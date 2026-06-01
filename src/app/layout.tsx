@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import "swiper/swiper-bundle.css";
 import "simplebar-react/dist/simplebar.min.css";
 import Providers from "./Providers";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import ServiceWorkerRegistration from "@/components/common/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -51,6 +52,12 @@ export const metadata: Metadata = {
 
 };
 
+export const viewport: Viewport = {
+	themeColor: "#465fff",
+	width: "device-width",
+	initialScale: 1,
+};
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -62,6 +69,7 @@ export default function RootLayout({
 				<GoogleAnalytics />
 				<Analytics />
 				<SpeedInsights />
+				<ServiceWorkerRegistration />
 				<Providers>{children}</Providers>
 			</body>
 		</html>

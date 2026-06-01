@@ -104,7 +104,9 @@ export const adminRouter = createTRPCRouter({
 
 			const storage = getStorageProvider();
 			await Promise.allSettled(
-				documents.map((d) => storage.delete(d.storageKey)),
+				documents.flatMap((d) =>
+					d.storageKey ? [storage.delete(d.storageKey)] : [],
+				),
 			);
 
 			// Cascade deletes handle all related records.

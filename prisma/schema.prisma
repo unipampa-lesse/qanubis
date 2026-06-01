@@ -148,17 +148,32 @@ model Document {
   projectId      String
   name           String
   description    String?
-  mimeType       String   @default("application/pdf") // extensible for future doc types
-  storageKey     String // e.g. projects/{projectId}/documents/{id}.pdf
+  mimeType       String   @default("application/pdf")
+  storageKey     String?  // null = bib-only entry (no PDF yet)
   pageCount      Int      @default(0)
-  fileSize       Int      @default(0) // bytes
+  fileSize       Int      @default(0)
   extractedTitle String?
+  source         String   @default("upload") // "upload" | "bibtex"
+  citeKey        String?
+  entryType      String?
+  authors        String[] @default([])
+  year           Int?
+  doi            String?
+  abstract       String?
+  journal        String?
+  volume         String?
+  issue          String?
+  pages          String?
+  publisher      String?
+  bibUrl         String?
+  enriched       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   quotes  Quote[]
 
+  @@unique([projectId, doi])
   @@index([projectId])
 }
 

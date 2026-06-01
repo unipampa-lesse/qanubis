@@ -9,21 +9,73 @@ import {
 } from "../trpc";
 
 export const documentRouter = createTRPCRouter({
-	/** List all documents in a project. Available to all members. */
+	/** Get a single document with full bibliographic metadata. */
+	get: projectProcedure
+		.input(z.object({ projectId: z.string(), documentId: z.string() }))
+		.query(async ({ input }) => {
+			const doc = await prisma.document.findUnique({
+				where: { id: input.documentId, projectId: input.projectId },
+				select: {
+					id: true,
+					name: true,
+					source: true,
+					storageKey: true,
+					pageCount: true,
+					authors: true,
+					year: true,
+					doi: true,
+					abstract: true,
+					journal: true,
+					volume: true,
+					issue: true,
+					pages: true,
+					publisher: true,
+					citeKey: true,
+					enriched: true,
+				},
+			});
+			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+			return doc;
+		}),
+
+	/** List documents in a project. Optional source filter: "upload" | "bibtex". */
 	list: projectProcedure
-		.input(z.object({ projectId: z.string() }))
+		.input(
+			z.object({
+				projectId: z.string(),
+				source: z.enum(["upload", "bibtex"]).optional(),
+			}),
+		)
 		.query(async ({ input }) => {
 			const [docs, codedGroups] = await Promise.all([
 				prisma.document.findMany({
-					where: { projectId: input.projectId },
+					where: {
+						projectId: input.projectId,
+						...(input.source && { source: input.source }),
+					},
 					select: {
 						id: true,
 						name: true,
 						description: true,
 						mimeType: true,
+						storageKey: true,
 						pageCount: true,
 						fileSize: true,
 						extractedTitle: true,
+						source: true,
+						citeKey: true,
+						entryType: true,
+						authors: true,
+						year: true,
+						doi: true,
+						abstract: true,
+						journal: true,
+						volume: true,
+						issue: true,
+						pages: true,
+						publisher: true,
+						bibUrl: true,
+						enriched: true,
 						createdAt: true,
 						_count: { select: { quotes: true } },
 					},
@@ -38,14 +90,16 @@ export const documentRouter = createTRPCRouter({
 					_count: { id: true },
 				}),
 			]);
-			const codedMap = new Map(codedGroups.map((g) => [g.documentId, g._count.id]));
+			const codedMap = new Map(
+				codedGroups.map((g) => [g.documentId, g._count.id]),
+			);
 			return docs.map((doc) => ({
 				...doc,
 				codedQuoteCount: codedMap.get(doc.id) ?? 0,
 			}));
 		}),
 
-	/** Get a presigned URL to view (GET) a document PDF. Available to all members. */
+	/** Get a presigned URL to view a document PDF. Throws NOT_FOUND if no PDF. */
 	getViewUrl: projectProcedure
 		.input(z.object({ projectId: z.string(), documentId: z.string() }))
 		.query(async ({ input }) => {
@@ -54,13 +108,17 @@ export const documentRouter = createTRPCRouter({
 				select: { storageKey: true },
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+			if (!doc.storageKey)
+				throw new TRPCError({ code: "NOT_FOUND", message: "No PDF available" });
 
-			const storage = getStorageProvider();
-			const url = await storage.getPresignedUrl(doc.storageKey, 1800);
+			const url = await getStorageProvider().getPresignedUrl(
+				doc.storageKey,
+				1800,
+			);
 			return { url };
 		}),
 
-	/** Get a presigned URL to download (force-download) a document PDF. Available to all members. */
+	/** Get a presigned URL to force-download a document PDF. */
 	getDownloadUrl: projectProcedure
 		.input(z.object({ projectId: z.string(), documentId: z.string() }))
 		.query(async ({ input }) => {
@@ -69,12 +127,15 @@ export const documentRouter = createTRPCRouter({
 				select: { storageKey: true, name: true },
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+			if (!doc.storageKey)
+				throw new TRPCError({ code: "NOT_FOUND", message: "No PDF available" });
 
-			const storage = getStorageProvider();
 			const filename = doc.name.endsWith(".pdf") ? doc.name : `${doc.name}.pdf`;
-			const url = await storage.getPresignedUrl(doc.storageKey, 3600, {
-				filename,
-			});
+			const url = await getStorageProvider().getPresignedUrl(
+				doc.storageKey,
+				3600,
+				{ filename },
+			);
 			return { url, filename };
 		}),
 
@@ -105,7 +166,7 @@ export const documentRouter = createTRPCRouter({
 			});
 		}),
 
-	/** Delete a document and remove its file from object storage (collaborator+). */
+	/** Delete a document and remove its PDF from object storage if present (collaborator+). */
 	delete: collaboratorProcedure
 		.input(z.object({ projectId: z.string(), documentId: z.string() }))
 		.mutation(async ({ input }) => {
@@ -115,9 +176,11 @@ export const documentRouter = createTRPCRouter({
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
 
-			// Remove from storage first; if it fails, the DB record stays intact.
-			const storage = getStorageProvider();
-			await storage.delete(doc.storageKey);
+			if (doc.storageKey) {
+				await getStorageProvider()
+					.delete(doc.storageKey)
+					.catch(() => {});
+			}
 
 			await prisma.document.delete({ where: { id: input.documentId } });
 			return { success: true };
