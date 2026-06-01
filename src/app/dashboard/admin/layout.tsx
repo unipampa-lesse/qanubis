@@ -22,7 +22,7 @@ export default async function AdminAreaLayout({
 		select: { role: true },
 	});
 
-	if (!user || user.role !== "ADMIN") redirect("/dashboard");
+	if (user?.role !== "ADMIN") redirect("/dashboard");
 
 	return <>{children}</>;
 }

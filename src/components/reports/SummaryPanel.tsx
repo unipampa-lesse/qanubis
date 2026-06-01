@@ -14,9 +14,9 @@ export default function SummaryPanel({ projectId }: SummaryPanelProps) {
 	if (isLoading) {
 		return (
 			<div className="space-y-4">
-				{Array.from({ length: 3 }, (_, i) => (
+				{["row-1", "row-2", "row-3"].map((itemKey) => (
 					<div
-						key={i}
+						key={itemKey}
 						className="h-12 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
 					/>
 				))}

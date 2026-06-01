@@ -48,8 +48,7 @@ export const QuoteReference = Node.create<object>({
 	},
 
 	addNodeView() {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return ReactNodeViewRenderer(QuoteReferenceView as any);
+		return ReactNodeViewRenderer(QuoteReferenceView);
 	},
 
 	addCommands() {

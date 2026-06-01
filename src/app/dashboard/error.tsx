@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useTranslation } from "@/context/LanguageContext";
 
 export default function DashboardError({
-	error,
 	reset,
 }: {
 	error: Error & { digest?: string };
@@ -18,11 +17,13 @@ export default function DashboardError({
 				<div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/10">
 					<svg
 						className="h-7 w-7 text-error-500"
+						role="img"
 						fill="none"
 						viewBox="0 0 24 24"
 						strokeWidth={1.5}
 						stroke="currentColor"
 					>
+						<title>{t.errorPage.heading}</title>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"

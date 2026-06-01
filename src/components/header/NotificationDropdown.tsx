@@ -108,24 +108,6 @@ export default function NotificationDropdown() {
 								if (!n.read) markRead.mutate({ notificationId: n.id });
 								setOpen(false);
 							};
-							const body = (
-								<div className="flex items-start gap-2">
-									<HiOutlineChatBubbleLeft className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-500" />
-									<div className="min-w-0 flex-1">
-										<p className="text-sm font-medium text-gray-800 dark:text-white/90">
-											{n.title}
-										</p>
-										{n.body && (
-											<p className="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-												{n.body}
-											</p>
-										)}
-									</div>
-									{!n.read && (
-										<span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
-									)}
-								</div>
-							);
 							return n.link ? (
 								<Link
 									key={n.id}
@@ -133,7 +115,22 @@ export default function NotificationDropdown() {
 									onClick={handleClick}
 									className={rowClass}
 								>
-									{body}
+									<div className="flex items-start gap-2">
+										<HiOutlineChatBubbleLeft className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-500" />
+										<div className="min-w-0 flex-1">
+											<p className="text-sm font-medium text-gray-800 dark:text-white/90">
+												{n.title}
+											</p>
+											{n.body && (
+												<p className="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+													{n.body}
+												</p>
+											)}
+										</div>
+										{!n.read && (
+											<span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
+										)}
+									</div>
 								</Link>
 							) : (
 								<button
@@ -142,7 +139,22 @@ export default function NotificationDropdown() {
 									onClick={handleClick}
 									className={rowClass}
 								>
-									{body}
+									<div className="flex items-start gap-2">
+										<HiOutlineChatBubbleLeft className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-500" />
+										<div className="min-w-0 flex-1">
+											<p className="text-sm font-medium text-gray-800 dark:text-white/90">
+												{n.title}
+											</p>
+											{n.body && (
+												<p className="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+													{n.body}
+												</p>
+											)}
+										</div>
+										{!n.read && (
+											<span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
+										)}
+									</div>
 								</button>
 							);
 						})}

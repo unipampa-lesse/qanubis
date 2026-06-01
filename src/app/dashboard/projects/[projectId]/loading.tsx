@@ -9,9 +9,9 @@ export default function ProjectLoading() {
 
 			{/* Tabs skeleton */}
 			<div className="flex gap-2 border-b border-gray-200 pb-2 dark:border-gray-800">
-				{Array.from({ length: 5 }, (_, i) => (
+				{["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"].map((itemKey) => (
 					<div
-						key={i}
+						key={itemKey}
 						className="h-8 w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800"
 					/>
 				))}
@@ -19,9 +19,9 @@ export default function ProjectLoading() {
 
 			{/* Content skeleton */}
 			<div className="space-y-3">
-				{Array.from({ length: 4 }, (_, i) => (
+				{["row-1", "row-2", "row-3", "row-4"].map((itemKey) => (
 					<div
-						key={i}
+						key={itemKey}
 						className="h-16 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
 					/>
 				))}

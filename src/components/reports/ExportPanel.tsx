@@ -186,7 +186,7 @@ function buildNarrativeMarkdown(
 		for (const memo of data.memos) {
 			lines.push(`### ${memo.name}\n`);
 			const text = tiptapToText(memo.content).trim();
-			if (text) lines.push(text + "\n");
+			if (text) lines.push(`${text}\n`);
 		}
 	}
 
@@ -359,13 +359,14 @@ export default function ExportPanel({
 						size="sm"
 						variant="outline"
 						startIcon={<HiOutlineArrowDownTray className="h-4 w-4" />}
-						onClick={() =>
+						onClick={() => {
+							if (!narrativeData) return;
 							downloadFile(
-								buildNarrativeMarkdown(narrativeData!, projectName),
+								buildNarrativeMarkdown(narrativeData, projectName),
 								`${slug}-narrative.md`,
 								"text/markdown;charset=utf-8",
-							)
-						}
+							);
+						}}
 					>
 						{t.reports.exportMarkdown}
 					</Button>

@@ -70,8 +70,6 @@ export default function ChartsPanel({ quotes }: ChartsPanelProps) {
 
 	const isDark = theme === "dark";
 	const textColor = isDark ? "#e5e7eb" : "#374151"; // gray-200 : gray-700
-	const gridColor = isDark ? "#374151" : "#e5e7eb"; // gray-700 : gray-200
-	const bgColor = isDark ? "#111827" : "#ffffff"; // gray-900 : white
 
 	const plotStyle = {
 		background: "transparent",

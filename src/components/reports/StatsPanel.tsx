@@ -25,9 +25,9 @@ export default function StatsPanel({ projectId }: StatsPanelProps) {
 	if (isLoading) {
 		return (
 			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-				{Array.from({ length: 5 }, (_, i) => (
+				{["card-1", "card-2", "card-3", "card-4", "card-5"].map((itemKey) => (
 					<div
-						key={i}
+						key={itemKey}
 						className="h-20 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
 					/>
 				))}

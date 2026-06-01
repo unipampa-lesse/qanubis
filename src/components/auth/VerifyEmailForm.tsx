@@ -19,8 +19,7 @@ export default function VerifyEmailForm() {
 		if (token) {
 			verify.mutate({ token });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [token]);
+	}, [token, verify.mutate]);
 
 	return (
 		<div className="flex flex-col flex-1 lg:w-1/2 w-full">

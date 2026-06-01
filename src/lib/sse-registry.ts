@@ -9,7 +9,9 @@ const registry = new Map<string, Set<SendFn>>();
 
 export function registerSSEConnection(userId: string, send: SendFn): void {
 	if (!registry.has(userId)) registry.set(userId, new Set());
-	registry.get(userId)!.add(send);
+	const conns = registry.get(userId);
+	if (!conns) return;
+	conns.add(send);
 }
 
 export function unregisterSSEConnection(userId: string, send: SendFn): void {

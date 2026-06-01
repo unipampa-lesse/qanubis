@@ -163,7 +163,7 @@ export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 		where: { id: ctx.userId },
 		select: { role: true },
 	});
-	if (!user || user.role !== "ADMIN") {
+	if (user?.role !== "ADMIN") {
 		throw new TRPCError({ code: "FORBIDDEN" });
 	}
 	return next({ ctx: { ...ctx, userId: ctx.userId } });

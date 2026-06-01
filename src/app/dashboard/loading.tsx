@@ -12,9 +12,9 @@ export default function DashboardLoading() {
 
 			{/* Content skeleton */}
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-				{Array.from({ length: 3 }, (_, i) => (
+				{["card-1", "card-2", "card-3"].map((itemKey) => (
 					<div
-						key={i}
+						key={itemKey}
 						className="h-36 animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
 					/>
 				))}
