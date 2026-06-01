@@ -275,8 +275,9 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 							</div>
 
 							<div className="text-xs text-gray-400">
-								{t.memos.lastUpdated} {formatDate(selectedMemo.updatedAt, locale)}{" "}
-								{t.memos.by} {selectedMemo.createdBy.name ?? "—"}
+								{t.memos.lastUpdated}{" "}
+								{formatDate(selectedMemo.updatedAt, locale)} {t.memos.by}{" "}
+								{selectedMemo.createdBy.name ?? "—"}
 							</div>
 
 							<MemoEditor

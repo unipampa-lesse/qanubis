@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import QuoteReferenceView from "./QuoteReferenceView";
 
@@ -54,9 +54,11 @@ export const QuoteReference = Node.create<object>({
 
 	addCommands() {
 		return {
-			insertQuoteReference: (attrs) => ({ commands }) => {
-				return commands.insertContent({ type: "quoteReference", attrs });
-			},
+			insertQuoteReference:
+				(attrs) =>
+				({ commands }) => {
+					return commands.insertContent({ type: "quoteReference", attrs });
+				},
 		};
 	},
 });

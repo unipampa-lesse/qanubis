@@ -285,7 +285,9 @@ export const quoteRouter = createTRPCRouter({
 					document: { select: { id: true, name: true } },
 					quoteCodes: {
 						select: {
-							code: { select: { id: true, name: true, color: true, textColor: true } },
+							code: {
+								select: { id: true, name: true, color: true, textColor: true },
+							},
 						},
 					},
 				},

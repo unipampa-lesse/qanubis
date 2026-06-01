@@ -95,8 +95,7 @@ export const translations: Translations = {
 		verifyEmailTitle: "Verifique Seu E-mail",
 		verifyingEmail: "Verificando seu endereço de e-mail…",
 		emailVerified: "Seu e-mail foi verificado! Você já pode entrar.",
-		verifyTokenInvalid:
-			"Este link de verificação é inválido ou expirou.",
+		verifyTokenInvalid: "Este link de verificação é inválido ou expirou.",
 		verifyEmailError: "Algo deu errado. Tente novamente.",
 		verificationEmailSent:
 			"Um e-mail de verificação foi enviado para sua caixa de entrada.",
@@ -300,12 +299,15 @@ export const translations: Translations = {
 		exportCSV: "Baixar CSV",
 		exportTXT: "Baixar TXT",
 		exportJSON: "Baixar JSON",
-		exportJSONHint: "Dados estruturados para uso com outras ferramentas (Atlas.ti, NVivo, etc.).",
+		exportJSONHint:
+			"Dados estruturados para uso com outras ferramentas (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "Nenhuma citação para exportar ainda.",
 		exportNarrative: "Relatório Narrativo",
-		exportNarrativeHint: "Relatório estruturado por código → citações → trechos de memorando. Ideal para defesa de dissertação ou publicação acadêmica.",
+		exportNarrativeHint:
+			"Relatório estruturado por código → citações → trechos de memorando. Ideal para defesa de dissertação ou publicação acadêmica.",
 		exportMarkdown: "Baixar Markdown",
-		exportNarrativeEmpty: "Adicione códigos e citações para gerar um relatório narrativo.",
+		exportNarrativeEmpty:
+			"Adicione códigos e citações para gerar um relatório narrativo.",
 		// Stats
 		stats: "Estatísticas",
 		totalDocuments: "Documentos",
@@ -314,7 +316,7 @@ export const translations: Translations = {
 		totalMemos: "Memorandos",
 		uncodedQuotes: "Citações sem código",
 		codeFrequency: "Frequência de códigos",
-		documentDistribution: "Citações por documento"
+		documentDistribution: "Citações por documento",
 	},
 
 	// Memos tab

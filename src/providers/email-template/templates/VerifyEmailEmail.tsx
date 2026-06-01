@@ -47,8 +47,8 @@ export function VerifyEmailEmail({ verifyUrl }: VerifyEmailEmailProps) {
 						<Hr style={styles.divider} />
 
 						<Text style={styles.footer}>
-							This link expires in 24 hours. If you didn&apos;t create a
-							QAnubis account, you can safely ignore this email.
+							This link expires in 24 hours. If you didn&apos;t create a QAnubis
+							account, you can safely ignore this email.
 						</Text>
 					</Section>
 				</Container>
@@ -57,9 +57,7 @@ export function VerifyEmailEmail({ verifyUrl }: VerifyEmailEmailProps) {
 	);
 }
 
-export function verifyEmailText({
-	verifyUrl,
-}: VerifyEmailEmailProps): string {
+export function verifyEmailText({ verifyUrl }: VerifyEmailEmailProps): string {
 	return [
 		"Thanks for signing up for QAnubis!",
 		"",

@@ -7,7 +7,12 @@
 export function getGravatarUrl(
 	email: string,
 	size = 80,
-	fallback: "identicon" | "mp" | "retro" | "robohash" | "monsterid" = "identicon",
+	fallback:
+		| "identicon"
+		| "mp"
+		| "retro"
+		| "robohash"
+		| "monsterid" = "identicon",
 ): string {
 	const normalized = email.trim().toLowerCase();
 	// Use a simple hash for the client side — crypto.subtle is available in browsers.
@@ -43,13 +48,20 @@ function sha256Hex(input: string): string {
 export async function getGravatarUrlAsync(
 	email: string,
 	size = 80,
-	fallback: "identicon" | "mp" | "retro" | "robohash" | "monsterid" = "identicon",
+	fallback:
+		| "identicon"
+		| "mp"
+		| "retro"
+		| "robohash"
+		| "monsterid" = "identicon",
 ): Promise<string> {
 	const normalized = email.trim().toLowerCase();
 	const encoder = new TextEncoder();
 	const data = encoder.encode(normalized);
 	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
-	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+	const hashHex = hashArray
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
 	return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=${fallback}`;
 }

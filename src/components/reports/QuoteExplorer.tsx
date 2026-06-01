@@ -27,7 +27,10 @@ interface QuoteExplorerProps {
 	quotes: Quote[];
 }
 
-export default function QuoteExplorer({ projectId, quotes }: QuoteExplorerProps) {
+export default function QuoteExplorer({
+	projectId,
+	quotes,
+}: QuoteExplorerProps) {
 	const t = useTranslation();
 	const [docFilter, setDocFilter] = useState("all");
 	const [codeFilter, setCodeFilter] = useState("all");

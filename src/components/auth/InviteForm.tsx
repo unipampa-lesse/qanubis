@@ -29,7 +29,14 @@ export default function InviteForm() {
 		) {
 			accept.mutate({ token });
 		}
-	}, [status, accept.isPending, accept.isSuccess, accept.isError, accept.mutate, token]);
+	}, [
+		status,
+		accept.isPending,
+		accept.isSuccess,
+		accept.isError,
+		accept.mutate,
+		token,
+	]);
 
 	if (status === "loading" || accept.isPending) {
 		return (

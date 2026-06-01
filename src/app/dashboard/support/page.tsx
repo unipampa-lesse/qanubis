@@ -196,7 +196,9 @@ export default function SupportPage() {
 							>
 								<option value="">{t.support.filterAllStatuses}</option>
 								<option value="OPEN">{t.support.statusOpen}</option>
-								<option value="IN_PROGRESS">{t.support.statusInProgress}</option>
+								<option value="IN_PROGRESS">
+									{t.support.statusInProgress}
+								</option>
 								<option value="RESOLVED">{t.support.statusResolved}</option>
 								<option value="CLOSED">{t.support.statusClosed}</option>
 							</select>

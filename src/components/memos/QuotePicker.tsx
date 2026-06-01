@@ -1,10 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-	HiOutlineMagnifyingGlass,
-	HiOutlineXMark,
-} from "react-icons/hi2";
+import { HiOutlineMagnifyingGlass, HiOutlineXMark } from "react-icons/hi2";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 

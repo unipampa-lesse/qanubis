@@ -11,7 +11,9 @@ async function probeDb(): Promise<ProbeStatus> {
 	try {
 		await prisma.$queryRaw`SELECT 1`;
 		// Clean up expired verification tokens on every health check tick.
-		await prisma.verificationToken.deleteMany({ where: { expires: { lt: new Date() } } });
+		await prisma.verificationToken.deleteMany({
+			where: { expires: { lt: new Date() } },
+		});
 		return "ok";
 	} catch {
 		return "degraded";

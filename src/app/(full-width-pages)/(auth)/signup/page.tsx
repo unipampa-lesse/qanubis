@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import SignUpForm from "@/components/auth/SignUpForm";
-import { Suspense } from 'react';
 
 export const metadata: Metadata = {
 	title: "Sign Up",
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function SignUp() {
 	return (
-            <Suspense>
-                <SignUpForm />
-            </Suspense>
-        );
+		<Suspense>
+			<SignUpForm />
+		</Suspense>
+	);
 }

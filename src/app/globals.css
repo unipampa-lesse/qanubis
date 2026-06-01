@@ -1022,7 +1022,10 @@ option {
 	user-select: text;
 
 	--total-scale-factor: 1;
-	--text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size, 1));
+	--text-scale-factor: calc(
+		var(--total-scale-factor) *
+		var(--min-font-size, 1)
+	);
 	--min-font-size-inv: calc(1 / var(--min-font-size, 1));
 }
 
@@ -1033,7 +1036,8 @@ option {
 	cursor: text;
 	transform-origin: 0% 0%;
 	font-size: calc(var(--text-scale-factor) * var(--font-height, 0px));
-	transform: rotate(var(--rotate, 0deg)) scaleX(var(--scale-x, 1)) scale(var(--min-font-size-inv));
+	transform: rotate(var(--rotate, 0deg)) scaleX(var(--scale-x, 1))
+		scale(var(--min-font-size-inv));
 }
 
 .pdf-text-layer span::selection {

@@ -37,7 +37,9 @@ function PlotChart({
 		// Plot renders the color legend as HTML outside the SVG, so the `style`
 		// option does not reach it. Inject a scoped <style> to override.
 		const color =
-			options.style && typeof options.style === "object" && "color" in options.style
+			options.style &&
+			typeof options.style === "object" &&
+			"color" in options.style
 				? String((options.style as { color?: string }).color ?? "")
 				: "";
 		if (color) {

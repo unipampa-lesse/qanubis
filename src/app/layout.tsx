@@ -3,20 +3,18 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import "swiper/swiper-bundle.css";
 import "simplebar-react/dist/simplebar.min.css";
-import Providers from "./Providers";
-import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
-import ServiceWorkerRegistration from "@/components/common/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import ServiceWorkerRegistration from "@/components/common/ServiceWorkerRegistration";
+import Providers from "./Providers";
 
 const outfit = Outfit({
 	subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-	metadataBase: new URL(
-		process.env.NEXTAUTH_URL ?? "https://qanubis.app",
-	),
+	metadataBase: new URL(process.env.NEXTAUTH_URL ?? "https://qanubis.app"),
 	title: {
 		default: "QAnubis — Open-Source Qualitative Research Analysis",
 		template: "%s — QAnubis",
@@ -49,7 +47,6 @@ export const metadata: Metadata = {
 			"max-snippet": -1,
 		},
 	},
-
 };
 
 export const viewport: Viewport = {

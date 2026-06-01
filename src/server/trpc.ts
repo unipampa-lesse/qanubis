@@ -1,5 +1,5 @@
-import type { ProjectRole } from "@prisma/client";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
+import type { ProjectRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";

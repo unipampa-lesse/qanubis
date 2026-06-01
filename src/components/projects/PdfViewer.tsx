@@ -69,9 +69,7 @@ export default function PdfViewer({
 	const pageContainerRef = useRef<HTMLDivElement>(null);
 
 	const pdfRef = useRef<PDFDocumentProxy | null>(null);
-	const renderTaskRef = useRef<ReturnType<PDFPageProxy["render"]> | null>(
-		null,
-	);
+	const renderTaskRef = useRef<ReturnType<PDFPageProxy["render"]> | null>(null);
 
 	const [numPages, setNumPages] = useState(0);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -342,8 +340,7 @@ export default function PdfViewer({
 										width: `${rect.width * 100}%`,
 										height: `${rect.height * 100}%`,
 										backgroundColor: quote.color,
-										opacity:
-											selectedQuoteId === quote.id ? 0.55 : 0.3,
+										opacity: selectedQuoteId === quote.id ? 0.55 : 0.3,
 										cursor: "pointer",
 										borderRadius: 2,
 										transition: "opacity 0.15s",

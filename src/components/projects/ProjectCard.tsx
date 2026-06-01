@@ -36,7 +36,9 @@ export default function ProjectCard({
 		VIEWER: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
 	};
 
-	const updatedLabel = new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
+	const updatedLabel = new Intl.RelativeTimeFormat(locale, {
+		numeric: "auto",
+	}).format(
 		Math.round((updatedAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
 		"day",
 	);

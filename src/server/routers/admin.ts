@@ -71,7 +71,12 @@ export const adminRouter = createTRPCRouter({
 					color: true,
 					createdAt: true,
 					_count: {
-						select: { members: true, documents: true, codes: true, memos: true },
+						select: {
+							members: true,
+							documents: true,
+							codes: true,
+							memos: true,
+						},
 					},
 				},
 				orderBy: { createdAt: "desc" },

@@ -25,7 +25,9 @@ export const codeRouter = createTRPCRouter({
 					description: true,
 					parentId: true,
 					createdAt: true,
-					_count: { select: { quoteCodes: true, children: true, comments: true } },
+					_count: {
+						select: { quoteCodes: true, children: true, comments: true },
+					},
 				},
 				orderBy: { createdAt: "asc" },
 			});

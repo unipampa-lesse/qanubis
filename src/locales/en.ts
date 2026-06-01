@@ -94,11 +94,9 @@ export const translations = {
 		verifyEmailTitle: "Verify Your Email",
 		verifyingEmail: "Verifying your email address…",
 		emailVerified: "Your email has been verified! You can now sign in.",
-		verifyTokenInvalid:
-			"This verification link is invalid or has expired.",
+		verifyTokenInvalid: "This verification link is invalid or has expired.",
 		verifyEmailError: "Something went wrong. Please try again.",
-		verificationEmailSent:
-			"A verification email has been sent to your inbox.",
+		verificationEmailSent: "A verification email has been sent to your inbox.",
 		checkInboxMessage:
 			"Please check your email and click the verification link to activate your account.",
 	},
@@ -300,12 +298,15 @@ export const translations = {
 		exportCSV: "Download CSV",
 		exportTXT: "Download TXT",
 		exportJSON: "Download JSON",
-		exportJSONHint: "Structured data for use with other tools (Atlas.ti, NVivo, etc.).",
+		exportJSONHint:
+			"Structured data for use with other tools (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "No quotes to export yet.",
 		exportNarrative: "Narrative Report",
-		exportNarrativeHint: "Report structured by code → quotes → memo excerpts. Ideal for thesis defense or academic publication.",
+		exportNarrativeHint:
+			"Report structured by code → quotes → memo excerpts. Ideal for thesis defense or academic publication.",
 		exportMarkdown: "Download Markdown",
-		exportNarrativeEmpty: "Add codes and quotes to generate a narrative report.",
+		exportNarrativeEmpty:
+			"Add codes and quotes to generate a narrative report.",
 		// Stats
 		stats: "Statistics",
 		totalDocuments: "Documents",
@@ -314,7 +315,7 @@ export const translations = {
 		totalMemos: "Memos",
 		uncodedQuotes: "Uncoded quotes",
 		codeFrequency: "Code frequency",
-		documentDistribution: "Quotes per document"
+		documentDistribution: "Quotes per document",
 	},
 
 	// Memos tab

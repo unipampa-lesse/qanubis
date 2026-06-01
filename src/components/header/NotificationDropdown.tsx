@@ -1,15 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
 	HiOutlineBell,
-	HiOutlineCheckCircle,
 	HiOutlineChatBubbleLeft,
+	HiOutlineCheckCircle,
 } from "react-icons/hi2";
-import Link from "next/link";
 import { useTranslation } from "@/context/LanguageContext";
-import { trpc } from "@/server/client";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
+import { trpc } from "@/server/client";
 
 export default function NotificationDropdown() {
 	const t = useTranslation();
@@ -19,10 +19,8 @@ export default function NotificationDropdown() {
 	useNotificationStream();
 
 	const { data: count = 0 } = trpc.notification.unreadCount.useQuery();
-	const { data: notifications = [], isLoading } = trpc.notification.list.useQuery(
-		{ limit: 10 },
-		{ enabled: open },
-	);
+	const { data: notifications = [], isLoading } =
+		trpc.notification.list.useQuery({ limit: 10 }, { enabled: open });
 	const utils = trpc.useUtils();
 
 	const markAllRead = trpc.notification.markAllRead.useMutation({

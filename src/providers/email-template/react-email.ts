@@ -8,6 +8,11 @@ import type {
 	RenderedEmail,
 } from "./interface";
 import {
+	InviteAcceptedEmail,
+	inviteAcceptedSubject,
+	inviteAcceptedText,
+} from "./templates/InviteAcceptedEmail";
+import {
 	ProjectInviteEmail,
 	projectInviteSubject,
 	projectInviteText,
@@ -22,11 +27,6 @@ import {
 	verifyEmailSubject,
 	verifyEmailText,
 } from "./templates/VerifyEmailEmail";
-import {
-	InviteAcceptedEmail,
-	inviteAcceptedSubject,
-	inviteAcceptedText,
-} from "./templates/InviteAcceptedEmail";
 
 export class ReactEmailTemplateProvider implements IEmailTemplateProvider {
 	async render<T extends EmailTemplateName>(

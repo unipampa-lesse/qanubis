@@ -1,6 +1,6 @@
 import "server-only";
-import { S3StorageProvider } from "./s3";
 import type { IStorageProvider } from "./interface";
+import { S3StorageProvider } from "./s3";
 
 export type { IStorageProvider };
 

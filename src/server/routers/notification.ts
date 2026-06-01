@@ -12,7 +12,11 @@ export const notificationRouter = createTRPCRouter({
 
 	/** Recent notifications for the dropdown. */
 	list: protectedProcedure
-		.input(z.object({ limit: z.number().int().min(1).max(50).default(20) }).optional())
+		.input(
+			z
+				.object({ limit: z.number().int().min(1).max(50).default(20) })
+				.optional(),
+		)
 		.query(async ({ ctx, input }) => {
 			return prisma.notification.findMany({
 				where: { userId: ctx.userId },

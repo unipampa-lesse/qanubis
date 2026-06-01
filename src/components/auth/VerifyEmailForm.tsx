@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useTranslation } from "@/context/LanguageContext";
 import Button from "@/components/ui/button/Button";
+import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
 export default function VerifyEmailForm() {
@@ -40,9 +40,7 @@ export default function VerifyEmailForm() {
 
 					{verify.isSuccess && (
 						<div className="space-y-4">
-							<p className="text-sm text-success-500">
-								{t.auth.emailVerified}
-							</p>
+							<p className="text-sm text-success-500">{t.auth.emailVerified}</p>
 							<Button
 								size="sm"
 								className="w-full"

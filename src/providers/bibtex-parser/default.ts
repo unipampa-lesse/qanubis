@@ -37,7 +37,9 @@ function extractValue(s: string, pos: number): { value: string; end: number } {
  * Walk the input finding all @type{...} blocks.
  * Handles nested braces correctly; skips @comment/@string/@preamble.
  */
-function extractEntryBlocks(input: string): Array<{ type: string; body: string }> {
+function extractEntryBlocks(
+	input: string,
+): Array<{ type: string; body: string }> {
 	const results: Array<{ type: string; body: string }> = [];
 	let i = 0;
 
@@ -64,7 +66,10 @@ function extractEntryBlocks(input: string): Array<{ type: string; body: string }
 		}
 
 		if (depth === 0 && !["comment", "preamble", "string"].includes(entryType)) {
-			results.push({ type: entryType, body: input.slice(braceStart + 1, j - 1) });
+			results.push({
+				type: entryType,
+				body: input.slice(braceStart + 1, j - 1),
+			});
 		}
 		i = j;
 	}

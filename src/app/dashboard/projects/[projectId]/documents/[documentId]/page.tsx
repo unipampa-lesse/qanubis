@@ -17,8 +17,8 @@ import {
 } from "react-icons/hi2";
 import type {
 	PendingSelection,
-	VisualPosition,
 	QuoteHighlight,
+	VisualPosition,
 } from "@/components/projects/PdfViewer";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -488,7 +488,10 @@ export default function DocumentViewerPage() {
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
 
 	// Fetch document metadata (title, authors, bib info for header)
-	const { data: document } = trpc.document.get.useQuery({ projectId, documentId });
+	const { data: document } = trpc.document.get.useQuery({
+		projectId,
+		documentId,
+	});
 
 	// Fetch presigned URL
 	const { data: urlData, isLoading: urlLoading } =

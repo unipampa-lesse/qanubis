@@ -298,12 +298,15 @@ export const translations: Translations = {
 		exportCSV: "Descargar CSV",
 		exportTXT: "Descargar TXT",
 		exportJSON: "Descargar JSON",
-		exportJSONHint: "Datos estructurados para uso con otras herramientas (Atlas.ti, NVivo, etc.).",
+		exportJSONHint:
+			"Datos estructurados para uso con otras herramientas (Atlas.ti, NVivo, etc.).",
 		exportEmptyHint: "Aún no hay citas para exportar.",
 		exportNarrative: "Informe Narrativo",
-		exportNarrativeHint: "Informe estructurado por código → citas → extractos de memorando. Ideal para defensa de tesis o publicación académica.",
+		exportNarrativeHint:
+			"Informe estructurado por código → citas → extractos de memorando. Ideal para defensa de tesis o publicación académica.",
 		exportMarkdown: "Descargar Markdown",
-		exportNarrativeEmpty: "Agrega códigos y citas para generar un informe narrativo.",
+		exportNarrativeEmpty:
+			"Agrega códigos y citas para generar un informe narrativo.",
 		// Stats
 		stats: "Estadísticas",
 		totalDocuments: "Documentos",
@@ -312,7 +315,7 @@ export const translations: Translations = {
 		totalMemos: "Memorandos",
 		uncodedQuotes: "Citas sin código",
 		codeFrequency: "Frecuencia de códigos",
-		documentDistribution: "Citas por documento"
+		documentDistribution: "Citas por documento",
 	},
 
 	// Memos tab

@@ -1,6 +1,6 @@
 import "server-only";
-import { NodemailerEmailProvider } from "./nodemailer";
 import type { IEmailProvider } from "./interface";
+import { NodemailerEmailProvider } from "./nodemailer";
 
 export type { IEmailProvider, SendEmailOptions } from "./interface";
 

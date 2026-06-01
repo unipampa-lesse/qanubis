@@ -1,5 +1,5 @@
-import { registerOTel } from "@vercel/otel";
 import { PrismaInstrumentation } from "@prisma/instrumentation";
+import { registerOTel } from "@vercel/otel";
 
 // Runs once in the Node.js runtime before the server starts.
 // Edge Runtime is not used, so the guard here is a safety net only.

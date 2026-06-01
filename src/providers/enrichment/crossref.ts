@@ -199,7 +199,10 @@ export class CrossrefEnrichmentProvider implements IEnrichmentProvider {
 					}),
 				);
 			} catch (err) {
-				this.log.warn({ err, documentId }, "failed to send enrichment notifications");
+				this.log.warn(
+					{ err, documentId },
+					"failed to send enrichment notifications",
+				);
 			}
 		}
 	}

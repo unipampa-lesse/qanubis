@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import type { ProjectRole } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { HiOutlineMagnifyingGlass, HiOutlinePlus } from "react-icons/hi2";
 import CreateProjectModal from "@/components/projects/CreateProjectModal";
 import ProjectCard from "@/components/projects/ProjectCard";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
-import type { ProjectRole } from "@prisma/client";
 
 const SKELETON_KEYS = ["sk-a", "sk-b", "sk-c"] as const;
 
@@ -87,7 +87,9 @@ export default function DashboardPage() {
 					<div className="relative">
 						<select
 							value={roleFilter}
-							onChange={(e) => setRoleFilter(e.target.value as ProjectRole | "")}
+							onChange={(e) =>
+								setRoleFilter(e.target.value as ProjectRole | "")
+							}
 							className={SELECT_CLASS}
 						>
 							<option value="">{t.dashboard.roleAll}</option>

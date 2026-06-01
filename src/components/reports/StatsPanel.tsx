@@ -7,13 +7,7 @@ interface StatsPanelProps {
 	projectId: string;
 }
 
-function StatCard({
-	label,
-	value,
-}: {
-	label: string;
-	value: number;
-}) {
+function StatCard({ label, value }: { label: string; value: number }) {
 	return (
 		<div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/50">
 			<p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
@@ -47,11 +41,17 @@ export default function StatsPanel({ projectId }: StatsPanelProps) {
 		<div className="space-y-8">
 			{/* Totals */}
 			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-				<StatCard label={t.reports.totalDocuments} value={stats.totals.documents} />
+				<StatCard
+					label={t.reports.totalDocuments}
+					value={stats.totals.documents}
+				/>
 				<StatCard label={t.reports.totalQuotes} value={stats.totals.quotes} />
 				<StatCard label={t.reports.totalCodes} value={stats.totals.codes} />
 				<StatCard label={t.reports.totalMemos} value={stats.totals.memos} />
-				<StatCard label={t.reports.uncodedQuotes} value={stats.totals.uncodedQuotes} />
+				<StatCard
+					label={t.reports.uncodedQuotes}
+					value={stats.totals.uncodedQuotes}
+				/>
 			</div>
 
 			{/* Quotes per code (bar-like) */}

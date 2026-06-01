@@ -100,7 +100,11 @@ export default function ReportsTab({
 			)}
 			{activeSubTab === "export" && (
 				<ErrorBoundary>
-					<ExportPanel projectId={projectId} quotes={safeQuotes} projectName={projectName} />
+					<ExportPanel
+						projectId={projectId}
+						quotes={safeQuotes}
+						projectName={projectName}
+					/>
 				</ErrorBoundary>
 			)}
 		</div>

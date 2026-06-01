@@ -33,9 +33,6 @@ export async function GET(request: NextRequest) {
 		</div>,
 		{ width: size, height: size },
 	);
-	response.headers.set(
-		"Cache-Control",
-		"public, max-age=31536000, immutable",
-	);
+	response.headers.set("Cache-Control", "public, max-age=31536000, immutable");
 	return response;
 }

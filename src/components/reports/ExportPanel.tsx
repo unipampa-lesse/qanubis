@@ -3,8 +3,8 @@
 import {
 	HiOutlineArrowDownTray,
 	HiOutlineDocumentText,
-	HiOutlineTag,
 	HiOutlineNewspaper,
+	HiOutlineTag,
 } from "react-icons/hi2";
 import Button from "@/components/ui/button/Button";
 import { useTranslation } from "@/context/LanguageContext";
@@ -149,7 +149,12 @@ type NarrativeData = {
 		id: string;
 		name: string;
 		description: string | null;
-		quotes: { id: string; text: string; page: number; document: { name: string } }[];
+		quotes: {
+			id: string;
+			text: string;
+			page: number;
+			document: { name: string };
+		}[];
 	}[];
 	memos: { id: string; name: string; content: unknown }[];
 };
@@ -188,7 +193,11 @@ function buildNarrativeMarkdown(
 	return lines.join("\n");
 }
 
-export default function ExportPanel({ projectId, quotes, projectName }: ExportPanelProps) {
+export default function ExportPanel({
+	projectId,
+	quotes,
+	projectName,
+}: ExportPanelProps) {
 	const t = useTranslation();
 	const slug = projectName.toLowerCase().replace(/\s+/g, "-");
 
@@ -302,9 +311,7 @@ export default function ExportPanel({ projectId, quotes, projectName }: ExportPa
 						{t.reports.exportJSON}
 					</h3>
 				</div>
-				<p className="mb-4 text-xs text-gray-400">
-					{t.reports.exportJSONHint}
-				</p>
+				<p className="mb-4 text-xs text-gray-400">{t.reports.exportJSONHint}</p>
 				<Button
 					size="sm"
 					variant="outline"
@@ -344,7 +351,9 @@ export default function ExportPanel({ projectId, quotes, projectName }: ExportPa
 				{isLoadingNarrative ? (
 					<div className="h-8 w-48 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
 				) : !hasCodesWithQuotes ? (
-					<p className="text-xs text-gray-400">{t.reports.exportNarrativeEmpty}</p>
+					<p className="text-xs text-gray-400">
+						{t.reports.exportNarrativeEmpty}
+					</p>
 				) : (
 					<Button
 						size="sm"

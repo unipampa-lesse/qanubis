@@ -323,7 +323,9 @@ export default function DocumentsTab({
 								<HiOutlineArrowUpTray className="h-3.5 w-3.5" />
 								{t.bibliography.uploadBibFile}
 							</button>
-							<span className="text-xs text-gray-400">{t.bibliography.orPaste}</span>
+							<span className="text-xs text-gray-400">
+								{t.bibliography.orPaste}
+							</span>
 						</div>
 						<textarea
 							value={bibtexText}
@@ -414,294 +416,298 @@ export default function DocumentsTab({
 
 								return (
 									<Fragment key={doc.id}>
-									<tr
-										className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
-									>
-										{/* Document name */}
-										<td className="px-5 py-3">
-											{isEditing ? (
-												<form
-													className="flex items-center gap-2"
-													onSubmit={(e) => {
-														e.preventDefault();
-														commitEdit(doc.id);
-													}}
-												>
-													<DocTypeIcon mimeType={doc.mimeType} />
-													<input
-														type="text"
-														value={draftName}
-														onChange={(e) => setDraftName(e.target.value)}
-														onKeyDown={(e) =>
-															e.key === "Escape" && cancelEdit()
-														}
-														maxLength={200}
-														required
-														className="h-8 flex-1 rounded-lg border border-brand-400 bg-transparent px-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-brand-500 dark:text-white/90"
-													/>
-													<button
-														type="submit"
-														disabled={rename.isPending || !draftName.trim()}
-														className="text-success-600 hover:text-success-700 disabled:opacity-40 dark:text-success-400"
-														title={t.common.save}
+										<tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+											{/* Document name */}
+											<td className="px-5 py-3">
+												{isEditing ? (
+													<form
+														className="flex items-center gap-2"
+														onSubmit={(e) => {
+															e.preventDefault();
+															commitEdit(doc.id);
+														}}
 													>
-														<HiOutlineCheck className="h-4 w-4" />
-													</button>
-													<button
-														type="button"
-														onClick={cancelEdit}
-														className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-														title={t.common.cancel}
+														<DocTypeIcon mimeType={doc.mimeType} />
+														<input
+															type="text"
+															value={draftName}
+															onChange={(e) => setDraftName(e.target.value)}
+															onKeyDown={(e) =>
+																e.key === "Escape" && cancelEdit()
+															}
+															maxLength={200}
+															required
+															className="h-8 flex-1 rounded-lg border border-brand-400 bg-transparent px-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-brand-500 dark:text-white/90"
+														/>
+														<button
+															type="submit"
+															disabled={rename.isPending || !draftName.trim()}
+															className="text-success-600 hover:text-success-700 disabled:opacity-40 dark:text-success-400"
+															title={t.common.save}
+														>
+															<HiOutlineCheck className="h-4 w-4" />
+														</button>
+														<button
+															type="button"
+															onClick={cancelEdit}
+															className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+															title={t.common.cancel}
+														>
+															<HiOutlineXMark className="h-4 w-4" />
+														</button>
+													</form>
+												) : hasPdf ? (
+													<Link
+														href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
+														className="flex items-center gap-2 hover:underline"
 													>
-														<HiOutlineXMark className="h-4 w-4" />
-													</button>
-												</form>
-											) : hasPdf ? (
-												<Link
-													href={`/dashboard/projects/${projectId}/documents/${doc.id}`}
-													className="flex items-center gap-2 hover:underline"
-												>
-													<DocTypeIcon mimeType={doc.mimeType} />
-													<div className="min-w-0">
-														<div className="font-medium text-gray-800 dark:text-white/90">
-															{doc.name}
-														</div>
-														<div className="truncate text-xs text-gray-400">
-															{doc.authors.length > 0
-																? `${doc.authors.slice(0, 2).join("; ")}${doc.authors.length > 2 ? " et al." : ""}`
-																: doc.extractedTitle && doc.extractedTitle !== doc.name
-																	? doc.extractedTitle
-																	: null}
-														</div>
-													</div>
-												</Link>
-											) : (
-												<div className="flex items-center gap-2">
-													<DocTypeIcon mimeType={doc.mimeType} />
-													<div className="min-w-0">
-														<div className="font-medium text-gray-800 dark:text-white/90">
-															{doc.name}
-														</div>
-														{doc.authors.length > 0 && (
-															<div className="truncate text-xs text-gray-400">
-																{doc.authors.slice(0, 2).join("; ")}
-																{doc.authors.length > 2 ? " et al." : ""}
+														<DocTypeIcon mimeType={doc.mimeType} />
+														<div className="min-w-0">
+															<div className="font-medium text-gray-800 dark:text-white/90">
+																{doc.name}
 															</div>
-														)}
-													</div>
-												</div>
-											)}
-										</td>
-
-										{/* Status column */}
-										<td className="hidden px-5 py-3 sm:table-cell">
-											<div className="flex items-center gap-1.5">
-												{hasPdf ? (
-													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-success-700 ring-1 ring-success-200 dark:text-success-400 dark:ring-success-800">
-														PDF
-													</span>
+															<div className="truncate text-xs text-gray-400">
+																{doc.authors.length > 0
+																	? `${doc.authors.slice(0, 2).join("; ")}${doc.authors.length > 2 ? " et al." : ""}`
+																	: doc.extractedTitle &&
+																			doc.extractedTitle !== doc.name
+																		? doc.extractedTitle
+																		: null}
+															</div>
+														</div>
+													</Link>
 												) : (
-													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700">
-														{t.documents.noPdf}
-													</span>
-												)}
-												{isBib && (
-													<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-brand-600 ring-1 ring-brand-200 dark:text-brand-400 dark:ring-brand-800">
-														Ref
-													</span>
-												)}
-											</div>
-										</td>
-
-										{/* Pages */}
-										<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
-											{doc.pageCount > 0 ? doc.pageCount : "—"}
-										</td>
-
-										{/* Quotes + progress */}
-										<td className="hidden px-5 py-3 md:table-cell">
-											<div className="flex flex-col gap-1">
-												<span className="text-gray-500 dark:text-gray-400">
-													{doc._count.quotes}
-												</span>
-												{doc._count.quotes > 0 && (
-													<div
-														className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"
-														title={`${doc.codedQuoteCount}/${doc._count.quotes} ${t.documents.codingProgress}`}
-													>
-														<div
-															className="h-full rounded-full bg-brand-500 transition-[width]"
-															style={{
-																width: `${Math.round((doc.codedQuoteCount / doc._count.quotes) * 100)}%`,
-															}}
-														/>
+													<div className="flex items-center gap-2">
+														<DocTypeIcon mimeType={doc.mimeType} />
+														<div className="min-w-0">
+															<div className="font-medium text-gray-800 dark:text-white/90">
+																{doc.name}
+															</div>
+															{doc.authors.length > 0 && (
+																<div className="truncate text-xs text-gray-400">
+																	{doc.authors.slice(0, 2).join("; ")}
+																	{doc.authors.length > 2 ? " et al." : ""}
+																</div>
+															)}
+														</div>
 													</div>
 												)}
-											</div>
-										</td>
+											</td>
 
-										{/* Actions */}
-										<td className="px-5 py-3 text-right">
-											{!isEditing && (
-												<div className="flex items-center justify-end gap-2">
-													{/* Expand metadata — bib docs with any metadata */}
-													{hasMeta && (
-														<button
-															type="button"
-															title={isExpanded ? t.common.collapse : t.common.expand}
-															onClick={() =>
-																setExpandedId(isExpanded ? null : doc.id)
-															}
-															className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
+											{/* Status column */}
+											<td className="hidden px-5 py-3 sm:table-cell">
+												<div className="flex items-center gap-1.5">
+													{hasPdf ? (
+														<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-success-700 ring-1 ring-success-200 dark:text-success-400 dark:ring-success-800">
+															PDF
+														</span>
+													) : (
+														<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700">
+															{t.documents.noPdf}
+														</span>
+													)}
+													{isBib && (
+														<span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-brand-600 ring-1 ring-brand-200 dark:text-brand-400 dark:ring-brand-800">
+															Ref
+														</span>
+													)}
+												</div>
+											</td>
+
+											{/* Pages */}
+											<td className="hidden px-5 py-3 text-gray-500 dark:text-gray-400 sm:table-cell">
+												{doc.pageCount > 0 ? doc.pageCount : "—"}
+											</td>
+
+											{/* Quotes + progress */}
+											<td className="hidden px-5 py-3 md:table-cell">
+												<div className="flex flex-col gap-1">
+													<span className="text-gray-500 dark:text-gray-400">
+														{doc._count.quotes}
+													</span>
+													{doc._count.quotes > 0 && (
+														<div
+															className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"
+															title={`${doc.codedQuoteCount}/${doc._count.quotes} ${t.documents.codingProgress}`}
 														>
-															{isExpanded ? (
-																<HiOutlineChevronUp className="h-4 w-4" />
-															) : (
-																<HiOutlineChevronDown className="h-4 w-4" />
-															)}
-														</button>
+															<div
+																className="h-full rounded-full bg-brand-500 transition-[width]"
+																style={{
+																	width: `${Math.round((doc.codedQuoteCount / doc._count.quotes) * 100)}%`,
+																}}
+															/>
+														</div>
 													)}
+												</div>
+											</td>
 
-													{/* Attach PDF — bib docs without PDF */}
-													{isBib && !hasPdf && canEdit && (
-														<button
-															type="button"
-															title={t.bibliography.uploadPdf}
-															disabled={isAttaching}
-															onClick={() => {
-																setAttachingPdfFor(doc.id);
-																bibPdfRef.current?.click();
-															}}
-															className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
-														>
-															<HiOutlineArrowUpTray className="h-4 w-4" />
-														</button>
-													)}
-
-													{/* Enrich — bib docs with DOI, not yet enriched */}
-													{isBib && doc.doi && !doc.enriched && canEdit && (
-														<button
-															type="button"
-															title={t.bibliography.enrich}
-															disabled={enrichMutation.isPending}
-															onClick={() =>
-																enrichMutation.mutate({
-																	projectId,
-																	documentId: doc.id,
-																})
-															}
-															className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
-														>
-															<HiOutlineSparkles className="h-4 w-4" />
-														</button>
-													)}
-
-													{/* Download — only when PDF exists */}
-													{hasPdf && (
-														<DownloadButton
-															projectId={projectId}
-															documentId={doc.id}
-															title={t.documents.download}
-														/>
-													)}
-
-													{canEdit && (
-														<>
+											{/* Actions */}
+											<td className="px-5 py-3 text-right">
+												{!isEditing && (
+													<div className="flex items-center justify-end gap-2">
+														{/* Expand metadata — bib docs with any metadata */}
+														{hasMeta && (
 															<button
 																type="button"
-																title={t.documents.renameDocument}
-																onClick={() => startEdit(doc.id, doc.name)}
+																title={
+																	isExpanded
+																		? t.common.collapse
+																		: t.common.expand
+																}
+																onClick={() =>
+																	setExpandedId(isExpanded ? null : doc.id)
+																}
 																className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
 															>
-																<HiOutlinePencilSquare className="h-4 w-4" />
+																{isExpanded ? (
+																	<HiOutlineChevronUp className="h-4 w-4" />
+																) : (
+																	<HiOutlineChevronDown className="h-4 w-4" />
+																)}
 															</button>
+														)}
+
+														{/* Attach PDF — bib docs without PDF */}
+														{isBib && !hasPdf && canEdit && (
 															<button
 																type="button"
-																title={t.documents.deleteDocument}
+																title={t.bibliography.uploadPdf}
+																disabled={isAttaching}
+																onClick={() => {
+																	setAttachingPdfFor(doc.id);
+																	bibPdfRef.current?.click();
+																}}
+																className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
+															>
+																<HiOutlineArrowUpTray className="h-4 w-4" />
+															</button>
+														)}
+
+														{/* Enrich — bib docs with DOI, not yet enriched */}
+														{isBib && doc.doi && !doc.enriched && canEdit && (
+															<button
+																type="button"
+																title={t.bibliography.enrich}
+																disabled={enrichMutation.isPending}
 																onClick={() =>
-																	remove.mutate({
+																	enrichMutation.mutate({
 																		projectId,
 																		documentId: doc.id,
 																	})
 																}
-																className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
+																className="text-gray-400 hover:text-brand-600 disabled:opacity-40 dark:hover:text-brand-400"
 															>
-																<HiOutlineTrash className="h-4 w-4" />
+																<HiOutlineSparkles className="h-4 w-4" />
 															</button>
-														</>
-													)}
-												</div>
-											)}
-										</td>
-									</tr>
-									{isExpanded && hasMeta && (
-										<tr className="bg-gray-50/70 dark:bg-white/[0.015]">
-											<td colSpan={5} className="px-8 pb-4 pt-2">
-												<dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-xs sm:grid-cols-2">
-													{doc.authors.length > 0 && (
-														<>
-															<dt className="font-medium text-gray-500 dark:text-gray-400">
-																{t.bibliography.authors}
-															</dt>
-															<dd className="text-gray-700 dark:text-gray-300">
-																{doc.authors.join("; ")}
-															</dd>
-														</>
-													)}
-													{doc.year && (
-														<>
-															<dt className="font-medium text-gray-500 dark:text-gray-400">
-																{t.bibliography.year}
-															</dt>
-															<dd className="text-gray-700 dark:text-gray-300">
-																{doc.year}
-															</dd>
-														</>
-													)}
-													{doc.journal && (
-														<>
-															<dt className="font-medium text-gray-500 dark:text-gray-400">
-																{t.bibliography.venue}
-															</dt>
-															<dd className="text-gray-700 dark:text-gray-300">
-																{doc.journal}
-																{doc.volume && `, ${t.bibliography.vol} ${doc.volume}`}
-																{doc.issue && `(${doc.issue})`}
-																{doc.pages && `, ${doc.pages}`}
-															</dd>
-														</>
-													)}
-													{doc.doi && (
-														<>
-															<dt className="font-medium text-gray-500 dark:text-gray-400">
-																DOI
-															</dt>
-															<dd>
-																<a
-																	href={`https://doi.org/${doc.doi}`}
-																	target="_blank"
-																	rel="noreferrer"
-																	className="break-all text-brand-600 hover:underline dark:text-brand-400"
+														)}
+
+														{/* Download — only when PDF exists */}
+														{hasPdf && (
+															<DownloadButton
+																projectId={projectId}
+																documentId={doc.id}
+																title={t.documents.download}
+															/>
+														)}
+
+														{canEdit && (
+															<>
+																<button
+																	type="button"
+																	title={t.documents.renameDocument}
+																	onClick={() => startEdit(doc.id, doc.name)}
+																	className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400"
 																>
-																	{doc.doi}
-																</a>
-															</dd>
-														</>
-													)}
-													{doc.abstract && (
-														<>
-															<dt className="col-span-full font-medium text-gray-500 dark:text-gray-400">
-																{t.bibliography.abstract}
-															</dt>
-															<dd className="col-span-full leading-relaxed text-gray-700 dark:text-gray-300">
-																{doc.abstract}
-															</dd>
-														</>
-													)}
-												</dl>
+																	<HiOutlinePencilSquare className="h-4 w-4" />
+																</button>
+																<button
+																	type="button"
+																	title={t.documents.deleteDocument}
+																	onClick={() =>
+																		remove.mutate({
+																			projectId,
+																			documentId: doc.id,
+																		})
+																	}
+																	className="text-gray-400 hover:text-error-500 dark:hover:text-error-400"
+																>
+																	<HiOutlineTrash className="h-4 w-4" />
+																</button>
+															</>
+														)}
+													</div>
+												)}
 											</td>
 										</tr>
-									)}
+										{isExpanded && hasMeta && (
+											<tr className="bg-gray-50/70 dark:bg-white/[0.015]">
+												<td colSpan={5} className="px-8 pb-4 pt-2">
+													<dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-xs sm:grid-cols-2">
+														{doc.authors.length > 0 && (
+															<>
+																<dt className="font-medium text-gray-500 dark:text-gray-400">
+																	{t.bibliography.authors}
+																</dt>
+																<dd className="text-gray-700 dark:text-gray-300">
+																	{doc.authors.join("; ")}
+																</dd>
+															</>
+														)}
+														{doc.year && (
+															<>
+																<dt className="font-medium text-gray-500 dark:text-gray-400">
+																	{t.bibliography.year}
+																</dt>
+																<dd className="text-gray-700 dark:text-gray-300">
+																	{doc.year}
+																</dd>
+															</>
+														)}
+														{doc.journal && (
+															<>
+																<dt className="font-medium text-gray-500 dark:text-gray-400">
+																	{t.bibliography.venue}
+																</dt>
+																<dd className="text-gray-700 dark:text-gray-300">
+																	{doc.journal}
+																	{doc.volume &&
+																		`, ${t.bibliography.vol} ${doc.volume}`}
+																	{doc.issue && `(${doc.issue})`}
+																	{doc.pages && `, ${doc.pages}`}
+																</dd>
+															</>
+														)}
+														{doc.doi && (
+															<>
+																<dt className="font-medium text-gray-500 dark:text-gray-400">
+																	DOI
+																</dt>
+																<dd>
+																	<a
+																		href={`https://doi.org/${doc.doi}`}
+																		target="_blank"
+																		rel="noreferrer"
+																		className="break-all text-brand-600 hover:underline dark:text-brand-400"
+																	>
+																		{doc.doi}
+																	</a>
+																</dd>
+															</>
+														)}
+														{doc.abstract && (
+															<>
+																<dt className="col-span-full font-medium text-gray-500 dark:text-gray-400">
+																	{t.bibliography.abstract}
+																</dt>
+																<dd className="col-span-full leading-relaxed text-gray-700 dark:text-gray-300">
+																	{doc.abstract}
+																</dd>
+															</>
+														)}
+													</dl>
+												</td>
+											</tr>
+										)}
 									</Fragment>
 								);
 							})}
