@@ -46,13 +46,13 @@ jobs:
         run: pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.strict-dep-builds=false
 
       - name: Generate Prisma Client
-        run: pnpm prisma:generate
+        run: pnpm --config.minimum-release-age=0 --config.verify-deps-before-run=false run prisma:generate
 
       - name: Run lint:check
-        run: pnpm lint:check
+        run: pnpm --config.minimum-release-age=0 --config.verify-deps-before-run=false run lint:check
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm --config.minimum-release-age=0 --config.verify-deps-before-run=false run test
 
       - name: Build project
-        run: pnpm build
+        run: pnpm --config.minimum-release-age=0 --config.verify-deps-before-run=false run build

@@ -51,7 +51,7 @@ jobs:
         run: pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.strict-dep-builds=false
 
       - name: Generate Prisma Client
-        run: pnpm prisma:generate
+        run: pnpm --config.minimum-release-age=0 --config.verify-deps-before-run=false run prisma:generate
 
       - name: Run Semantic Release
         id: release
