@@ -54,7 +54,12 @@ jobs:
         run: pnpm audit --audit-level=high
 
       - name: Generate CycloneDX SBOM
-        run: pnpm dlx @cyclonedx/cyclonedx-npm --output-format json --output-file sbom.cdx.json
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+          upload-artifact: false
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
