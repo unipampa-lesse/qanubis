@@ -43,6 +43,42 @@ Open **http://localhost:3000** and sign in with `researcher@qanubis.local` / `us
 
 For the full setup guide including service URLs and seed accounts, see [Contribution Guidelines](https://github.com/unipampa-lesse/qanubis/wiki/Contribution_Guidelines#run-locally).
 
+## Release Runbook
+
+### CI policy and lockfile
+
+- CI installs dependencies with `pnpm install --frozen-lockfile`.
+- Release and PR validation workflows set `npm_config_minimum_release_age=0` to avoid false negatives when trusted dependencies were published recently.
+- Never edit `pnpm-lock.yaml` manually.
+
+### When lockfile checks fail in CI
+
+1. Inspect the dependency update PR and confirm package versions are expected.
+2. Rebuild lockfile deterministically:
+
+```bash
+pnpm clean --lockfile
+pnpm install
+```
+
+3. Re-run local quality checks:
+
+```bash
+pnpm lint:check
+pnpm test
+pnpm build
+```
+
+4. Commit the updated `pnpm-lock.yaml` and re-run CI.
+
+### Release rollback
+
+1. Identify the last stable tag/release in GitHub.
+2. Revert the problematic commit on `main`.
+3. Push the revert commit.
+4. Let the release workflow publish a patch release automatically.
+5. Document root cause and remediation in the release notes.
+
 ## Authors
 
 - [@guilhermebolfe11](https://www.github.com/guilhermebolfe11)
