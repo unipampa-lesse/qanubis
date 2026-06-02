@@ -481,9 +481,12 @@ export default function DocumentViewerPage() {
 	const [pendingCodeIds, setPendingCodeIds] = useState<string[]>([]);
 
 	// Derive current role (default COLLABORATOR while loading)
-	const { data: members } = trpc.member.list.useQuery({ projectId });
+	const { data: members } = trpc.member.list.useQuery({
+		projectId,
+		limit: 100,
+	});
 	const currentRole: ProjectRole =
-		members?.find((m) => m.user.id === session?.user?.id)?.role ??
+		members?.items.find((m) => m.user.id === session?.user?.id)?.role ??
 		"COLLABORATOR";
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
 
@@ -507,7 +510,11 @@ export default function DocumentViewerPage() {
 	});
 
 	// Fetch codes
-	const { data: codes = [] } = trpc.code.list.useQuery({ projectId });
+	const { data: codesData } = trpc.code.list.useQuery({
+		projectId,
+		limit: 200,
+	});
+	const codes = codesData?.items ?? [];
 
 	const assignCode = trpc.quote.assignCode.useMutation();
 

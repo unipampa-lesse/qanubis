@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { getEmailProvider } from "@/providers/email";
 import { getEmailTemplateProvider } from "@/providers/email-template";
+import { recordAuditEventSafe } from "@/server/services/audit";
 import {
 	createTRPCRouter,
 	ownerProcedure,
@@ -16,17 +17,39 @@ const INVITE_TTL_HOURS = 48;
 export const memberRouter = createTRPCRouter({
 	/** List members of a project. Available to all project members. */
 	list: projectProcedure
-		.input(z.object({ projectId: z.string() }))
+		.input(
+			z.object({
+				projectId: z.string(),
+				limit: z.number().int().min(1).max(100).default(30),
+				cursor: z.string().optional(),
+			}),
+		)
 		.query(async ({ input }) => {
-			return prisma.projectMember.findMany({
+			const items = await prisma.projectMember.findMany({
 				where: { projectId: input.projectId },
 				include: {
 					user: {
 						select: { id: true, name: true, email: true, avatar: true },
 					},
 				},
-				orderBy: { joinedAt: "asc" },
+				orderBy: [{ joinedAt: "asc" }, { id: "asc" }],
+				take: input.limit + 1,
+				...(input.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
 			});
+
+			const hasMore = items.length > input.limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return {
+				items: page,
+				nextCursor,
+			};
 		}),
 
 	/** Invite a user by email (owner only). Sends an invite email with a tokenized link. */
@@ -116,6 +139,20 @@ export const memberRouter = createTRPCRouter({
 				text: emailContent.text,
 			});
 
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "MEMBER_INVITED",
+				entityType: "PROJECT_MEMBER",
+				entityId: invite.id,
+				summary: `Invite sent to ${input.email}`,
+				details: {
+					email: input.email,
+					role: input.role,
+					expiresAt: expiresAt.toISOString(),
+				},
+			});
+
 			return { success: true, expiresAt };
 		}),
 
@@ -203,6 +240,19 @@ export const memberRouter = createTRPCRouter({
 				});
 			}
 
+			await recordAuditEventSafe({
+				projectId: invite.projectId,
+				actorId: ctx.userId,
+				action: "MEMBER_INVITE_ACCEPTED",
+				entityType: "PROJECT_MEMBER",
+				entityId: ctx.userId,
+				summary: `${user.name ?? user.email} joined project`,
+				details: {
+					role: invite.role,
+					email: user.email,
+				},
+			});
+
 			return { projectId: invite.projectId };
 		}),
 
@@ -222,7 +272,7 @@ export const memberRouter = createTRPCRouter({
 					message: "Cannot change your own role",
 				});
 			}
-			return prisma.projectMember.update({
+			const updated = await prisma.projectMember.update({
 				where: {
 					projectId_userId: {
 						projectId: input.projectId,
@@ -231,6 +281,18 @@ export const memberRouter = createTRPCRouter({
 				},
 				data: { role: input.role },
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "MEMBER_ROLE_UPDATED",
+				entityType: "PROJECT_MEMBER",
+				entityId: input.userId,
+				summary: `Member role changed to ${input.role}`,
+				details: { role: input.role },
+			});
+
+			return updated;
 		}),
 
 	/** Remove a member from the project (owner only; cannot remove themselves). */
@@ -256,6 +318,15 @@ export const memberRouter = createTRPCRouter({
 					},
 				},
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "MEMBER_REMOVED",
+				entityType: "PROJECT_MEMBER",
+				entityId: input.userId,
+				summary: "Member removed from project",
+			});
 			return { success: true };
 		}),
 
@@ -277,6 +348,15 @@ export const memberRouter = createTRPCRouter({
 						userId: ctx.userId,
 					},
 				},
+			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "MEMBER_LEFT",
+				entityType: "PROJECT_MEMBER",
+				entityId: ctx.userId,
+				summary: "Member left project",
 			});
 			return { success: true };
 		}),
@@ -316,6 +396,16 @@ export const memberRouter = createTRPCRouter({
 					data: { role: "COLLABORATOR" },
 				}),
 			]);
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "PROJECT_OWNERSHIP_TRANSFERRED",
+				entityType: "PROJECT_MEMBER",
+				entityId: input.newOwnerId,
+				summary: "Project ownership transferred",
+				details: { fromUserId: ctx.userId, toUserId: input.newOwnerId },
+			});
 			return { success: true };
 		}),
 });

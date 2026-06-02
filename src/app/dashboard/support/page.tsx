@@ -27,7 +27,14 @@ export default function SupportPage() {
 	const router = useRouter();
 	const utils = trpc.useUtils();
 
-	const { data: tickets, isLoading } = trpc.support.listMyTickets.useQuery();
+	const ticketsQuery = trpc.support.listMyTickets.useInfiniteQuery(
+		{ limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const tickets = useMemo(
+		() => ticketsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+		[ticketsQuery.data],
+	);
 
 	const [showForm, setShowForm] = useState(false);
 	const [subject, setSubject] = useState("");
@@ -45,7 +52,7 @@ export default function SupportPage() {
 	});
 
 	const filtered = useMemo(() => {
-		if (!tickets) return [];
+		if (!tickets.length) return [];
 		const q = search.trim().toLowerCase();
 		return tickets.filter((tk) => {
 			const matchSearch = !q || tk.subject.toLowerCase().includes(q);
@@ -53,6 +60,8 @@ export default function SupportPage() {
 			return matchSearch && matchStatus;
 		});
 	}, [tickets, search, statusFilter]);
+
+	const isLoading = ticketsQuery.isLoading;
 
 	function statusLabel(status: string) {
 		const map: Record<string, string> = {
@@ -168,7 +177,7 @@ export default function SupportPage() {
 						/>
 					))}
 				</div>
-			) : !tickets || tickets.length === 0 ? (
+			) : tickets.length === 0 ? (
 				<div className="rounded-xl border border-dashed border-gray-300 py-16 text-center text-sm text-gray-400 dark:border-gray-700">
 					{t.support.noTickets}
 				</div>
@@ -259,6 +268,21 @@ export default function SupportPage() {
 						</div>
 					)}
 				</>
+			)}
+
+			{ticketsQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => ticketsQuery.fetchNextPage()}
+						disabled={ticketsQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{ticketsQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
+				</div>
 			)}
 		</div>
 	);

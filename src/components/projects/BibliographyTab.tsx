@@ -98,25 +98,27 @@ export default function BibliographyTab({
 
 	const utils = trpc.useUtils();
 
-	const { data: entries, isLoading } = trpc.document.list.useQuery({
-		projectId,
-		source: "bibtex",
-	});
+	const entriesQuery = trpc.document.list.useInfiniteQuery(
+		{ projectId, source: "bibtex", limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const entries = entriesQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const isLoading = entriesQuery.isLoading;
 
 	const importMutation = trpc.bibtex.importText.useMutation({
 		onSuccess: (result) => {
 			setImportResult(result);
 			setBibtexText("");
-			utils.document.list.invalidate({ projectId });
+			utils.document.list.invalidate();
 		},
 	});
 
 	const deleteMutation = trpc.document.delete.useMutation({
-		onSuccess: () => utils.document.list.invalidate({ projectId }),
+		onSuccess: () => utils.document.list.invalidate(),
 	});
 
 	const enrichMutation = trpc.bibtex.triggerEnrichment.useMutation({
-		onSuccess: () => utils.document.list.invalidate({ projectId }),
+		onSuccess: () => utils.document.list.invalidate(),
 	});
 
 	function handleImport() {
@@ -151,7 +153,7 @@ export default function BibliographyTab({
 				const body = await res.json().catch(() => ({}));
 				throw new Error((body as { error?: string }).error ?? "Upload failed");
 			}
-			await utils.document.list.invalidate({ projectId });
+			await utils.document.list.invalidate();
 		} catch (err) {
 			setPdfUploadError(err instanceof Error ? err.message : "Upload failed");
 		} finally {
@@ -160,7 +162,7 @@ export default function BibliographyTab({
 		}
 	}
 
-	const deletingEntry = entries?.find((e) => e.id === deletingId);
+	const deletingEntry = entries.find((e) => e.id === deletingId);
 
 	return (
 		<div className="space-y-4">
@@ -247,7 +249,7 @@ export default function BibliographyTab({
 						/>
 					))}
 				</div>
-			) : entries && entries.length > 0 ? (
+			) : entries.length > 0 ? (
 				<div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
 					<table className="w-full text-sm">
 						<thead className="bg-gray-50 dark:bg-gray-800/50">
@@ -441,6 +443,21 @@ export default function BibliographyTab({
 						{t.bibliography.noEntries}
 						{canEdit && ` ${t.bibliography.noEntriesHint}`}
 					</p>
+				</div>
+			)}
+
+			{entriesQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => entriesQuery.fetchNextPage()}
+						disabled={entriesQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{entriesQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
 				</div>
 			)}
 

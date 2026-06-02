@@ -6,6 +6,7 @@ import { extractPdfMetadata } from "@/lib/pdf";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStorageProvider } from "@/providers/storage";
+import { recordAuditEventSafe } from "@/server/services/audit";
 
 const log = logger.child({ module: "upload/document" });
 
@@ -163,6 +164,21 @@ export async function POST(req: NextRequest) {
 		updated = await prisma.document.update({
 			where: { id: document.id },
 			data: { storageKey },
+		});
+
+		await recordAuditEventSafe({
+			projectId,
+			actorId: userId,
+			action: "DOCUMENT_UPLOADED",
+			entityType: "DOCUMENT",
+			entityId: updated.id,
+			summary: `Document uploaded: ${updated.name}`,
+			details: {
+				mimeType: updated.mimeType,
+				fileSize: updated.fileSize,
+				pageCount: updated.pageCount,
+				source: updated.source,
+			},
 		});
 	} catch (err) {
 		await Promise.allSettled([

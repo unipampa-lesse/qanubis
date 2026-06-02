@@ -16,7 +16,14 @@ export default function AdminProjectsPage() {
 	const t = useTranslation();
 	const { locale } = useLanguage();
 	const utils = trpc.useUtils();
-	const { data: projects, isLoading } = trpc.admin.listProjects.useQuery();
+	const projectsQuery = trpc.admin.listProjects.useInfiniteQuery(
+		{ limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const projects = useMemo(
+		() => projectsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+		[projectsQuery.data],
+	);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [search, setSearch] = useState("");
 
@@ -29,11 +36,13 @@ export default function AdminProjectsPage() {
 	});
 
 	const filtered = useMemo(() => {
-		if (!projects) return [];
+		if (!projects.length) return [];
 		const q = search.trim().toLowerCase();
 		if (!q) return projects;
 		return projects.filter((p) => p.name.toLowerCase().includes(q));
 	}, [projects, search]);
+
+	const isLoading = projectsQuery.isLoading;
 
 	if (isLoading) {
 		return (
@@ -171,6 +180,21 @@ export default function AdminProjectsPage() {
 							))}
 						</tbody>
 					</table>
+				</div>
+			)}
+
+			{projectsQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => projectsQuery.fetchNextPage()}
+						disabled={projectsQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{projectsQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
 				</div>
 			)}
 		</div>

@@ -48,7 +48,7 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.strict-dep-builds=false
+        run: pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.strict-dep-builds=false && pnpm approve-builds --all
 
       - name: Audit dependencies (high and critical)
         run: pnpm audit --audit-level=high

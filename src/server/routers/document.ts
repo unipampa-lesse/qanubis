@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getStorageProvider } from "@/providers/storage";
+import { recordAuditEventSafe } from "@/server/services/audit";
 import {
 	collaboratorProcedure,
 	createTRPCRouter,
@@ -44,9 +45,12 @@ export const documentRouter = createTRPCRouter({
 			z.object({
 				projectId: z.string(),
 				source: z.enum(["upload", "bibtex"]).optional(),
+				limit: z.number().int().min(1).max(100).default(30),
+				cursor: z.string().optional(),
 			}),
 		)
 		.query(async ({ input }) => {
+			const limit = input.limit;
 			const [docs, codedGroups] = await Promise.all([
 				prisma.document.findMany({
 					where: {
@@ -79,7 +83,14 @@ export const documentRouter = createTRPCRouter({
 						createdAt: true,
 						_count: { select: { quotes: true } },
 					},
-					orderBy: { createdAt: "desc" },
+					orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+					take: limit + 1,
+					...(input.cursor
+						? {
+								cursor: { id: input.cursor },
+								skip: 1,
+							}
+						: {}),
 				}),
 				prisma.quote.groupBy({
 					by: ["documentId"],
@@ -90,13 +101,20 @@ export const documentRouter = createTRPCRouter({
 					_count: { id: true },
 				}),
 			]);
+
+			const hasMore = docs.length > limit;
+			const page = hasMore ? docs.slice(0, -1) : docs;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
 			const codedMap = new Map(
 				codedGroups.map((g) => [g.documentId, g._count.id]),
 			);
-			return docs.map((doc) => ({
-				...doc,
-				codedQuoteCount: codedMap.get(doc.id) ?? 0,
-			}));
+			return {
+				items: page.map((doc) => ({
+					...doc,
+					codedQuoteCount: codedMap.get(doc.id) ?? 0,
+				})),
+				nextCursor,
+			};
 		}),
 
 	/** Get a presigned URL to view a document PDF. Throws NOT_FOUND if no PDF. */
@@ -149,13 +167,13 @@ export const documentRouter = createTRPCRouter({
 				description: z.string().max(1000).nullable().optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const doc = await prisma.document.findUnique({
 				where: { id: input.documentId, projectId: input.projectId },
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
 
-			return prisma.document.update({
+			const updated = await prisma.document.update({
 				where: { id: input.documentId },
 				data: {
 					...(input.name !== undefined && { name: input.name }),
@@ -164,17 +182,47 @@ export const documentRouter = createTRPCRouter({
 					}),
 				},
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "DOCUMENT_UPDATED",
+				entityType: "DOCUMENT",
+				entityId: input.documentId,
+				summary: `Document updated: ${updated.name}`,
+				details: {
+					before: {
+						name: doc.name,
+						description: doc.description,
+					},
+					after: {
+						name: updated.name,
+						description: updated.description,
+					},
+				},
+			});
+
+			return updated;
 		}),
 
 	/** Delete a document and remove its PDF from object storage if present (collaborator+). */
 	delete: collaboratorProcedure
 		.input(z.object({ projectId: z.string(), documentId: z.string() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const doc = await prisma.document.findUnique({
 				where: { id: input.documentId, projectId: input.projectId },
-				select: { storageKey: true },
+				select: { storageKey: true, name: true },
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "DOCUMENT_DELETED",
+				entityType: "DOCUMENT",
+				entityId: input.documentId,
+				summary: `Document deleted: ${doc.name}`,
+			});
 
 			if (doc.storageKey) {
 				await getStorageProvider()

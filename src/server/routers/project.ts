@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { recordAuditEventSafe } from "@/server/services/audit";
 import {
 	createTRPCRouter,
 	ownerProcedure,
@@ -10,24 +11,48 @@ import {
 
 export const projectRouter = createTRPCRouter({
 	/** List all projects the current user is a member of. */
-	list: protectedProcedure.query(async ({ ctx }) => {
-		const memberships = await prisma.projectMember.findMany({
-			where: { userId: ctx.userId },
-			include: {
-				project: {
-					include: {
-						_count: { select: { members: true, documents: true } },
+	list: protectedProcedure
+		.input(
+			z
+				.object({
+					limit: z.number().int().min(1).max(100).default(20),
+					cursor: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const limit = input?.limit ?? 20;
+			const memberships = await prisma.projectMember.findMany({
+				where: { userId: ctx.userId },
+				include: {
+					project: {
+						include: {
+							_count: { select: { members: true, documents: true } },
+						},
 					},
 				},
-			},
-			orderBy: { project: { updatedAt: "desc" } },
-		});
+				orderBy: [{ project: { updatedAt: "desc" } }, { id: "desc" }],
+				take: limit + 1,
+				...(input?.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
+			});
 
-		return memberships.map((m) => ({
-			...m.project,
-			role: m.role,
-		}));
-	}),
+			const hasMore = memberships.length > limit;
+			const page = hasMore ? memberships.slice(0, -1) : memberships;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return {
+				items: page.map((m) => ({
+					...m.project,
+					role: m.role,
+				})),
+				nextCursor,
+			};
+		}),
 
 	/** Get a single project (member-only). */
 	get: projectProcedure
@@ -66,6 +91,18 @@ export const projectRouter = createTRPCRouter({
 					},
 				},
 			});
+			await recordAuditEventSafe({
+				projectId: project.id,
+				actorId: ctx.userId,
+				action: "PROJECT_CREATED",
+				entityType: "PROJECT",
+				entityId: project.id,
+				summary: `Project created: ${project.name}`,
+				details: {
+					name: project.name,
+					color: project.color,
+				},
+			});
 			return project;
 		}),
 
@@ -82,8 +119,13 @@ export const projectRouter = createTRPCRouter({
 					.optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
-			return prisma.project.update({
+		.mutation(async ({ ctx, input }) => {
+			const before = await prisma.project.findUnique({
+				where: { id: input.projectId },
+				select: { name: true, description: true, color: true },
+			});
+
+			const updated = await prisma.project.update({
 				where: { id: input.projectId },
 				data: {
 					...(input.name !== undefined && { name: input.name }),
@@ -93,12 +135,46 @@ export const projectRouter = createTRPCRouter({
 					...(input.color !== undefined && { color: input.color }),
 				},
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "PROJECT_UPDATED",
+				entityType: "PROJECT",
+				entityId: input.projectId,
+				summary: `Project updated: ${updated.name}`,
+				details: {
+					before,
+					after: {
+						name: updated.name,
+						description: updated.description,
+						color: updated.color,
+					},
+				},
+			});
+
+			return updated;
 		}),
 
 	/** Delete a project and all its data (owner only). */
 	delete: ownerProcedure
 		.input(z.object({ projectId: z.string() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
+			const project = await prisma.project.findUnique({
+				where: { id: input.projectId },
+				select: { id: true, name: true },
+			});
+			if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "PROJECT_DELETED",
+				entityType: "PROJECT",
+				entityId: input.projectId,
+				summary: `Project deleted: ${project.name}`,
+			});
+
 			await prisma.project.delete({ where: { id: input.projectId } });
 			return { success: true };
 		}),

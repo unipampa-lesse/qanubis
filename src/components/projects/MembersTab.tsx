@@ -26,7 +26,12 @@ export default function MembersTab({
 	const [inviteSuccess, setInviteSuccess] = useState(false);
 
 	const utils = trpc.useUtils();
-	const { data: members, isLoading } = trpc.member.list.useQuery({ projectId });
+	const membersQuery = trpc.member.list.useInfiniteQuery(
+		{ projectId, limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const members = membersQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const isLoading = membersQuery.isLoading;
 
 	const invite = trpc.member.invite.useMutation({
 		onSuccess: () => {
@@ -43,11 +48,11 @@ export default function MembersTab({
 	});
 
 	const remove = trpc.member.remove.useMutation({
-		onSuccess: () => utils.member.list.invalidate({ projectId }),
+		onSuccess: () => utils.member.list.invalidate(),
 	});
 
 	const updateRole = trpc.member.updateRole.useMutation({
-		onSuccess: () => utils.member.list.invalidate({ projectId }),
+		onSuccess: () => utils.member.list.invalidate(),
 	});
 
 	function handleInvite(e: React.SyntheticEvent<HTMLFormElement>) {
@@ -139,7 +144,7 @@ export default function MembersTab({
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
-							{members?.map((m) => (
+							{members.map((m) => (
 								<tr
 									key={m.id}
 									className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
@@ -204,6 +209,21 @@ export default function MembersTab({
 					</table>
 				)}
 			</div>
+
+			{membersQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => membersQuery.fetchNextPage()}
+						disabled={membersQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{membersQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }

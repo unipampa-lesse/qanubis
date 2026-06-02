@@ -22,22 +22,45 @@ export const adminRouter = createTRPCRouter({
 	// Users
 	// -------------------------------------------------------------------------
 
-	listUsers: adminProcedure.query(async () => {
-		return prisma.user.findMany({
-			select: {
-				id: true,
-				name: true,
-				email: true,
-				role: true,
-				suspended: true,
-				createdAt: true,
-				_count: {
-					select: { projectMembers: true, quotes: true },
+	listUsers: adminProcedure
+		.input(
+			z
+				.object({
+					limit: z.number().int().min(1).max(100).default(30),
+					cursor: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ input }) => {
+			const limit = input?.limit ?? 30;
+			const items = await prisma.user.findMany({
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					role: true,
+					suspended: true,
+					createdAt: true,
+					_count: {
+						select: { projectMembers: true, quotes: true },
+					},
 				},
-			},
-			orderBy: { createdAt: "asc" },
-		});
-	}),
+				orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+				take: limit + 1,
+				...(input?.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
+			});
+
+			const hasMore = items.length > limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return { items: page, nextCursor };
+		}),
 
 	updateUser: adminProcedure
 		.input(
@@ -62,40 +85,63 @@ export const adminRouter = createTRPCRouter({
 	// Projects
 	// -------------------------------------------------------------------------
 
-	listProjects: adminProcedure.query(async () => {
-		const [projects, storageSums] = await Promise.all([
-			prisma.project.findMany({
-				select: {
-					id: true,
-					name: true,
-					color: true,
-					createdAt: true,
-					_count: {
-						select: {
-							members: true,
-							documents: true,
-							codes: true,
-							memos: true,
+	listProjects: adminProcedure
+		.input(
+			z
+				.object({
+					limit: z.number().int().min(1).max(100).default(30),
+					cursor: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ input }) => {
+			const limit = input?.limit ?? 30;
+			const [projects, storageSums] = await Promise.all([
+				prisma.project.findMany({
+					select: {
+						id: true,
+						name: true,
+						color: true,
+						createdAt: true,
+						_count: {
+							select: {
+								members: true,
+								documents: true,
+								codes: true,
+								memos: true,
+							},
 						},
 					},
-				},
-				orderBy: { createdAt: "desc" },
-			}),
-			prisma.document.groupBy({
-				by: ["projectId"],
-				_sum: { fileSize: true },
-			}),
-		]);
+					orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+					take: limit + 1,
+					...(input?.cursor
+						? {
+								cursor: { id: input.cursor },
+								skip: 1,
+							}
+						: {}),
+				}),
+				prisma.document.groupBy({
+					by: ["projectId"],
+					_sum: { fileSize: true },
+				}),
+			]);
 
-		const storageMap = new Map(
-			storageSums.map((s) => [s.projectId, s._sum.fileSize ?? 0]),
-		);
+			const storageMap = new Map(
+				storageSums.map((s) => [s.projectId, s._sum.fileSize ?? 0]),
+			);
+			const hasMore = projects.length > limit;
+			const page = hasMore ? projects.slice(0, -1) : projects;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
 
-		return projects.map((p) => ({
-			...p,
-			storageBytes: storageMap.get(p.id) ?? 0,
-		}));
-	}),
+			return {
+				items: page.map((p) => ({
+					...p,
+					storageBytes: storageMap.get(p.id) ?? 0,
+				})),
+				nextCursor,
+			};
+		}),
 
 	/** Admin-level project deletion. Removes all documents from storage. */
 	deleteProject: adminProcedure
@@ -126,20 +172,43 @@ export const adminRouter = createTRPCRouter({
 	// Support tickets
 	// -------------------------------------------------------------------------
 
-	listTickets: adminProcedure.query(async () => {
-		return prisma.supportTicket.findMany({
-			select: {
-				id: true,
-				subject: true,
-				status: true,
-				createdAt: true,
-				updatedAt: true,
-				user: { select: { id: true, name: true, email: true } },
-				_count: { select: { messages: true } },
-			},
-			orderBy: { updatedAt: "desc" },
-		});
-	}),
+	listTickets: adminProcedure
+		.input(
+			z
+				.object({
+					limit: z.number().int().min(1).max(100).default(30),
+					cursor: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ input }) => {
+			const limit = input?.limit ?? 30;
+			const items = await prisma.supportTicket.findMany({
+				select: {
+					id: true,
+					subject: true,
+					status: true,
+					createdAt: true,
+					updatedAt: true,
+					user: { select: { id: true, name: true, email: true } },
+					_count: { select: { messages: true } },
+				},
+				orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+				take: limit + 1,
+				...(input?.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
+			});
+
+			const hasMore = items.length > limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return { items: page, nextCursor };
+		}),
 
 	getTicket: adminProcedure
 		.input(z.object({ ticketId: z.string() }))

@@ -80,6 +80,7 @@ model User {
   supportTickets SupportTicket[]
   ticketMessages TicketMessage[]
   notifications  Notification[]
+  auditEvents    AuditEvent[]
 }
 
 // ---------------------------------------------------------------------------
@@ -346,4 +347,26 @@ model Notification {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, read])
+}
+
+// ---------------------------------------------------------------------------
+// Audit Trail
+// ---------------------------------------------------------------------------
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  projectId  String
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  summary    String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt(sort: Desc)])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
 }

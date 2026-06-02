@@ -6,6 +6,7 @@ import { extractPdfMetadata } from "@/lib/pdf";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStorageProvider } from "@/providers/storage";
+import { recordAuditEventSafe } from "@/server/services/audit";
 
 const log = logger.child({ module: "upload/bibtex-pdf" });
 
@@ -141,6 +142,20 @@ export async function POST(req: NextRequest) {
 	const updated = await prisma.document.update({
 		where: { id: documentId },
 		data: { storageKey: newKey, fileSize: buffer.length, pageCount },
+	});
+
+	await recordAuditEventSafe({
+		projectId,
+		actorId: userId,
+		action: "DOCUMENT_PDF_ATTACHED",
+		entityType: "DOCUMENT",
+		entityId: updated.id,
+		summary: `PDF attached to document: ${updated.name}`,
+		details: {
+			fileSize: updated.fileSize,
+			pageCount: updated.pageCount,
+			source: updated.source,
+		},
 	});
 
 	return NextResponse.json(updated, { status: 200 });

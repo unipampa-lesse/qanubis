@@ -128,16 +128,20 @@ export default function DocumentsTab({
 
 	const utils = trpc.useUtils();
 
-	const { data: documents, isLoading } = trpc.document.list.useQuery({
-		projectId,
-	});
+	const documentsQuery = trpc.document.list.useInfiniteQuery(
+		{ projectId, limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const documents =
+		documentsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const isLoading = documentsQuery.isLoading;
 
 	const remove = trpc.document.delete.useMutation({
-		onSuccess: () => utils.document.list.invalidate({ projectId }),
+		onSuccess: () => utils.document.list.invalidate(),
 	});
 	const rename = trpc.document.update.useMutation({
 		onSuccess: () => {
-			utils.document.list.invalidate({ projectId });
+			utils.document.list.invalidate();
 			setEditingId(null);
 		},
 	});
@@ -145,11 +149,11 @@ export default function DocumentsTab({
 		onSuccess: (result) => {
 			setImportResult(result);
 			setBibtexText("");
-			utils.document.list.invalidate({ projectId });
+			utils.document.list.invalidate();
 		},
 	});
 	const enrichMutation = trpc.bibtex.triggerEnrichment.useMutation({
-		onSuccess: () => utils.document.list.invalidate({ projectId }),
+		onSuccess: () => utils.document.list.invalidate(),
 	});
 
 	function startEdit(id: string, currentName: string) {
@@ -187,7 +191,7 @@ export default function DocumentsTab({
 				const body = await res.json().catch(() => ({}));
 				throw new Error((body as { error?: string }).error ?? "Upload failed");
 			}
-			await utils.document.list.invalidate({ projectId });
+			await utils.document.list.invalidate();
 		} catch (err) {
 			setUploadError(err instanceof Error ? err.message : "Upload failed");
 		} finally {
@@ -214,7 +218,7 @@ export default function DocumentsTab({
 				const body = await res.json().catch(() => ({}));
 				throw new Error((body as { error?: string }).error ?? "Upload failed");
 			}
-			await utils.document.list.invalidate({ projectId });
+			await utils.document.list.invalidate();
 		} catch (err) {
 			setAttachError(err instanceof Error ? err.message : "Upload failed");
 		} finally {
@@ -377,7 +381,7 @@ export default function DocumentsTab({
 						/>
 					))}
 				</div>
-			) : documents && documents.length > 0 ? (
+			) : documents.length > 0 ? (
 				<div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
 					<table className="w-full text-sm">
 						<thead className="bg-gray-50 dark:bg-gray-800/50">
@@ -741,6 +745,21 @@ export default function DocumentsTab({
 							</Button>
 						</div>
 					)}
+				</div>
+			)}
+
+			{documentsQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => documentsQuery.fetchNextPage()}
+						disabled={documentsQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{documentsQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
 				</div>
 			)}
 		</div>

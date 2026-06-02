@@ -14,14 +14,24 @@ export const notificationRouter = createTRPCRouter({
 	list: protectedProcedure
 		.input(
 			z
-				.object({ limit: z.number().int().min(1).max(50).default(20) })
+				.object({
+					limit: z.number().int().min(1).max(50).default(20),
+					cursor: z.string().optional(),
+				})
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
-			return prisma.notification.findMany({
+			const limit = input?.limit ?? 20;
+			const items = await prisma.notification.findMany({
 				where: { userId: ctx.userId },
-				orderBy: { createdAt: "desc" },
-				take: input?.limit ?? 20,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				take: limit + 1,
+				...(input?.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
 				select: {
 					id: true,
 					type: true,
@@ -32,6 +42,12 @@ export const notificationRouter = createTRPCRouter({
 					createdAt: true,
 				},
 			});
+
+			const hasMore = items.length > limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return { items: page, nextCursor };
 		}),
 
 	/** Mark a single notification as read. */

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getBibtexParser } from "@/providers/bibtex-parser";
 import { getEnrichmentProvider } from "@/providers/enrichment";
+import { recordAuditEventSafe } from "@/server/services/audit";
 import { collaboratorProcedure, createTRPCRouter } from "../trpc";
 
 export const bibtexRouter = createTRPCRouter({
@@ -19,7 +20,7 @@ export const bibtexRouter = createTRPCRouter({
 				bibtex: z.string().min(1).max(500_000),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const parsed = getBibtexParser().parse(input.bibtex);
 
 			if (parsed.length === 0) {
@@ -68,16 +69,33 @@ export const bibtexRouter = createTRPCRouter({
 			}
 
 			getEnrichmentProvider().schedule(importedIds);
+
+			if (results.imported > 0 || results.skipped > 0) {
+				await recordAuditEventSafe({
+					projectId: input.projectId,
+					actorId: ctx.userId,
+					action: "BIBTEX_IMPORTED",
+					entityType: "DOCUMENT",
+					summary: `BibTeX import finished: ${results.imported} imported, ${results.skipped} skipped`,
+					details: {
+						imported: results.imported,
+						skipped: results.skipped,
+						total: results.total,
+						importedDocumentIds: importedIds,
+					},
+				});
+			}
+
 			return results;
 		}),
 
 	/** Re-trigger CrossRef + PDF enrichment for a document that has a DOI. */
 	triggerEnrichment: collaboratorProcedure
 		.input(z.object({ projectId: z.string(), documentId: z.string() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const doc = await prisma.document.findUnique({
 				where: { id: input.documentId, projectId: input.projectId },
-				select: { id: true, doi: true },
+				select: { id: true, doi: true, name: true },
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
 			if (!doc.doi) {
@@ -88,6 +106,17 @@ export const bibtexRouter = createTRPCRouter({
 			}
 
 			getEnrichmentProvider().schedule([doc.id]);
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "DOCUMENT_ENRICHMENT_SCHEDULED",
+				entityType: "DOCUMENT",
+				entityId: doc.id,
+				summary: `Enrichment scheduled: ${doc.name}`,
+				details: { doi: doc.doi },
+			});
+
 			return { scheduled: true };
 		}),
 });

@@ -11,7 +11,14 @@ const SELECT_CLASS =
 export default function AdminUsersPage() {
 	const t = useTranslation();
 	const utils = trpc.useUtils();
-	const { data: users, isLoading } = trpc.admin.listUsers.useQuery();
+	const usersQuery = trpc.admin.listUsers.useInfiniteQuery(
+		{ limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const users = useMemo(
+		() => usersQuery.data?.pages.flatMap((page) => page.items) ?? [],
+		[usersQuery.data],
+	);
 
 	const [search, setSearch] = useState("");
 	const [roleFilter, setRoleFilter] = useState<"" | "ADMIN" | "USER">("");
@@ -24,7 +31,7 @@ export default function AdminUsersPage() {
 	});
 
 	const filtered = useMemo(() => {
-		if (!users) return [];
+		if (!users.length) return [];
 		const q = search.trim().toLowerCase();
 		return users.filter((u) => {
 			const matchSearch =
@@ -38,6 +45,8 @@ export default function AdminUsersPage() {
 			return matchSearch && matchRole && matchStatus;
 		});
 	}, [users, search, roleFilter, statusFilter]);
+
+	const isLoading = usersQuery.isLoading;
 
 	if (isLoading) {
 		return (
@@ -202,6 +211,21 @@ export default function AdminUsersPage() {
 							))}
 						</tbody>
 					</table>
+				</div>
+			)}
+
+			{usersQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => usersQuery.fetchNextPage()}
+						disabled={usersQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{usersQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
 				</div>
 			)}
 		</div>

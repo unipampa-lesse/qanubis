@@ -19,8 +19,16 @@ export default function NotificationDropdown() {
 	useNotificationStream();
 
 	const { data: count = 0 } = trpc.notification.unreadCount.useQuery();
-	const { data: notifications = [], isLoading } =
-		trpc.notification.list.useQuery({ limit: 10 }, { enabled: open });
+	const notificationsQuery = trpc.notification.list.useInfiniteQuery(
+		{ limit: 10 },
+		{
+			enabled: open,
+			getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+		},
+	);
+	const notifications =
+		notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const isLoading = notificationsQuery.isLoading;
 	const utils = trpc.useUtils();
 
 	const markAllRead = trpc.notification.markAllRead.useMutation({
@@ -158,6 +166,21 @@ export default function NotificationDropdown() {
 								</button>
 							);
 						})}
+
+						{notificationsQuery.hasNextPage && (
+							<div className="border-t border-gray-100 p-2 dark:border-gray-800">
+								<button
+									type="button"
+									onClick={() => notificationsQuery.fetchNextPage()}
+									disabled={notificationsQuery.isFetchingNextPage}
+									className="w-full rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-white/[0.04]"
+								>
+									{notificationsQuery.isFetchingNextPage
+										? t.audit.loadingMore
+										: t.audit.loadMore}
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			)}

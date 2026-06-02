@@ -25,20 +25,43 @@ export const supportRouter = createTRPCRouter({
 		}),
 
 	/** List all tickets opened by the current user. */
-	listMyTickets: protectedProcedure.query(async ({ ctx }) => {
-		return prisma.supportTicket.findMany({
-			where: { userId: ctx.userId },
-			select: {
-				id: true,
-				subject: true,
-				status: true,
-				createdAt: true,
-				updatedAt: true,
-				_count: { select: { messages: true } },
-			},
-			orderBy: { updatedAt: "desc" },
-		});
-	}),
+	listMyTickets: protectedProcedure
+		.input(
+			z
+				.object({
+					limit: z.number().int().min(1).max(100).default(30),
+					cursor: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const limit = input?.limit ?? 30;
+			const items = await prisma.supportTicket.findMany({
+				where: { userId: ctx.userId },
+				select: {
+					id: true,
+					subject: true,
+					status: true,
+					createdAt: true,
+					updatedAt: true,
+					_count: { select: { messages: true } },
+				},
+				orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+				take: limit + 1,
+				...(input?.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
+			});
+
+			const hasMore = items.length > limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return { items: page, nextCursor };
+		}),
 
 	/** Get a single ticket with its full message thread (owner only). */
 	getMyTicket: protectedProcedure

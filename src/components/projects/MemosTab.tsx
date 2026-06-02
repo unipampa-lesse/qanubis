@@ -41,25 +41,30 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
 
 	const utils = trpc.useUtils();
-	const { data: memos, isLoading } = trpc.memo.list.useQuery({ projectId });
+	const memosQuery = trpc.memo.list.useInfiniteQuery(
+		{ projectId, limit: 30 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const memos = memosQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const isLoading = memosQuery.isLoading;
 
 	const createMemo = trpc.memo.create.useMutation({
 		onSuccess: (newMemo) => {
-			utils.memo.list.invalidate({ projectId });
+			utils.memo.list.invalidate();
 			selectMemo(newMemo.id);
 		},
 	});
 
 	const updateMemo = trpc.memo.update.useMutation({
 		onSuccess: () => {
-			utils.memo.list.invalidate({ projectId });
+			utils.memo.list.invalidate();
 			setSaveStatus("saved");
 		},
 	});
 
 	const deleteMemo = trpc.memo.delete.useMutation({
 		onSuccess: () => {
-			utils.memo.list.invalidate({ projectId });
+			utils.memo.list.invalidate();
 			selectMemo(null);
 		},
 	});
@@ -89,7 +94,7 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 	// Auto-select the first memo when the list loads or when selection is cleared.
 	// Functional updater avoids needing selectedId in deps while still reading the current value.
 	useEffect(() => {
-		if (memos && memos.length > 0) {
+		if (memos.length > 0) {
 			setSelectedId((prev) => prev ?? memos[0].id);
 		}
 	}, [memos]);
@@ -182,7 +187,7 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 								/>
 							))}
 						</div>
-					) : memos && memos.length > 0 ? (
+					) : memos.length > 0 ? (
 						<ul className="space-y-1">
 							{memos.map((memo) => (
 								<li key={memo.id}>
@@ -213,6 +218,19 @@ export default function MemosTab({ projectId, currentRole }: MemosTabProps) {
 								{canEdit && ` ${t.memos.noMemosHint}`}
 							</p>
 						</div>
+					)}
+
+					{memosQuery.hasNextPage && (
+						<button
+							type="button"
+							onClick={() => memosQuery.fetchNextPage()}
+							disabled={memosQuery.isFetchingNextPage}
+							className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+						>
+							{memosQuery.isFetchingNextPage
+								? t.audit.loadingMore
+								: t.audit.loadMore}
+						</button>
 					)}
 				</div>
 

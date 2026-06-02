@@ -23,10 +23,18 @@ export default function DashboardPage() {
 	const [roleFilter, setRoleFilter] = useState<ProjectRole | "">("");
 	const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-	const { data: projects, isLoading } = trpc.project.list.useQuery();
+	const projectsQuery = trpc.project.list.useInfiniteQuery(
+		{ limit: 24 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+
+	const projects = useMemo(
+		() => projectsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+		[projectsQuery.data],
+	);
 
 	const filtered = useMemo(() => {
-		if (!projects) return [];
+		if (!projects.length) return [];
 
 		const q = search.trim().toLowerCase();
 
@@ -46,8 +54,9 @@ export default function DashboardPage() {
 		return result;
 	}, [projects, search, roleFilter, sortOrder]);
 
-	const hasProjects = projects && projects.length > 0;
+	const hasProjects = projects.length > 0;
 	const hasResults = filtered.length > 0;
+	const isLoading = projectsQuery.isLoading;
 
 	return (
 		<div>
@@ -169,6 +178,21 @@ export default function DashboardPage() {
 						router.push(`/dashboard/projects/${id}`);
 					}}
 				/>
+			)}
+
+			{projectsQuery.hasNextPage && (
+				<div className="mt-5 flex justify-center">
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={projectsQuery.isFetchingNextPage}
+						onClick={() => projectsQuery.fetchNextPage()}
+					>
+						{projectsQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</Button>
+				</div>
 			)}
 		</div>
 	);

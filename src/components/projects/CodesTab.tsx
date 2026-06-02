@@ -652,8 +652,13 @@ export default function CodesTab({ projectId, currentRole }: CodesTabProps) {
 	const canEdit = currentRole === "OWNER" || currentRole === "COLLABORATOR";
 	const [showCreateForm, setShowCreateForm] = useState(false);
 
-	const { data: codes, isLoading } = trpc.code.list.useQuery({ projectId });
-	const tree = codes ? buildTree(codes) : [];
+	const codesQuery = trpc.code.list.useInfiniteQuery(
+		{ projectId, limit: 100 },
+		{ getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+	);
+	const codes = codesQuery.data?.pages.flatMap((page) => page.items) ?? [];
+	const tree = buildTree(codes);
+	const isLoading = codesQuery.isLoading;
 
 	if (isLoading) {
 		return (
@@ -728,6 +733,21 @@ export default function CodesTab({ projectId, currentRole }: CodesTabProps) {
 						)}
 					</div>
 				)
+			)}
+
+			{codesQuery.hasNextPage && (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={() => codesQuery.fetchNextPage()}
+						disabled={codesQuery.isFetchingNextPage}
+						className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+					>
+						{codesQuery.isFetchingNextPage
+							? t.audit.loadingMore
+							: t.audit.loadMore}
+					</button>
+				</div>
 			)}
 		</div>
 	);

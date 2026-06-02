@@ -6,12 +6,14 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import {
 	HiOutlineChartBar,
+	HiOutlineClock,
 	HiOutlineDocument,
 	HiOutlineDocumentText,
 	HiOutlinePencilSquare,
 	HiOutlineTag,
 	HiOutlineUsers,
 } from "react-icons/hi2";
+import AuditTab from "@/components/projects/AuditTab";
 import CodesTab from "@/components/projects/CodesTab";
 import DocumentsTab from "@/components/projects/DocumentsTab";
 import EditProjectModal from "@/components/projects/EditProjectModal";
@@ -22,7 +24,7 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useTranslation } from "@/context/LanguageContext";
 import { trpc } from "@/server/client";
 
-type Tab = "documents" | "codes" | "memos" | "reports" | "members";
+type Tab = "documents" | "codes" | "memos" | "reports" | "members" | "audit";
 
 export default function ProjectPage() {
 	const { projectId } = useParams<{ projectId: string }>();
@@ -39,7 +41,7 @@ export default function ProjectPage() {
 	);
 
 	const { data: members } = trpc.member.list.useQuery(
-		{ projectId },
+		{ projectId, limit: 100 },
 		{ enabled: !!project },
 	);
 
@@ -54,7 +56,7 @@ export default function ProjectPage() {
 	// Derive the current user's role from the members list.
 	// Falls back to COLLABORATOR (read-only UI) while the list is loading.
 	const myRole: ProjectRole =
-		members?.find((m) => m.user.id === session?.user?.id)?.role ??
+		members?.items.find((m) => m.user.id === session?.user?.id)?.role ??
 		"COLLABORATOR";
 
 	const TABS: {
@@ -67,6 +69,7 @@ export default function ProjectPage() {
 		{ id: "memos", label: t.tabs.memos, Icon: HiOutlineDocumentText },
 		{ id: "reports", label: t.tabs.reports, Icon: HiOutlineChartBar },
 		{ id: "members", label: t.tabs.members, Icon: HiOutlineUsers },
+		{ id: "audit", label: t.tabs.audit, Icon: HiOutlineClock },
 	];
 
 	if (isLoading) {
@@ -187,6 +190,7 @@ export default function ProjectPage() {
 			{activeTab === "members" && (
 				<MembersTab projectId={projectId} currentRole={myRole} />
 			)}
+			{activeTab === "audit" && <AuditTab projectId={projectId} />}
 
 			<ConfirmModal
 				isOpen={showDeleteConfirm}

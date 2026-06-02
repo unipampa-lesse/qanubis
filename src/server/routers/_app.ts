@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../trpc";
 import { adminRouter } from "./admin";
+import { auditRouter } from "./audit";
 import { bibtexRouter } from "./bibtex";
 import { codeRouter } from "./code";
 import { documentRouter } from "./document";
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
 	memo: memoRouter,
 	report: reportRouter,
 	admin: adminRouter,
+	audit: auditRouter,
 	support: supportRouter,
 	notification: notificationRouter,
 });

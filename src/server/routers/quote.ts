@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { pushSSENotification } from "@/lib/sse-registry";
+import { recordAuditEventSafe } from "@/server/services/audit";
 import {
 	collaboratorProcedure,
 	createTRPCRouter,
@@ -88,7 +89,7 @@ export const quoteRouter = createTRPCRouter({
 			});
 			if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
 
-			return prisma.quote.create({
+			const quote = await prisma.quote.create({
 				data: {
 					documentId: input.documentId,
 					createdById: ctx.userId,
@@ -99,6 +100,22 @@ export const quoteRouter = createTRPCRouter({
 				},
 				select: quoteSelect,
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_CREATED",
+				entityType: "QUOTE",
+				entityId: quote.id,
+				summary: `Quote created on page ${quote.page}`,
+				details: {
+					documentId: input.documentId,
+					page: quote.page,
+					textPreview: quote.text.slice(0, 180),
+				},
+			});
+
+			return quote;
 		}),
 
 	/** Change the highlight color of a quote. Collaborator+ only. */
@@ -110,29 +127,56 @@ export const quoteRouter = createTRPCRouter({
 				color: hexColor,
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const quote = await prisma.quote.findFirst({
 				where: { id: input.quoteId, document: { projectId: input.projectId } },
-				select: { id: true },
+				select: { id: true, color: true },
 			});
 			if (!quote) throw new TRPCError({ code: "NOT_FOUND" });
 
-			return prisma.quote.update({
+			const updated = await prisma.quote.update({
 				where: { id: input.quoteId },
 				data: { color: input.color },
 				select: quoteSelect,
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_COLOR_UPDATED",
+				entityType: "QUOTE",
+				entityId: input.quoteId,
+				summary: "Quote highlight color updated",
+				details: {
+					beforeColor: quote.color,
+					afterColor: updated.color,
+				},
+			});
+
+			return updated;
 		}),
 
 	/** Delete a quote and all its codes/comments. Collaborator+ only. */
 	delete: collaboratorProcedure
 		.input(z.object({ projectId: z.string(), quoteId: z.string() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const quote = await prisma.quote.findFirst({
 				where: { id: input.quoteId, document: { projectId: input.projectId } },
-				select: { id: true },
+				select: { id: true, text: true, page: true },
 			});
 			if (!quote) throw new TRPCError({ code: "NOT_FOUND" });
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_DELETED",
+				entityType: "QUOTE",
+				entityId: input.quoteId,
+				summary: `Quote deleted from page ${quote.page}`,
+				details: {
+					textPreview: quote.text.slice(0, 180),
+				},
+			});
 
 			await prisma.quote.delete({ where: { id: input.quoteId } });
 			return { success: true };
@@ -147,7 +191,7 @@ export const quoteRouter = createTRPCRouter({
 				codeId: z.string(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const quote = await prisma.quote.findFirst({
 				where: { id: input.quoteId, document: { projectId: input.projectId } },
 				select: { id: true },
@@ -167,6 +211,19 @@ export const quoteRouter = createTRPCRouter({
 				create: { quoteId: input.quoteId, codeId: input.codeId },
 				update: {},
 			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_CODE_ASSIGNED",
+				entityType: "QUOTE_CODE",
+				entityId: `${input.quoteId}:${input.codeId}`,
+				summary: "Code assigned to quote",
+				details: {
+					quoteId: input.quoteId,
+					codeId: input.codeId,
+				},
+			});
 			return { success: true };
 		}),
 
@@ -179,7 +236,7 @@ export const quoteRouter = createTRPCRouter({
 				codeId: z.string(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const quote = await prisma.quote.findFirst({
 				where: { id: input.quoteId, document: { projectId: input.projectId } },
 				select: { id: true },
@@ -194,6 +251,19 @@ export const quoteRouter = createTRPCRouter({
 
 			await prisma.quoteCode.deleteMany({
 				where: { quoteId: input.quoteId, codeId: input.codeId },
+			});
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_CODE_REMOVED",
+				entityType: "QUOTE_CODE",
+				entityId: `${input.quoteId}:${input.codeId}`,
+				summary: "Code removed from quote",
+				details: {
+					quoteId: input.quoteId,
+					codeId: input.codeId,
+				},
 			});
 			return { success: true };
 		}),
@@ -269,14 +339,34 @@ export const quoteRouter = createTRPCRouter({
 				pushSSENotification(quote.createdById, notification);
 			}
 
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_COMMENT_ADDED",
+				entityType: "QUOTE",
+				entityId: quote.id,
+				summary: "Comment added to quote",
+				details: {
+					commentId: comment.id,
+					commentPreview: input.content.slice(0, 180),
+					textPreview: quote.text.slice(0, 180),
+				},
+			});
+
 			return comment;
 		}),
 
 	/** List all quotes for a project (used by memo quote picker). */
 	listForProject: projectProcedure
-		.input(z.object({ projectId: z.string() }))
+		.input(
+			z.object({
+				projectId: z.string(),
+				limit: z.number().int().min(1).max(200).default(60),
+				cursor: z.string().optional(),
+			}),
+		)
 		.query(async ({ input }) => {
-			return prisma.quote.findMany({
+			const items = await prisma.quote.findMany({
 				where: { document: { projectId: input.projectId } },
 				select: {
 					id: true,
@@ -291,9 +381,24 @@ export const quoteRouter = createTRPCRouter({
 						},
 					},
 				},
-				orderBy: [{ document: { name: "asc" } }, { page: "asc" }],
-				take: 500,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				take: input.limit + 1,
+				...(input.cursor
+					? {
+							cursor: { id: input.cursor },
+							skip: 1,
+						}
+					: {}),
 			});
+
+			const hasMore = items.length > input.limit;
+			const page = hasMore ? items.slice(0, -1) : items;
+			const nextCursor = hasMore ? page[page.length - 1]?.id : null;
+
+			return {
+				items: page,
+				nextCursor,
+			};
 		}),
 
 	/**
@@ -308,13 +413,32 @@ export const quoteRouter = createTRPCRouter({
 					id: input.commentId,
 					quote: { document: { projectId: input.projectId } },
 				},
-				select: { id: true, userId: true },
+				select: {
+					id: true,
+					content: true,
+					userId: true,
+					quote: { select: { id: true, text: true } },
+				},
 			});
 			if (!comment) throw new TRPCError({ code: "NOT_FOUND" });
 
 			if (comment.userId !== ctx.userId && ctx.member.role === "VIEWER") {
 				throw new TRPCError({ code: "FORBIDDEN" });
 			}
+
+			await recordAuditEventSafe({
+				projectId: input.projectId,
+				actorId: ctx.userId,
+				action: "QUOTE_COMMENT_DELETED",
+				entityType: "QUOTE",
+				entityId: comment.quote.id,
+				summary: "Comment removed from quote",
+				details: {
+					commentId: comment.id,
+					commentPreview: comment.content.slice(0, 180),
+					textPreview: comment.quote.text.slice(0, 180),
+				},
+			});
 
 			await prisma.quoteComment.delete({ where: { id: input.commentId } });
 			return { success: true };
