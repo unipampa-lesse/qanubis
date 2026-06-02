@@ -1,76 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useLanguage, useTranslation } from "@/context/LanguageContext";
+import {
+	AUDIT_ACTIONS,
+	AUDIT_ENTITY_TYPES,
+	type AuditAction,
+	type AuditEntityType,
+} from "@/lib/audit/catalog";
 import { trpc } from "@/server/client";
-
-type AuditActionKey =
-	| "PROJECT_CREATED"
-	| "PROJECT_UPDATED"
-	| "PROJECT_DELETED"
-	| "PROJECT_OWNERSHIP_TRANSFERRED"
-	| "MEMBER_INVITED"
-	| "MEMBER_INVITE_ACCEPTED"
-	| "MEMBER_ROLE_UPDATED"
-	| "MEMBER_REMOVED"
-	| "MEMBER_LEFT"
-	| "DOCUMENT_UPDATED"
-	| "DOCUMENT_DELETED"
-	| "CODE_CREATED"
-	| "CODE_UPDATED"
-	| "CODE_DELETED"
-	| "QUOTE_CREATED"
-	| "QUOTE_COLOR_UPDATED"
-	| "QUOTE_DELETED"
-	| "QUOTE_CODE_ASSIGNED"
-	| "QUOTE_CODE_REMOVED"
-	| "MEMO_CREATED"
-	| "MEMO_UPDATED"
-	| "MEMO_DELETED";
-
-type AuditEntityKey =
-	| "PROJECT"
-	| "PROJECT_MEMBER"
-	| "DOCUMENT"
-	| "CODE"
-	| "QUOTE"
-	| "QUOTE_CODE"
-	| "MEMO";
-
-const actionOptions: AuditActionKey[] = [
-	"PROJECT_CREATED",
-	"PROJECT_UPDATED",
-	"PROJECT_DELETED",
-	"PROJECT_OWNERSHIP_TRANSFERRED",
-	"MEMBER_INVITED",
-	"MEMBER_INVITE_ACCEPTED",
-	"MEMBER_ROLE_UPDATED",
-	"MEMBER_REMOVED",
-	"MEMBER_LEFT",
-	"DOCUMENT_UPDATED",
-	"DOCUMENT_DELETED",
-	"CODE_CREATED",
-	"CODE_UPDATED",
-	"CODE_DELETED",
-	"QUOTE_CREATED",
-	"QUOTE_COLOR_UPDATED",
-	"QUOTE_DELETED",
-	"QUOTE_CODE_ASSIGNED",
-	"QUOTE_CODE_REMOVED",
-	"MEMO_CREATED",
-	"MEMO_UPDATED",
-	"MEMO_DELETED",
-];
-
-const entityOptions: AuditEntityKey[] = [
-	"PROJECT",
-	"PROJECT_MEMBER",
-	"DOCUMENT",
-	"CODE",
-	"QUOTE",
-	"QUOTE_CODE",
-	"MEMO",
-];
+import { AuditFiltersBar } from "./audit/AuditFiltersBar";
+import { useAuditFilters } from "./audit/useAuditFilters";
 
 interface AuditTabProps {
 	projectId: string;
@@ -79,44 +19,48 @@ interface AuditTabProps {
 export default function AuditTab({ projectId }: AuditTabProps) {
 	const t = useTranslation();
 	const { locale } = useLanguage();
-	const [search, setSearch] = useState("");
-	const [debouncedSearch, setDebouncedSearch] = useState("");
-	const [action, setAction] = useState<AuditActionKey | "ALL">("ALL");
-	const [entityType, setEntityType] = useState<AuditEntityKey | "ALL">("ALL");
-	const [actorId, setActorId] = useState<string>("ALL");
-	const [dateFrom, setDateFrom] = useState("");
-	const [dateTo, setDateTo] = useState("");
+	const { state, setters, normalizedFilters, clearFilters } = useAuditFilters();
 
-	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			setDebouncedSearch(search);
-		}, 300);
+	const membersQuery = trpc.member.list.useInfiniteQuery(
+		{
+			projectId,
+			limit: 30,
+			...(normalizedFilters.actorSearch
+				? { query: normalizedFilters.actorSearch }
+				: {}),
+		},
+		{
+			getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+		},
+	);
 
-		return () => clearTimeout(timeoutId);
-	}, [search]);
-
-	const membersQuery = trpc.member.list.useQuery({ projectId, limit: 100 });
-	const members = membersQuery.data?.items ?? [];
-
-	const normalizedSearch = debouncedSearch.trim() || undefined;
-	const normalizedAction = action === "ALL" ? undefined : action;
-	const normalizedEntityType = entityType === "ALL" ? undefined : entityType;
-	const normalizedActorId = actorId === "ALL" ? undefined : actorId;
-	const normalizedDateFrom = dateFrom
-		? new Date(`${dateFrom}T00:00:00`)
-		: undefined;
-	const normalizedDateTo = dateTo ? new Date(`${dateTo}T00:00:00`) : undefined;
+	const members = useMemo(
+		() =>
+			membersQuery.data?.pages
+				.flatMap((page) => page.items)
+				.map((member) => ({
+					id: member.user.id,
+					label: member.user.name ?? member.user.email,
+				})) ?? [],
+		[membersQuery.data],
+	);
 
 	const query = trpc.audit.list.useInfiniteQuery(
 		{
 			projectId,
 			limit: 30,
-			...(normalizedSearch ? { query: normalizedSearch } : {}),
-			...(normalizedAction ? { action: normalizedAction } : {}),
-			...(normalizedEntityType ? { entityType: normalizedEntityType } : {}),
-			...(normalizedActorId ? { actorId: normalizedActorId } : {}),
-			...(normalizedDateFrom ? { dateFrom: normalizedDateFrom } : {}),
-			...(normalizedDateTo ? { dateTo: normalizedDateTo } : {}),
+			...(normalizedFilters.query ? { query: normalizedFilters.query } : {}),
+			...(normalizedFilters.action ? { action: normalizedFilters.action } : {}),
+			...(normalizedFilters.entityType
+				? { entityType: normalizedFilters.entityType }
+				: {}),
+			...(normalizedFilters.actorId
+				? { actorId: normalizedFilters.actorId }
+				: {}),
+			...(normalizedFilters.dateFrom
+				? { dateFrom: normalizedFilters.dateFrom }
+				: {}),
+			...(normalizedFilters.dateTo ? { dateTo: normalizedFilters.dateTo } : {}),
 		},
 		{
 			getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
@@ -140,87 +84,43 @@ export default function AuditTab({ projectId }: AuditTabProps) {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center gap-2">
-				<input
-					type="text"
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-					placeholder={t.audit.searchPlaceholder}
-					className="h-9 min-w-56 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				/>
-
-				<select
-					value={action}
-					onChange={(e) => setAction(e.target.value as AuditActionKey | "ALL")}
-					className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				>
-					<option value="ALL">{t.audit.filterAllActions}</option>
-					{actionOptions.map((opt) => (
-						<option key={opt} value={opt}>
-							{t.audit.actions[opt]}
-						</option>
-					))}
-				</select>
-
-				<select
-					value={entityType}
-					onChange={(e) =>
-						setEntityType(e.target.value as AuditEntityKey | "ALL")
-					}
-					className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				>
-					<option value="ALL">{t.audit.filterAllEntities}</option>
-					{entityOptions.map((opt) => (
-						<option key={opt} value={opt}>
-							{t.audit.entities[opt]}
-						</option>
-					))}
-				</select>
-
-				<select
-					value={actorId}
-					onChange={(e) => setActorId(e.target.value)}
-					className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				>
-					<option value="ALL">{t.audit.filterAllUsers}</option>
-					{members.map((member) => (
-						<option key={member.user.id} value={member.user.id}>
-							{member.user.name ?? member.user.email}
-						</option>
-					))}
-				</select>
-
-				<input
-					type="date"
-					value={dateFrom}
-					onChange={(e) => setDateFrom(e.target.value)}
-					aria-label={t.audit.dateFrom}
-					className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				/>
-
-				<input
-					type="date"
-					value={dateTo}
-					onChange={(e) => setDateTo(e.target.value)}
-					aria-label={t.audit.dateTo}
-					className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-				/>
-
-				<button
-					type="button"
-					onClick={() => {
-						setSearch("");
-						setAction("ALL");
-						setEntityType("ALL");
-						setActorId("ALL");
-						setDateFrom("");
-						setDateTo("");
-					}}
-					className="h-9 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-				>
-					{t.audit.clearFilters}
-				</button>
-			</div>
+			<AuditFiltersBar
+				search={state.search}
+				onSearchChange={setters.setSearch}
+				action={state.action}
+				onActionChange={setters.setAction}
+				entityType={state.entityType}
+				onEntityTypeChange={setters.setEntityType}
+				actorSearch={state.actorSearch}
+				onActorSearchChange={setters.setActorSearch}
+				actorId={state.actorId}
+				onActorIdChange={setters.setActorId}
+				dateFrom={state.dateFrom}
+				onDateFromChange={setters.setDateFrom}
+				dateTo={state.dateTo}
+				onDateToChange={setters.setDateTo}
+				onClear={clearFilters}
+				actionOptions={AUDIT_ACTIONS}
+				entityOptions={AUDIT_ENTITY_TYPES}
+				memberOptions={members}
+				canLoadMoreMembers={Boolean(membersQuery.hasNextPage)}
+				isLoadingMoreMembers={membersQuery.isFetchingNextPage}
+				onLoadMoreMembers={() => membersQuery.fetchNextPage()}
+				labels={{
+					searchPlaceholder: t.audit.searchPlaceholder,
+					filterAllActions: t.audit.filterAllActions,
+					filterAllEntities: t.audit.filterAllEntities,
+					filterAllUsers: t.audit.filterAllUsers,
+					dateFrom: t.audit.dateFrom,
+					dateTo: t.audit.dateTo,
+					clearFilters: t.audit.clearFilters,
+					userSearchPlaceholder: t.audit.userSearchPlaceholder,
+					loadMoreUsers: t.audit.loadMoreUsers,
+					loadingUsers: t.audit.loadingUsers,
+					actions: t.audit.actions as Record<AuditAction, string>,
+					entities: t.audit.entities as Record<AuditEntityType, string>,
+				}}
+			/>
 
 			{items.length === 0 ? (
 				<div className="rounded-xl border border-dashed border-gray-300 py-10 text-center text-sm text-gray-400 dark:border-gray-700">
@@ -235,11 +135,10 @@ export default function AuditTab({ projectId }: AuditTabProps) {
 						>
 							<div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
 								<span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-									{t.audit.actions[event.action as AuditActionKey] ??
-										event.action}
+									{t.audit.actions[event.action as AuditAction] ?? event.action}
 								</span>
 								<span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-									{t.audit.entities[event.entityType as AuditEntityKey] ??
+									{t.audit.entities[event.entityType as AuditEntityType] ??
 										event.entityType}
 								</span>
 								<span>{new Date(event.createdAt).toLocaleString(locale)}</span>

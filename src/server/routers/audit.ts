@@ -1,4 +1,11 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "@/lib/audit/catalog";
+import {
+	buildAuditTextSearchWhere,
+	normalizeAuditTextQuery,
+	parseAuditDateRange,
+} from "@/lib/audit/filters";
 import { prisma } from "@/lib/prisma";
 import { createTRPCRouter, projectProcedure } from "../trpc";
 
@@ -10,67 +17,50 @@ export const auditRouter = createTRPCRouter({
 				limit: z.number().int().min(1).max(100).default(50),
 				cursor: z.string().optional(),
 				query: z.string().trim().max(200).optional(),
-				action: z.string().optional(),
-				entityType: z.string().optional(),
+				action: z.enum(AUDIT_ACTIONS).optional(),
+				entityType: z.enum(AUDIT_ENTITY_TYPES).optional(),
 				actorId: z.string().optional(),
-				dateFrom: z.coerce.date().optional(),
-				dateTo: z.coerce.date().optional(),
+				dateFrom: z.string().max(10).optional(),
+				dateTo: z.string().max(10).optional(),
 			}),
 		)
 		.query(async ({ input }) => {
-			const textQuery = input.query?.trim();
-			const actionFilter =
-				input.action && input.action !== "ALL" ? input.action : undefined;
-			const entityTypeFilter =
-				input.entityType && input.entityType !== "ALL"
-					? input.entityType
-					: undefined;
-			const actorIdFilter =
-				input.actorId && input.actorId !== "ALL" ? input.actorId : undefined;
-			const dateToExclusive = input.dateTo
-				? new Date(input.dateTo.getTime() + 24 * 60 * 60 * 1000)
-				: undefined;
+			const textQuery = normalizeAuditTextQuery(input.query);
+			const { dateFrom, dateToExclusive, invalid } = parseAuditDateRange({
+				dateFrom: input.dateFrom,
+				dateTo: input.dateTo,
+			});
+
+			if (invalid) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Invalid date range",
+				});
+			}
 
 			const items = await prisma.auditEvent.findMany({
 				where: {
 					projectId: input.projectId,
-					...(actionFilter && { action: actionFilter }),
-					...(entityTypeFilter && { entityType: entityTypeFilter }),
-					...(actorIdFilter && { actorId: actorIdFilter }),
-					...(input.dateFrom || dateToExclusive
+					...(input.action && { action: input.action }),
+					...(input.entityType && { entityType: input.entityType }),
+					...(input.actorId && { actorId: input.actorId }),
+					...(dateFrom || dateToExclusive
 						? {
 								createdAt: {
-									...(input.dateFrom && { gte: input.dateFrom }),
+									...(dateFrom && { gte: dateFrom }),
 									...(dateToExclusive && { lt: dateToExclusive }),
 								},
 							}
 						: {}),
-					...(textQuery
-						? {
-								OR: [
-									{ action: { contains: textQuery, mode: "insensitive" } },
-									{ entityType: { contains: textQuery, mode: "insensitive" } },
-									{ entityId: { contains: textQuery, mode: "insensitive" } },
-									{ summary: { contains: textQuery, mode: "insensitive" } },
-									{
-										actor: {
-											is: {
-												OR: [
-													{
-														name: { contains: textQuery, mode: "insensitive" },
-													},
-													{
-														email: { contains: textQuery, mode: "insensitive" },
-													},
-												],
-											},
-										},
-									},
-								],
-							}
-						: {}),
+					...(textQuery ? buildAuditTextSearchWhere(textQuery) : {}),
 				},
-				include: {
+				select: {
+					id: true,
+					action: true,
+					entityType: true,
+					entityId: true,
+					summary: true,
+					createdAt: true,
 					actor: {
 						select: {
 							id: true,

@@ -22,11 +22,32 @@ export const memberRouter = createTRPCRouter({
 				projectId: z.string(),
 				limit: z.number().int().min(1).max(100).default(30),
 				cursor: z.string().optional(),
+				query: z.string().trim().max(120).optional(),
 			}),
 		)
 		.query(async ({ input }) => {
+			const textQuery = input.query?.trim();
+
 			const items = await prisma.projectMember.findMany({
-				where: { projectId: input.projectId },
+				where: {
+					projectId: input.projectId,
+					...(textQuery
+						? {
+								OR: [
+									{
+										user: {
+											name: { contains: textQuery, mode: "insensitive" },
+										},
+									},
+									{
+										user: {
+											email: { contains: textQuery, mode: "insensitive" },
+										},
+									},
+								],
+							}
+						: {}),
+				},
 				include: {
 					user: {
 						select: { id: true, name: true, email: true, avatar: true },

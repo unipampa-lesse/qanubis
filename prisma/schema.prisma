@@ -367,6 +367,9 @@ model AuditEvent {
   actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt(sort: Desc)])
+  @@index([projectId, action, createdAt(sort: Desc)])
+  @@index([projectId, entityType, createdAt(sort: Desc)])
+  @@index([projectId, actorId, createdAt(sort: Desc)])
   @@index([actorId, createdAt(sort: Desc)])
   @@index([entityType, entityId])
 }
