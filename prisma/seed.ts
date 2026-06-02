@@ -121,6 +121,21 @@ async function main() {
 		password: "user123",
 	});
 
+	// Dedicated coders for analysis metrics (Cohen's Kappa) using cuid-like ids.
+	const coderA = await upsertUser({
+		id: "cseedusercodera001",
+		email: "coder.a@qanubis.local",
+		name: "Dana Coder A",
+		password: "user123",
+	});
+
+	const coderB = await upsertUser({
+		id: "cseedusercoderb001",
+		email: "coder.b@qanubis.local",
+		name: "Evan Coder B",
+		password: "user123",
+	});
+
 	// -------------------------------------------------------------------------
 	// Project A — full-featured, all three member roles
 	// -------------------------------------------------------------------------
@@ -142,6 +157,8 @@ async function main() {
 		{ userId: collaborator.id, role: "COLLABORATOR" as const },
 		{ userId: viewer.id, role: "VIEWER" as const },
 		{ userId: researcher.id, role: "COLLABORATOR" as const },
+		{ userId: coderA.id, role: "COLLABORATOR" as const },
+		{ userId: coderB.id, role: "COLLABORATOR" as const },
 	];
 	for (const m of membersA) {
 		await prisma.projectMember.upsert({
@@ -378,6 +395,240 @@ async function main() {
 	});
 
 	// -------------------------------------------------------------------------
+	// Analysis dataset — documents, quotes, coding assignments and saved queries
+	// -------------------------------------------------------------------------
+
+	const analysisCodeTeamTrust = await prisma.code.upsert({
+		where: { id: "cseedcodeanalysisa01" },
+		update: {},
+		create: {
+			id: "cseedcodeanalysisa01",
+			projectId: projectA.id,
+			name: "Team Trust",
+			color: "#0ea5e9",
+			textColor: "#ffffff",
+			description: "Evidence of trust and reliability among remote teammates",
+		},
+	});
+
+	const analysisCodeCoordination = await prisma.code.upsert({
+		where: { id: "cseedcodeanalysisb01" },
+		update: {},
+		create: {
+			id: "cseedcodeanalysisb01",
+			projectId: projectA.id,
+			name: "Coordination Costs",
+			color: "#f43f5e",
+			textColor: "#ffffff",
+			description: "Operational overhead caused by distributed coordination",
+		},
+	});
+
+	const analysisDocA = await prisma.document.upsert({
+		where: { id: "cseeddocanalysisa001" },
+		update: {},
+		create: {
+			id: "cseeddocanalysisa001",
+			projectId: projectA.id,
+			name: "Interview batch A",
+			description: "Primary interviews conducted in January",
+			source: "upload",
+			mimeType: "application/pdf",
+			pageCount: 18,
+			fileSize: 1250000,
+		},
+	});
+
+	const analysisDocB = await prisma.document.upsert({
+		where: { id: "cseeddocanalysisb001" },
+		update: {},
+		create: {
+			id: "cseeddocanalysisb001",
+			projectId: projectA.id,
+			name: "Interview batch B",
+			description: "Follow-up interviews with senior engineers",
+			source: "upload",
+			mimeType: "application/pdf",
+			pageCount: 22,
+			fileSize: 1580000,
+		},
+	});
+
+	const analysisQuotes = [
+		{
+			id: "cseedquoteanalysisa01",
+			documentId: analysisDocA.id,
+			createdById: owner.id,
+			text: "Daily standups became shorter because people trusted written updates.",
+			page: 3,
+			color: "#fbbf24",
+		},
+		{
+			id: "cseedquoteanalysisa02",
+			documentId: analysisDocA.id,
+			createdById: collaborator.id,
+			text: "Scheduling across time zones increased coordination overhead.",
+			page: 7,
+			color: "#fbbf24",
+		},
+		{
+			id: "cseedquoteanalysisb01",
+			documentId: analysisDocB.id,
+			createdById: owner.id,
+			text: "Trust improved once teams shared weekly progress notes.",
+			page: 5,
+			color: "#fbbf24",
+		},
+		{
+			id: "cseedquoteanalysisb02",
+			documentId: analysisDocB.id,
+			createdById: collaborator.id,
+			text: "People struggled to coordinate ad-hoc decisions without overlap hours.",
+			page: 9,
+			color: "#fbbf24",
+		},
+	];
+
+	for (const quote of analysisQuotes) {
+		await prisma.quote.upsert({
+			where: { id: quote.id },
+			update: {
+				text: quote.text,
+				page: quote.page,
+				color: quote.color,
+			},
+			create: {
+				id: quote.id,
+				documentId: quote.documentId,
+				createdById: quote.createdById,
+				text: quote.text,
+				page: quote.page,
+				position: [{ x: 0.08, y: 0.2, width: 0.82, height: 0.05 }],
+				color: quote.color,
+			},
+		});
+	}
+
+	const quoteCodeAssignments = [
+		{ quoteId: "cseedquoteanalysisa01", codeId: analysisCodeTeamTrust.id },
+		{ quoteId: "cseedquoteanalysisa02", codeId: analysisCodeCoordination.id },
+		{ quoteId: "cseedquoteanalysisb01", codeId: analysisCodeTeamTrust.id },
+		{ quoteId: "cseedquoteanalysisb02", codeId: analysisCodeCoordination.id },
+	];
+
+	for (const assignment of quoteCodeAssignments) {
+		await prisma.quoteCode.upsert({
+			where: {
+				quoteId_codeId: {
+					quoteId: assignment.quoteId,
+					codeId: assignment.codeId,
+				},
+			},
+			update: {},
+			create: {
+				quoteId: assignment.quoteId,
+				codeId: assignment.codeId,
+			},
+		});
+	}
+
+	// Agreement events for Team Trust code:
+	// qA01 yes/yes, qA02 yes/no, qB01 no/yes, qB02 no/no
+	const agreementAuditEvents = [
+		{
+			id: "cseedauditevta001",
+			actorId: coderA.id,
+			action: "QUOTE_CODE_ASSIGNED",
+			entityId: `cseedquoteanalysisa01:${analysisCodeTeamTrust.id}`,
+			details: {
+				quoteId: "cseedquoteanalysisa01",
+				codeId: analysisCodeTeamTrust.id,
+			},
+		},
+		{
+			id: "cseedauditevta002",
+			actorId: coderB.id,
+			action: "QUOTE_CODE_ASSIGNED",
+			entityId: `cseedquoteanalysisa01:${analysisCodeTeamTrust.id}`,
+			details: {
+				quoteId: "cseedquoteanalysisa01",
+				codeId: analysisCodeTeamTrust.id,
+			},
+		},
+		{
+			id: "cseedauditevta003",
+			actorId: coderA.id,
+			action: "QUOTE_CODE_ASSIGNED",
+			entityId: `cseedquoteanalysisa02:${analysisCodeTeamTrust.id}`,
+			details: {
+				quoteId: "cseedquoteanalysisa02",
+				codeId: analysisCodeTeamTrust.id,
+			},
+		},
+		{
+			id: "cseedauditevta004",
+			actorId: coderB.id,
+			action: "QUOTE_CODE_ASSIGNED",
+			entityId: `cseedquoteanalysisb01:${analysisCodeTeamTrust.id}`,
+			details: {
+				quoteId: "cseedquoteanalysisb01",
+				codeId: analysisCodeTeamTrust.id,
+			},
+		},
+	];
+
+	for (const event of agreementAuditEvents) {
+		await prisma.auditEvent.upsert({
+			where: { id: event.id },
+			update: {
+				action: event.action,
+				entityId: event.entityId,
+				details: event.details,
+			},
+			create: {
+				id: event.id,
+				projectId: projectA.id,
+				actorId: event.actorId,
+				action: event.action,
+				entityType: "QUOTE_CODE",
+				entityId: event.entityId,
+				summary: "Seeded coding event for agreement sample",
+				details: event.details,
+			},
+		});
+	}
+
+	await prisma.reportSavedQuery.upsert({
+		where: { id: "cseedrsqueryanalysis001" },
+		update: {
+			name: "Trust-only quotes",
+			filters: { codeId: analysisCodeTeamTrust.id },
+		},
+		create: {
+			id: "cseedrsqueryanalysis001",
+			projectId: projectA.id,
+			createdById: owner.id,
+			name: "Trust-only quotes",
+			filters: { codeId: analysisCodeTeamTrust.id },
+		},
+	});
+
+	await prisma.reportSavedQuery.upsert({
+		where: { id: "cseedrsqueryanalysis002" },
+		update: {
+			name: "Batch A uncoded",
+			filters: { documentId: analysisDocA.id, uncodedOnly: true },
+		},
+		create: {
+			id: "cseedrsqueryanalysis002",
+			projectId: projectA.id,
+			createdById: collaborator.id,
+			name: "Batch A uncoded",
+			filters: { documentId: analysisDocA.id, uncodedOnly: true },
+		},
+	});
+
+	// -------------------------------------------------------------------------
 	// Project B — smaller project, owned by collaborator user
 	// -------------------------------------------------------------------------
 
@@ -554,10 +805,14 @@ async function main() {
 	);
 	console.log("\n  Projects:");
 	console.log(
-		"    Remote Work Study  — owner + collaborator + viewer + 7 codes + 2 memos",
+		"    Remote Work Study  — 6 membros + 9 códigos + 2 documentos + 4 citações + 2 memos + dados de análise",
 	);
 	console.log(
 		"    Interview Archive  — collaborator as owner, owner as viewer + 2 codes + 1 memo",
+	);
+	console.log("\n  Analysis dataset:");
+	console.log(
+		"    2 queries salvas + eventos de auditoria para concordância (Cohen's Kappa)",
 	);
 	console.log("\n  Support tickets:");
 	console.log("    #1 IN_PROGRESS — PDF viewer bug (2 replies)");

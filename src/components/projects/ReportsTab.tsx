@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import AnalysisWorkspacePanel from "@/components/reports/AnalysisWorkspacePanel";
 import ExportPanel from "@/components/reports/ExportPanel";
 import QuoteExplorer from "@/components/reports/QuoteExplorer";
 import StatsPanel from "@/components/reports/StatsPanel";
@@ -22,7 +23,13 @@ interface ReportsTabProps {
 	projectName: string;
 }
 
-type SubTab = "explorer" | "stats" | "charts" | "summary" | "export";
+type SubTab =
+	| "explorer"
+	| "stats"
+	| "charts"
+	| "summary"
+	| "export"
+	| "analysis";
 
 export default function ReportsTab({
 	projectId,
@@ -40,6 +47,7 @@ export default function ReportsTab({
 		{ id: "stats", label: t.reports.stats },
 		{ id: "charts", label: t.reports.charts },
 		{ id: "summary", label: t.reports.summary },
+		{ id: "analysis", label: t.reports.analysis },
 		{ id: "export", label: t.reports.export },
 	];
 
@@ -96,6 +104,11 @@ export default function ReportsTab({
 			{activeSubTab === "summary" && (
 				<ErrorBoundary>
 					<SummaryPanel projectId={projectId} />
+				</ErrorBoundary>
+			)}
+			{activeSubTab === "analysis" && (
+				<ErrorBoundary>
+					<AnalysisWorkspacePanel projectId={projectId} quotes={safeQuotes} />
 				</ErrorBoundary>
 			)}
 			{activeSubTab === "export" && (

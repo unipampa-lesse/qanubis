@@ -1,6 +1,49 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { computeCohensKappa } from "@/lib/report/agreement";
 import { createTRPCRouter, projectProcedure } from "../trpc";
+
+const savedReportFiltersSchema = z.object({
+	search: z.string().trim().max(200).optional(),
+	documentId: z.string().cuid().optional(),
+	codeId: z.string().cuid().optional(),
+	uncodedOnly: z.boolean().optional(),
+});
+
+type SavedReportFilters = z.infer<typeof savedReportFiltersSchema>;
+
+function buildQuoteWhereForFilters(
+	projectId: string,
+	filters: SavedReportFilters,
+) {
+	const search = filters.search?.trim();
+
+	return {
+		document: {
+			projectId,
+			...(filters.documentId ? { id: filters.documentId } : {}),
+		},
+		...(search
+			? {
+					text: {
+						contains: search,
+						mode: "insensitive" as const,
+					},
+				}
+			: {}),
+		...(filters.codeId
+			? {
+					quoteCodes: {
+						some: {
+							codeId: filters.codeId,
+						},
+					},
+				}
+			: {}),
+		...(filters.uncodedOnly ? { quoteCodes: { none: {} } } : {}),
+	};
+}
 
 /** Full quote shape for report views. */
 const reportQuoteSelect = {
@@ -21,6 +64,321 @@ const reportQuoteSelect = {
 } as const;
 
 export const reportRouter = createTRPCRouter({
+	/**
+	 * Analytical matrix: codes x documents with assignment counts.
+	 */
+	matrix: projectProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				limitDocuments: z.number().int().min(1).max(100).default(25),
+				limitCodes: z.number().int().min(1).max(100).default(25),
+			}),
+		)
+		.query(async ({ input }) => {
+			const [topDocuments, topCodes, assignments] = await Promise.all([
+				prisma.document.findMany({
+					where: { projectId: input.projectId },
+					select: {
+						id: true,
+						name: true,
+						_count: { select: { quotes: true } },
+					},
+					orderBy: [{ quotes: { _count: "desc" } }, { name: "asc" }],
+					take: input.limitDocuments,
+				}),
+				prisma.code.findMany({
+					where: { projectId: input.projectId },
+					select: {
+						id: true,
+						name: true,
+						color: true,
+						textColor: true,
+						_count: { select: { quoteCodes: true } },
+					},
+					orderBy: [{ quoteCodes: { _count: "desc" } }, { name: "asc" }],
+					take: input.limitCodes,
+				}),
+				prisma.quoteCode.findMany({
+					where: {
+						quote: { document: { projectId: input.projectId } },
+					},
+					select: {
+						codeId: true,
+						quote: { select: { documentId: true } },
+					},
+				}),
+			]);
+
+			const allowedDocumentIds = new Set(topDocuments.map((d) => d.id));
+			const allowedCodeIds = new Set(topCodes.map((c) => c.id));
+
+			const matrixMap = new Map<string, number>();
+			for (const assignment of assignments) {
+				if (
+					!allowedCodeIds.has(assignment.codeId) ||
+					!allowedDocumentIds.has(assignment.quote.documentId)
+				) {
+					continue;
+				}
+				const key = `${assignment.codeId}:${assignment.quote.documentId}`;
+				matrixMap.set(key, (matrixMap.get(key) ?? 0) + 1);
+			}
+
+			return {
+				documents: topDocuments.map((d) => ({
+					id: d.id,
+					name: d.name,
+					quoteCount: d._count.quotes,
+				})),
+				codes: topCodes.map((c) => ({
+					id: c.id,
+					name: c.name,
+					color: c.color,
+					textColor: c.textColor,
+					quoteCount: c._count.quoteCodes,
+				})),
+				rows: topCodes.map((code) => ({
+					codeId: code.id,
+					cells: topDocuments.map((document) => ({
+						documentId: document.id,
+						count: matrixMap.get(`${code.id}:${document.id}`) ?? 0,
+					})),
+				})),
+			};
+		}),
+
+	/**
+	 * Saved filter queries for reports workflow.
+	 */
+	listSavedQueries: projectProcedure
+		.input(z.object({ projectId: z.string() }))
+		.query(async ({ input }) => {
+			const items = await prisma.reportSavedQuery.findMany({
+				where: { projectId: input.projectId },
+				select: {
+					id: true,
+					name: true,
+					filters: true,
+					createdAt: true,
+					updatedAt: true,
+					createdBy: {
+						select: { id: true, name: true, email: true },
+					},
+				},
+				orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+			});
+
+			return items.map((item) => ({
+				...item,
+				filters: savedReportFiltersSchema.parse(item.filters),
+			}));
+		}),
+
+	createSavedQuery: projectProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				name: z.string().trim().min(1).max(80),
+				filters: savedReportFiltersSchema,
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return prisma.reportSavedQuery.create({
+				data: {
+					projectId: input.projectId,
+					createdById: ctx.userId,
+					name: input.name,
+					filters: input.filters,
+				},
+				select: {
+					id: true,
+					name: true,
+					filters: true,
+					createdAt: true,
+					updatedAt: true,
+				},
+			});
+		}),
+
+	deleteSavedQuery: projectProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				savedQueryId: z.string().cuid(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const query = await prisma.reportSavedQuery.findFirst({
+				where: {
+					id: input.savedQueryId,
+					projectId: input.projectId,
+				},
+				select: { id: true, createdById: true },
+			});
+
+			if (!query) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			if (query.createdById !== ctx.userId && ctx.member.role !== "OWNER") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Only owner or query author can delete it",
+				});
+			}
+
+			await prisma.reportSavedQuery.delete({ where: { id: query.id } });
+			return { success: true };
+		}),
+
+	runSavedQuery: projectProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				savedQueryId: z.string().cuid(),
+			}),
+		)
+		.query(async ({ input }) => {
+			const savedQuery = await prisma.reportSavedQuery.findFirst({
+				where: {
+					id: input.savedQueryId,
+					projectId: input.projectId,
+				},
+				select: { filters: true },
+			});
+
+			if (!savedQuery) {
+				throw new TRPCError({ code: "NOT_FOUND" });
+			}
+
+			const filters = savedReportFiltersSchema.parse(savedQuery.filters);
+
+			return prisma.quote.findMany({
+				where: buildQuoteWhereForFilters(input.projectId, filters),
+				select: reportQuoteSelect,
+				orderBy: [
+					{ document: { name: "asc" } },
+					{ page: "asc" },
+					{ createdAt: "asc" },
+				],
+			});
+		}),
+
+	/**
+	 * Inter-coder agreement (Cohen's Kappa) from audit coding actions.
+	 */
+	coderAgreement: projectProcedure
+		.input(
+			z.object({
+				projectId: z.string(),
+				codeId: z.string().cuid(),
+				coderAId: z.string().cuid(),
+				coderBId: z.string().cuid(),
+			}),
+		)
+		.query(async ({ input }) => {
+			if (input.coderAId === input.coderBId) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Coders must be different users",
+				});
+			}
+
+			const [quotes, coders, events] = await Promise.all([
+				prisma.quote.findMany({
+					where: { document: { projectId: input.projectId } },
+					select: { id: true },
+					orderBy: { createdAt: "asc" },
+				}),
+				prisma.user.findMany({
+					where: { id: { in: [input.coderAId, input.coderBId] } },
+					select: { id: true, name: true, email: true },
+				}),
+				prisma.auditEvent.findMany({
+					where: {
+						projectId: input.projectId,
+						entityType: "QUOTE_CODE",
+						action: { in: ["QUOTE_CODE_ASSIGNED", "QUOTE_CODE_REMOVED"] },
+						actorId: { in: [input.coderAId, input.coderBId] },
+						details: {
+							path: ["codeId"],
+							equals: input.codeId,
+						},
+					},
+					select: {
+						id: true,
+						action: true,
+						actorId: true,
+						details: true,
+						createdAt: true,
+					},
+					orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+				}),
+			]);
+
+			if (coders.length !== 2) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "Coder not found" });
+			}
+
+			const coderState = new Map<string, boolean>();
+
+			for (const event of events) {
+				if (!event.actorId) {
+					continue;
+				}
+
+				const details = event.details as { quoteId?: unknown } | null;
+				const quoteId =
+					typeof details?.quoteId === "string" ? details.quoteId : null;
+				if (!quoteId) {
+					continue;
+				}
+
+				const stateKey = `${event.actorId}:${quoteId}`;
+				coderState.set(stateKey, event.action === "QUOTE_CODE_ASSIGNED");
+			}
+
+			let aYesBYes = 0;
+			let aYesBNo = 0;
+			let aNoBYes = 0;
+			let aNoBNo = 0;
+
+			for (const quote of quotes) {
+				const a = coderState.get(`${input.coderAId}:${quote.id}`) ?? false;
+				const b = coderState.get(`${input.coderBId}:${quote.id}`) ?? false;
+
+				if (a && b) aYesBYes++;
+				else if (a && !b) aYesBNo++;
+				else if (!a && b) aNoBYes++;
+				else aNoBNo++;
+			}
+
+			const metrics = computeCohensKappa({
+				total: quotes.length,
+				aYesBYes,
+				aYesBNo,
+				aNoBYes,
+				aNoBNo,
+			});
+
+			const coderA = coders.find((coder) => coder.id === input.coderAId);
+			const coderB = coders.find((coder) => coder.id === input.coderBId);
+
+			return {
+				codeId: input.codeId,
+				coderA: {
+					id: input.coderAId,
+					name: coderA?.name ?? coderA?.email ?? "Unknown",
+				},
+				coderB: {
+					id: input.coderBId,
+					name: coderB?.name ?? coderB?.email ?? "Unknown",
+				},
+				metrics,
+			};
+		}),
+
 	/**
 	 * Server-side full-text search across quote texts for a project.
 	 * Uses Postgres ILIKE via Prisma's insensitive mode — activated when

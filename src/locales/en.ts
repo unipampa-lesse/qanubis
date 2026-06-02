@@ -327,6 +327,7 @@ export const translations = {
 		// Sub-tabs
 		explorer: "Explorer",
 		charts: "Charts",
+		analysis: "Analysis Workspace",
 		export: "Export",
 		// Explorer
 		allDocuments: "All documents",
@@ -376,6 +377,20 @@ export const translations = {
 		uncodedQuotes: "Uncoded quotes",
 		codeFrequency: "Code frequency",
 		documentDistribution: "Quotes per document",
+		matrixTitle: "Analytical Matrix (Codes × Documents)",
+		agreementTitle: "Inter-coder Agreement",
+		selectCode: "Select a code",
+		selectCoderA: "Select coder A",
+		selectCoderB: "Select coder B",
+		kappa: "Cohen's Kappa",
+		observedAgreement: "Observed agreement",
+		units: "Units",
+		savedQueriesTitle: "Saved Queries",
+		savedQueryName: "Query name",
+		savedQueryDefaultName: "Saved query",
+		saveQuery: "Save query",
+		selectSavedQuery: "Select saved query",
+		savedQueryResults: "Resulting quotes",
 	},
 
 	// Memos tab
