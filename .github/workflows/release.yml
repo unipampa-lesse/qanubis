@@ -38,7 +38,9 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: pnpm install
+        env:
+          npm_config_minimum_release_age: 0
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
         run: pnpm prisma:generate
